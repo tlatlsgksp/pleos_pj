@@ -23,7 +23,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "pleos"
-include(":mobile")
 include(":automotive")
-include(":shared")
  

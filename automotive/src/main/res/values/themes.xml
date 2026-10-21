@@ -1,4 +1,4 @@
 <resources>
 
-    <style name="Theme.Pleos" parent="android:Theme.Material.Light.DarkActionBar" />
+    <style name="Theme.Pleos" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
