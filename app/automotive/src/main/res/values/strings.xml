@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">pleos</string>
+
+    <string name="dashboard_title">차계부</string>
+    <string name="dashboard_demo_badge">데모 모드</string>
+    <string name="dashboard_fuel">연료</string>
+    <string name="dashboard_range">주행 가능 거리</string>
+    <string name="dashboard_driving_mode">주행 모드</string>
+    <string name="dashboard_trip_since_refill">주유 후 주행거리</string>
+    <string name="dashboard_warnings">정비 경고</string>
+    <string name="dashboard_airbag_deployed">에어백이 전개됐어요. 보험사 연락이 필요하면 알려 주세요.</string>
+    <string name="dashboard_demo_play">데모 시나리오 재생</string>
+    <string name="dashboard_demo_stop">데모 중지</string>
+    <string name="dashboard_value_unknown">-</string>
+
+    <string name="driving_mode_eco">에코</string>
+    <string name="driving_mode_normal">노멀</string>
+    <string name="driving_mode_sport">스포츠</string>
+    <string name="driving_mode_snow">스노우</string>
+    <string name="driving_mode_custom">커스텀</string>
+    <string name="driving_mode_unknown">알 수 없음</string>
+
+    <string name="warning_engine_oil">엔진 오일</string>
+    <string name="warning_brake_fluid">브레이크액</string>
+    <string name="warning_transmission_oil">미션 오일</string>
+    <string name="warning_low_tire_pressure">타이어 공기압 부족</string>
+    <string name="warning_washer_fluid">워셔액 부족</string>
+    <string name="warning_power_down">엔진 이상(전원 차단 경고)</string>
+    <string name="warning_airbag_fault">에어백 이상</string>
+    <string name="warning_seat_belt">안전벨트 미착용</string>
 </resources>

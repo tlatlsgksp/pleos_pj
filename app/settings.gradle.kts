@@ -19,9 +19,15 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Pleos Connect SDK (Vehicle, NaviHelper, SpeechToText, TextToSpeech, FusedLocation).
+        maven("https://nexus-playground.pleos.ai/repository/maven-releases/") {
+            content { includeGroup("ai.pleos.playground") }
+        }
     }
 }
 
 rootProject.name = "pleos"
 include(":automotive")
- 
+include(":core:domain")
+include(":core:data")
+include(":core:platform")
