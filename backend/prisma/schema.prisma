@@ -1,7 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Prisma schema. Connection URL comes from prisma.config.ts (DATABASE_URL).
 
 generator client {
   provider = "prisma-client"
@@ -10,4 +7,19 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// PROVISIONAL: placeholder model so the Prisma client and the vehicles
+// module compile. The real data model is decided in a separate design
+// document and will replace this.
+model Vehicle {
+  id        String    @id @default(uuid()) @db.Uuid
+  /// HMAC of the VIN with VIN_HMAC_SECRET. The raw VIN is never stored.
+  vinHash   String    @unique
+  /// Groups vehicles for same-model statistics (e.g. "hyundai-ioniq5-2025").
+  modelKey  String
+  /// Set when the user consents to sending data to the server.
+  consentAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
