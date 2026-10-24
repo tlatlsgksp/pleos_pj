@@ -215,6 +215,6 @@ CPU 측정 기준(코어, 평균·최대)과 RAM 측정 기준(PSS, heap)은 원
 
 ### 아직 하지 않은 것
 
-- **Vehicle SDK 연동:** 차량 데이터를 쓰려면 `settings.gradle.kts`에 Pleos Maven 저장소(`https://nexus-playground.pleos.ai/repository/maven-releases/`)를, `automotive/build.gradle.kts`에 `ai.pleos.playground:Vehicle`을 추가하고, 필요한 `pleos.car.permission.*` 권한을 선언한다. 저장소 접근 권한이 필요하다.
+- **Vehicle SDK 연동:** 차량 데이터를 쓰려면 `app/settings.gradle.kts`에 Pleos Maven 저장소(`https://nexus-playground.pleos.ai/repository/maven-releases/`)를, `app/automotive/build.gradle.kts`에 `ai.pleos.playground:Vehicle`을 추가하고, 필요한 `pleos.car.permission.*` 권한을 선언한다. 저장소 접근 권한이 필요하다.
 - **화면 설계:** `MainActivity`는 템플릿의 기본 화면이다. portrait와 landscape 레이아웃, 상태 저장과 복원은 기능을 만들면서 구현한다.
 - **폰트:** Pleos 기본 폰트(Asta Sans)는 포함하지 않았다. 시스템 기본 폰트를 쓴다.

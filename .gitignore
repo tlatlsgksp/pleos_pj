@@ -1,15 +1,18 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# OS
 .DS_Store
+Thumbs.db
+
+# IDE and local tool state
+*.iml
+.idea/
+.vscode/
+.bkit/
+
+# Build output (all modules)
 build/
-/captures
-.externalNativeBuild
-.cxx
+
+# Local secrets and machine-specific settings
 local.properties
+.env
+.env.*
+!.env.example
