@@ -40,7 +40,7 @@ HUD, 클러스터, OSD 영역을 쓰는 경우 해당 영역의 정책을 따른
 
 DO를 선언하지 않은 앱은 Parking에서만 쓸 수 있고 Driving에서는 쓸 수 없다. 주행 중에도 쓰는 앱이면 DO를 선언해야 한다.
 
-이 앱은 Lifestyle 카테고리이고, 원문에는 이 카테고리의 주행 중 허용 예외가 없다. 그래서 `MainActivity`에 DO를 선언하지 않았다. 앱은 정차 중에만 쓸 수 있다. 주행 중 기능을 추가하려면 DO를 선언하고, `CarUxRestrictions`를 받아 제한된 기능을 끄는 처리를 함께 구현한다.
+이 앱은 Mobility Services 카테고리이고, 주행과 관련된 차량 관리와 주유소 탐색은 주행 중 제한적으로 허용될 수 있다. 아직 주행 중 기능을 만들지 않아서 `MainActivity`에 DO를 선언하지 않았고, 지금은 정차 중에만 쓸 수 있다. 주행 중 기능(경고 표시, 주유소 경유지 제안 등)을 추가할 때 DO를 선언하고, `CarUxRestrictions`를 받아 제한된 기능을 끄는 처리를 함께 구현한다.
 
 ### 기능별 대응 플래그
 
@@ -210,7 +210,7 @@ CPU 측정 기준(코어, 평균·최대)과 RAM 측정 기준(PSS, heap)은 원
 | `minSdk` | 28 | 시작 가이드의 최소 요구사항이며, App Market 배포 시 signing key rotation에 필요하다. Pleos Connect Emulator는 API 34다. |
 | `screenOrientation` | 지정하지 않음 | portrait, window 1개로 실행된다. 사용자가 window를 landscape로 바꿀 수 있고, 디자인 가이드는 모든 앱이 두 방향을 모두 지원하도록 요구한다. |
 | 테마 | Pleos 색상 토큰과 글자 크기 | `ui/theme`의 색상과 타이포그래피를 [디자인 가이드](UI_DESIGN_GUIDE.md) 3·4절 값으로 맞췄다. 시스템의 동적 색상은 쓰지 않는다. |
-| 카테고리 | Lifestyle | Android 매니페스트의 `appCategory`에는 Lifestyle에 해당하는 값이 없어 지정하지 않았다. 카테고리는 App Market 등록 시 정하는 것으로 보이며, 원문에서 확인되지 않았다. |
+| 카테고리 | Mobility Services | 2026-10-25에 Lifestyle에서 바꿨다. Android 매니페스트의 `appCategory`에는 이에 해당하는 값이 없어 지정하지 않았다. 카테고리는 App Market 등록 시 정하는 것으로 보이며, 원문에서 확인되지 않았다. |
 | DO | 선언하지 않음 | 2절 참고 |
 
 ### 아직 하지 않은 것

@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pleos">
 
-        <!-- Lifestyle category: not Distraction Optimized, so the app is available only while parked.
+        <!-- Mobility Services category. Not Distraction Optimized yet, so the app is available only while parked.
              screenOrientation is unset so the app opens in portrait in a single window. -->
         <activity
             android:name=".MainActivity"
