@@ -1,0 +1,733 @@
+<title>차곡 미니카 그랜저</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a toy-showroom stage beside a parts panel; stacks on phones. */
+:root {
+  --bg: #eef0f2;
+  --stage: #dde2e7;
+  --panel: #ffffff;
+  --fg: #16191d;
+  --muted: #5d6670;
+  --line: #d4d9de;
+  --accent: #0a5cd6;
+  --accent-fg: #ffffff;
+  --chip: #f3f5f7;
+  --sheet: #ffffff;
+  --font-display: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1215; --stage: #171b20; --panel: #14181c; --fg: #e8ebee; --muted: #98a1aa;
+    --line: #283038; --accent: #5b9bff; --accent-fg: #071225; --chip: #1c2228; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1215; --stage: #171b20; --panel: #14181c; --fg: #e8ebee; --muted: #98a1aa;
+  --line: #283038; --accent: #5b9bff; --accent-fg: #071225; --chip: #1c2228; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.app {
+  display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; min-height: 100%;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+.stage { position: sticky; top: 16px; align-self: start; height: calc(100vh - 32px); min-height: 460px; background: var(--stage); border-radius: 14px; overflow: hidden; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#view.placing { cursor: crosshair; }
+.stage-head { position: absolute; left: 20px; top: 16px; right: 20px; display: flex; justify-content: space-between; gap: 12px; pointer-events: none; }
+.stage-head h1 { font-family: var(--font-display); font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+.stage-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.views { pointer-events: auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.views button { padding: 5px 10px; font-size: 12px; }
+.toast { position: absolute; left: 50%; top: 74px; transform: translateX(-50%); background: var(--fg); color: var(--bg); font-size: 13px; padding: 7px 14px; border-radius: 999px; pointer-events: none; white-space: nowrap; }
+.stage-foot { position: absolute; left: 20px; bottom: 14px; right: 20px; display: flex; justify-content: space-between; align-items: end; gap: 12px; }
+.traits { font-size: 12px; color: var(--muted); max-width: 46ch; }
+.toggle { pointer-events: auto; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button, .filebtn {
+  font: inherit; color: var(--fg); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 10px; padding: 9px 12px; cursor: pointer; text-align: left;
+}
+button:hover, .filebtn:hover { border-color: var(--muted); }
+button:focus-visible, .filebtn:focus-within, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.preset strong { display: block; font-size: 14px; }
+.preset span { display: block; font-size: 12px; color: var(--muted); }
+.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.swatch { display: flex; flex-direction: column; gap: 6px; padding: 8px; font-size: 12px; line-height: 1.3; }
+.swatch i { display: block; height: 26px; border-radius: 6px; border: 1px solid rgba(127,127,127,.35); }
+.stickers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.sticker { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; font-size: 11px; line-height: 1.25; text-align: center; }
+.sticker canvas { width: 100%; height: 44px; object-fit: contain; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; padding: 7px 12px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); box-shadow: none; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.filebtn { position: relative; display: inline-block; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.cmd { font-family: var(--font-mono); font-size: 12px; background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; white-space: pre; margin: 0; }
+.tpl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; }
+.tpl-img { display: block; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--sheet); padding: 0; }
+.tpl-img img { display: block; width: 100%; height: auto; }
+.tpl-text { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; min-width: 0; }
+.editor { display: flex; flex-direction: column; gap: 8px; background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.editor label { display: grid; grid-template-columns: 52px minmax(0, 1fr) 64px; gap: 8px; align-items: center; font-size: 13px; }
+.editor output { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.editor input[type="range"] { width: 100%; }
+.bytes { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+input[type="color"] { width: 44px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--chip); padding: 2px; cursor: pointer; }
+input[type="text"] { font: inherit; color: var(--fg); background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1; }
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); padding: 12px; max-width: min(92vw, 900px); max-height: 92vh; }
+dialog img { display: block; max-width: 100%; max-height: 80vh; height: auto; background: var(--sheet); }
+dialog::backdrop { background: rgba(0,0,0,.5); }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .stage { position: relative; top: auto; height: auto; min-height: 340px; aspect-ratio: 4 / 3; max-width: 100%; }
+}
+</style>
+
+<div class="app">
+  <section class="stage" aria-label="3D 미니카 미리보기">
+    <canvas id="view"></canvas>
+    <div class="stage-head">
+      <div>
+        <h1>미니카 · 더 뉴 그랜저</h1>
+        <p>앱 속 내 차와 실내 무드등이 함께 바뀝니다</p>
+      </div>
+      <div class="views" role="group" aria-label="보는 방향">
+        <button data-view="front34">앞</button>
+        <button data-view="side">옆</button>
+        <button data-view="rear34">뒤</button>
+        <button id="spin" aria-pressed="true">자동 회전</button>
+      </div>
+    </div>
+    <div class="toast" id="toast" hidden></div>
+    <div class="stage-foot">
+      <p class="traits">살린 특징: 앞·뒤 차폭 일자 램프, 넓은 파라메트릭 그릴, 뒤로 흐르는 지붕선, C필러 오페라 글래스, 파라메트릭 휠. 실차 비율(5,035 × 1,880 × 1,460mm)에서 길이를 줄이고 바퀴를 키운 장난감 비율입니다.</p>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="section">
+      <h2>스킨 예시</h2>
+      <div class="presets">
+        <button class="preset" data-preset="personal" aria-pressed="true"><strong>개인</strong><span>세레니티 화이트 · 스티커 · 블루 무드등</span></button>
+        <button class="preset" data-preset="fleet" aria-pressed="false"><strong>법인 예시</strong><span>화이트 · 회사 리버리 전체 랩</span></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>차체 색</h2>
+      <div class="swatches" id="paints"></div>
+      <div class="row">
+        <div class="seg" role="group" aria-label="도장 질감">
+          <button id="gloss" aria-pressed="true">유광</button>
+          <button id="matte" aria-pressed="false">무광</button>
+        </div>
+        <label class="row" for="paintPick" style="gap:6px"><input type="color" id="paintPick" value="#e8e8e4"><span class="hint">직접 고르기</span></label>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>스티커</h2>
+      <div class="stickers" id="stickerLib"></div>
+      <div class="row">
+        <input type="text" id="stickerText" value="차곡차곡" aria-label="문구 스티커 내용" maxlength="12">
+        <button id="addText">문구 스티커</button>
+        <label class="filebtn" for="stickerFile">내 라벨 올리기<input type="file" id="stickerFile" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+      </div>
+      <p class="hint">스티커를 고른 뒤 차를 누르면 붙습니다. 붙은 스티커는 끌어서 옮깁니다.</p>
+      <div class="editor" id="editor" hidden>
+        <label for="sizeRange">크기 <input type="range" id="sizeRange" min="8" max="180" step="1"><output id="sizeOut"></output></label>
+        <label for="rotRange">회전 <input type="range" id="rotRange" min="-180" max="180" step="1"><output id="rotOut"></output></label>
+        <div class="row">
+          <button id="deleteSticker">이 스티커 떼기</button>
+          <button id="deselect">선택 해제</button>
+        </div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <span class="bytes" id="bytes"></span>
+        <button id="clearStickers">모두 떼기</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>전체 랩</h2>
+      <div class="seg" role="group" aria-label="전체 랩">
+        <button id="wrapNone" aria-pressed="true">없음</button>
+        <button id="wrapFull" aria-pressed="false">전체 랩</button>
+      </div>
+      <div class="tpl" id="fullRow" hidden>
+        <button class="tpl-img" id="tplOpen" aria-label="전개도 크게 보기"><img id="tplThumb" alt="차체 랩 전개도: 왼쪽 옆면, 오른쪽 옆면, 위, 앞, 뒤"></button>
+        <div class="tpl-text">
+          <p class="hint" id="tplHint">전개도를 크게 열어 이미지를 저장한 뒤 회색 면 위에 디자인하고, 같은 크기 PNG로 올리면 차에 입혀집니다. 투명한 곳은 차체 색이 보입니다.</p>
+          <label class="filebtn" for="wrapFile">랩 이미지 올리기<input type="file" id="wrapFile" accept="image/png,image/jpeg"></label>
+          <button id="wrapExample">예시 랩으로 되돌리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>실내 무드등</h2>
+      <div class="swatches" id="ambients"></div>
+      <p class="hint">스킨을 고르면 실제 차량에 아래 명령을 보냅니다. 에뮬레이터에서 차량 HAL까지 전달되는 것을 확인했습니다.</p>
+      <pre class="cmd" id="cmd"></pre>
+    </div>
+  </aside>
+</div>
+
+<dialog id="tplDialog">
+  <img id="tplBig" alt="차체 랩 전개도 원본">
+  <div class="row" style="justify-content:space-between;margin-top:8px">
+    <span class="hint">이미지를 길게 누르거나 오른쪽 클릭해 저장하세요.</span>
+    <button id="tplClose">닫기</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/DecalGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/BufferGeometryUtils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+(function () {
+  const FONT = "'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+  // GN7 Grandeur exterior colour names; hex values are approximations for the toy.
+  const PAINTS = [
+    { name: "세레니티 화이트", hex: "#e8e8e4" },
+    { name: "어비스 블랙", hex: "#14161a" },
+    { name: "녹턴 그레이", hex: "#4a4e55" },
+    { name: "트랜스미션 블루", hex: "#2c4a6e" },
+    { name: "그라파이트 그레이", hex: "#5d6166" },
+    { name: "샌드 베이지", hex: "#b8a78e" },
+    { name: "딥 그린", hex: "#24433b" },
+    { name: "버건디", hex: "#5a1e26" }
+  ];
+  const AMBIENTS = [
+    { name: "시안", hex: "#00e5ff" }, { name: "블루", hex: "#2979ff" }, { name: "퍼플", hex: "#aa00ff" },
+    { name: "화이트", hex: "#ffffff" }, { name: "앰버", hex: "#ffab00" }, { name: "그린", hex: "#00c853" }
+  ];
+
+  /* ---------- sticker art ---------- */
+  function round(g, x, y, w, h, r, fill) {
+    g.fillStyle = fill; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fill();
+  }
+  function text(g, s, x, y, size, color, weight) {
+    g.fillStyle = color; g.font = weight + " " + size + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(s, x, y);
+  }
+  const LIBRARY = [
+    { id: "beginner", name: "초보운전", w: 30, draw: (g, c) => { c.width = 600; c.height = 240; round(g, 0, 0, 600, 240, 28, "#ffd400"); g.strokeStyle = "#111"; g.lineWidth = 14; g.strokeRect(14, 14, 572, 212); text(g, "초보운전", 300, 128, 132, "#111", 800); } },
+    { id: "baby", name: "아이가 타고 있어요", w: 26, draw: (g, c) => { c.width = 560; c.height = 300; round(g, 0, 0, 560, 300, 40, "#ff8fb1"); text(g, "아이가", 280, 100, 92, "#fff", 800); text(g, "타고 있어요", 280, 205, 92, "#fff", 800); } },
+    { id: "stripes", name: "레이싱 스트라이프", w: 160, draw: (g, c) => { c.width = 1200; c.height = 300; g.fillStyle = "#f4f4f4"; g.fillRect(0, 30, 1200, 90); g.fillRect(0, 180, 1200, 90); g.fillStyle = "#c8102e"; g.fillRect(0, 60, 1200, 30); g.fillRect(0, 210, 1200, 30); } },
+    { id: "roundel", name: "번호 07", w: 45, draw: (g, c) => { c.width = 500; c.height = 500; g.fillStyle = "#fff"; g.beginPath(); g.arc(250, 250, 240, 0, Math.PI * 2); g.fill(); g.strokeStyle = "#111"; g.lineWidth = 20; g.stroke(); text(g, "07", 250, 268, 250, "#111", 800); } },
+    { id: "fleet", name: "회사 로고 예시", w: 70, draw: (g, c) => { c.width = 900; c.height = 300; g.fillStyle = "#0b7a3b"; g.fillRect(0, 230, 900, 40); text(g, "한결물류", 450, 120, 150, "#0e1a14", 800); text(g, "FLEET 07 · 1588-0000", 450, 205, 46, "#0e1a14", 600); } },
+    { id: "checker", name: "체커 플래그", w: 40, draw: (g, c) => { c.width = 480; c.height = 320; for (let y = 0; y < 4; y++) for (let x = 0; x < 6; x++) { g.fillStyle = (x + y) % 2 ? "#111" : "#fff"; g.fillRect(x * 80, y * 80, 80, 80); } } },
+    { id: "bolt", name: "번개", w: 22, draw: (g, c) => { c.width = 300; c.height = 420; g.fillStyle = "#00c2ff"; g.beginPath(); [[180, 0], [40, 240], [140, 240], [100, 420], [260, 160], [160, 160], [220, 0]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.fill(); g.strokeStyle = "#04324a"; g.lineWidth = 10; g.stroke(); } },
+    { id: "heart", name: "하트", w: 18, draw: (g, c) => { c.width = 400; c.height = 360; g.fillStyle = "#e5193f"; g.beginPath(); g.moveTo(200, 340); g.bezierCurveTo(-60, 160, 60, -40, 200, 90); g.bezierCurveTo(340, -40, 460, 160, 200, 340); g.fill(); } }
+  ];
+  function art(item) { const c = document.createElement("canvas"); item.draw(c.getContext("2d"), c); return c; }
+  function textSticker(s) {
+    const c = document.createElement("canvas"); const g = c.getContext("2d");
+    g.font = "800 140px " + FONT;
+    c.width = Math.max(300, Math.ceil(g.measureText(s).width) + 80); c.height = 220;
+    g.lineWidth = 12; g.strokeStyle = "#111"; g.font = "800 140px " + FONT; g.textAlign = "center"; g.textBaseline = "middle";
+    g.strokeText(s, c.width / 2, 116); text(g, s, c.width / 2, 116, 140, "#ffffff", 800);
+    return c;
+  }
+
+  /* ---------- scene ---------- */
+  const canvas = document.getElementById("view");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 100);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true; controls.autoRotate = true; controls.autoRotateSpeed = 0.8; controls.enablePan = false;
+  controls.target.set(0, 0.7, 0);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x3c424a, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(4, 7, 3); scene.add(key);
+  const cabinLight = new THREE.PointLight(0x2979ff, 2.4, 3.2, 2); cabinLight.position.set(-0.3, 1.15, 0); scene.add(cabinLight);
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    renderer.setSize(Math.max(1, r.width), Math.max(1, r.height), false);
+    camera.aspect = Math.max(1, r.width) / Math.max(1, r.height); camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(canvas);
+
+  /* ---------- the toy Grandeur ---------- */
+  // Units are metres of a toy-proportioned car: +X front, +Y up, +Z the car's left.
+  // The bevel grows the outline outward by BEVEL, which shrinks the wheel arches by the same amount.
+  const WB = 2.64, WR = 0.40, WY = 0.40, ARCH = 0.53, BODY_W = 1.62, BEVEL = 0.11;
+  const HALF = BODY_W / 2 + BEVEL;          // body side face
+  const car = new THREE.Group(); scene.add(car);
+
+  function sideProfile() {
+    const s = new THREE.Shape();
+    const dx = Math.sqrt(ARCH * ARCH - (0.22 - WY) ** 2), a = Math.asin((0.22 - WY) / ARCH);
+    s.moveTo(-1.98, 0.24);
+    s.lineTo(-WB / 2 - dx, 0.22);
+    s.absarc(-WB / 2, WY, ARCH, Math.PI - a, a, true);
+    s.lineTo(WB / 2 - dx, 0.22);
+    s.absarc(WB / 2, WY, ARCH, Math.PI - a, a, true);
+    s.lineTo(2.0, 0.24);
+    s.quadraticCurveTo(2.12, 0.28, 2.13, 0.46);       // front bumper
+    s.lineTo(2.11, 0.70);
+    s.quadraticCurveTo(2.08, 0.83, 1.92, 0.85);       // hood leading edge, low and long
+    s.lineTo(0.98, 0.96);                              // cowl
+    s.lineTo(0.18, 1.38);                              // windshield
+    s.quadraticCurveTo(-0.42, 1.46, -1.02, 1.39);      // roof
+    s.quadraticCurveTo(-1.52, 1.26, -1.86, 1.01);      // fastback C-pillar
+    s.lineTo(-2.04, 0.97);                             // short deck with lip
+    s.quadraticCurveTo(-2.11, 0.92, -2.11, 0.72);
+    s.lineTo(-2.09, 0.40);
+    s.quadraticCurveTo(-2.08, 0.26, -1.98, 0.24);
+    return s;
+  }
+
+  const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xe8e8e4, roughness: 0.22, metalness: 0.45, clearcoat: 1, clearcoatRoughness: 0.06 });
+  let bodyGeo = new THREE.ExtrudeGeometry(sideProfile(), { depth: BODY_W, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: BEVEL, bevelSegments: 6, curveSegments: 28 });
+  bodyGeo.translate(0, 0, -BODY_W / 2);
+  // Smooth the bevel and profile curves but keep the flat side panels crisp.
+  bodyGeo.deleteAttribute("uv");
+  bodyGeo = THREE.BufferGeometryUtils.toCreasedNormals(bodyGeo.index ? bodyGeo.toNonIndexed() : bodyGeo, THREE.MathUtils.degToRad(35));
+  const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+  car.add(bodyMesh);
+
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x18202a, roughness: 0.08, metalness: 0.3, clearcoat: 1 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x15171b, roughness: 0.5, metalness: 0.2 });
+  const chromeMat = new THREE.MeshStandardMaterial({ color: 0xcfd3d8, roughness: 0.2, metalness: 1 });
+  // Lamps skip tone mapping so the horizon lines stay pure white and red.
+  const frontLamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xf6f9ff).convertSRGBToLinear(), toneMapped: false });
+  const rearLamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(0xd0001c).convertSRGBToLinear(), toneMapped: false });
+
+  function sidePlate(points, z, mat) {
+    const sh = new THREE.Shape(points.map(p => new THREE.Vector2(p[0], p[1])));
+    const g = new THREE.ShapeGeometry(sh);
+    const m = new THREE.Mesh(g, mat);
+    m.position.z = z;
+    if (z < 0) m.rotation.y = Math.PI, m.position.x = 0, m.scale.x = -1;
+    return m;
+  }
+  // Side glass: front door, rear door, and the small opera glass on the C-pillar.
+  const WINDOWS = [
+    [[0.92, 1.0], [0.24, 1.33], [-0.28, 1.37], [-0.28, 1.0]],
+    [[-0.36, 1.0], [-0.36, 1.37], [-0.86, 1.34], [-1.08, 1.0]],
+    [[-1.16, 1.0], [-1.03, 1.27], [-1.39, 1.12], [-1.50, 1.0]]
+  ];
+  [HALF + 0.004, -HALF - 0.004].forEach(z => WINDOWS.forEach(w => car.add(sidePlate(w, z, glassMat))));
+
+  // A quad laid on the slope between profile points a and b, lifted off the surface.
+  function slopeQuad(a, b, halfW, lift, mat) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+    let nx = -dy / len, ny = dx / len;
+    if (nx * ((a[0] + b[0]) / 2) + ny * ((a[1] + b[1]) / 2 - 0.7) < 0) { nx = -nx; ny = -ny; }
+    const o = BEVEL + lift;
+    const P = (p, z) => [p[0] + nx * o, p[1] + ny * o, z];
+    const v = [...P(a, -halfW), ...P(b, -halfW), ...P(b, halfW), ...P(a, -halfW), ...P(b, halfW), ...P(a, halfW)];
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, mat); m.material.side = THREE.DoubleSide;
+    return m;
+  }
+  car.add(slopeQuad([0.94, 0.98], [0.22, 1.36], BODY_W / 2 - 0.04, 0.004, glassMat));   // windshield
+  car.add(slopeQuad([-1.10, 1.36], [-1.78, 1.05], BODY_W / 2 - 0.08, 0.004, glassMat)); // rear glass
+  car.add(slopeQuad([0.10, 1.40], [-0.95, 1.40], BODY_W / 2 - 0.18, 0.003, glassMat));  // panoramic roof
+
+  function box(w, h, d, mat, x, y, z) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); return m; }
+  // Seamless horizon lamp: one thin line across the full width, front and rear.
+  car.add(box(0.04, 0.03, BODY_W + 0.16, frontLamp, 2.226, 0.745, 0));
+  car.add(box(0.04, 0.028, BODY_W + 0.12, rearLamp, -2.226, 0.83, 0));
+  car.add(box(0.04, 0.06, 0.32, rearLamp, -2.222, 0.78, HALF - 0.2));
+  car.add(box(0.04, 0.06, 0.32, rearLamp, -2.222, 0.78, -HALF + 0.2));
+
+  // Wide parametric grille below the lamp line.
+  function grilleTexture() {
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 256; const g = c.getContext("2d");
+    g.fillStyle = "#0d0f12"; g.fillRect(0, 0, 1024, 256);
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 40; x++) {
+      const cx = x * 26 + (y % 2) * 13 + 6, cy = y * 32 + 16;
+      g.fillStyle = (x + y) % 3 === 0 ? "#3a3f46" : "#23272d";
+      g.beginPath(); g.moveTo(cx, cy - 12); g.lineTo(cx + 11, cy); g.lineTo(cx, cy + 12); g.lineTo(cx - 11, cy); g.closePath(); g.fill();
+    }
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+  }
+  const grille = new THREE.Mesh(new THREE.PlaneGeometry(BODY_W + 0.02, 0.24), new THREE.MeshStandardMaterial({ map: grilleTexture(), roughness: 0.45, metalness: 0.4 }));
+  grille.rotation.y = Math.PI / 2; grille.position.set(2.247, 0.52, 0); car.add(grille);
+  car.add(box(0.02, 0.02, BODY_W - 0.1, chromeMat, 2.245, 0.66, 0));
+  car.add(box(0.02, 0.05, BODY_W - 0.4, darkMat, -2.21, 0.36, 0));   // rear diffuser strip
+
+  // Mirrors and flush door-handle lines.
+  [1, -1].forEach(s => {
+    car.add(box(0.2, 0.09, 0.14, bodyMat, 0.86, 1.04, s * (HALF + 0.07)));
+    car.add(box(0.03, 0.07, 0.04, darkMat, 0.80, 1.0, s * (HALF + 0.02)));
+    car.add(box(0.16, 0.012, 0.006, chromeMat, 0.0, 0.93, s * (HALF + 0.004)));
+    car.add(box(0.16, 0.012, 0.006, chromeMat, -0.72, 0.93, s * (HALF + 0.004)));
+  });
+
+  // Parametric wheel face.
+  function wheelTexture() {
+    const c = document.createElement("canvas"); c.width = 512; c.height = 512; const g = c.getContext("2d");
+    g.fillStyle = "#1b1d21"; g.fillRect(0, 0, 512, 512);
+    g.translate(256, 256);
+    g.fillStyle = "#9aa1a9"; g.beginPath(); g.arc(0, 0, 236, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#2a2e34"; g.beginPath(); g.arc(0, 0, 214, 0, Math.PI * 2); g.fill();
+    for (let i = 0; i < 10; i++) {
+      g.save(); g.rotate(i * Math.PI / 5);
+      g.fillStyle = i % 2 ? "#c9ced4" : "#8e959d";
+      g.beginPath(); g.moveTo(-14, -40); g.lineTo(14, -40); g.lineTo(44, -212); g.lineTo(-10, -212); g.closePath(); g.fill();
+      g.restore();
+    }
+    g.fillStyle = "#c9ced4"; g.beginPath(); g.arc(0, 0, 52, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#2a2e34"; g.beginPath(); g.arc(0, 0, 30, 0, Math.PI * 2); g.fill();
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+  }
+  const rimMat = new THREE.MeshStandardMaterial({ map: wheelTexture(), roughness: 0.3, metalness: 0.8 });
+  const tireMat = new THREE.MeshStandardMaterial({ color: 0x1a1b1e, roughness: 0.9 });
+  const wheels = [];
+  [[WB / 2, 1], [WB / 2, -1], [-WB / 2, 1], [-WB / 2, -1]].forEach(([x, s]) => {
+    const w = new THREE.Group();
+    const tire = new THREE.Mesh(new THREE.CylinderGeometry(WR, WR, 0.26, 40, 1, false), [tireMat, rimMat, rimMat]);
+    tire.rotation.x = Math.PI / 2;
+    w.add(tire);
+    w.position.set(x, WY, s * (HALF - 0.1));
+    if (s < 0) w.rotation.y = Math.PI;
+    car.add(w); wheels.push(w);
+  });
+
+  const groundGlow = new THREE.Mesh(new THREE.CircleGeometry(2.7, 64), new THREE.MeshBasicMaterial({ color: 0x2979ff, transparent: true, opacity: 0.12, depthWrite: false }));
+  groundGlow.rotation.x = -Math.PI / 2; groundGlow.position.y = 0.002; scene.add(groundGlow);
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.22, depthWrite: false }));
+  shadow.rotation.x = -Math.PI / 2; shadow.scale.set(2.3, 1.05, 1); shadow.position.y = 0.003; scene.add(shadow);
+
+  /* ---------- wrap sheet built from the body geometry ---------- */
+  // Every body triangle is assigned to the view it faces (left, right, top, front, rear) and projected as seen from outside.
+  const SHEET = (function buildSheet() {
+    const pos = bodyGeo.attributes.position, n = pos.count / 3;
+    const VIEWS = {
+      left: p => [p.x, -p.y], right: p => [-p.x, -p.y], top: p => [p.x, p.z],
+      front: p => [-p.z, -p.y], rear: p => [p.z, -p.y], bottom: p => [p.x, -p.z]
+    };
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), nrm = new THREE.Vector3();
+    const tri = [], group = [];
+    for (let i = 0; i < n; i++) {
+      a.fromBufferAttribute(pos, i * 3); b.fromBufferAttribute(pos, i * 3 + 1); c.fromBufferAttribute(pos, i * 3 + 2);
+      nrm.subVectors(c, b).cross(new THREE.Vector3().subVectors(a, b)).normalize();
+      const ax = Math.abs(nrm.x) > Math.abs(nrm.y) ? (Math.abs(nrm.x) > Math.abs(nrm.z) ? "x" : "z") : (Math.abs(nrm.y) > Math.abs(nrm.z) ? "y" : "z");
+      const k = ax === "z" ? (nrm.z > 0 ? "left" : "right") : ax === "y" ? (nrm.y > 0 ? "top" : "bottom") : (nrm.x > 0 ? "front" : "rear");
+      tri.push([a.clone(), b.clone(), c.clone()]); group.push(k);
+    }
+    const PRINTED = ["left", "right", "top", "front", "rear"];
+    const bbox = {};
+    PRINTED.forEach(k => {
+      let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+      tri.forEach((t, i) => { if (group[i] !== k) return; t.forEach(p => { const [u, v] = VIEWS[k](p); x0 = Math.min(x0, u); y0 = Math.min(y0, v); x1 = Math.max(x1, u); y1 = Math.max(y1, v); }); });
+      bbox[k] = { x0, y0, w: x1 - x0, h: y1 - y0 };
+    });
+    const M = 0.22, place = {};
+    let y = M * 2.2;
+    ["left", "right", "top"].forEach(k => { place[k] = [M, y]; y += bbox[k].h + M * 1.5; });
+    let x = M; ["front", "rear"].forEach(k => { place[k] = [x, y]; x += bbox[k].w + M; });
+    const sw = Math.max(M * 2 + Math.max(bbox.left.w, bbox.top.w), x), sh = y + Math.max(bbox.front.h, bbox.rear.h) + M * 1.8;
+    const S = 2048 / Math.max(sw, sh), W = Math.round(sw * S), H = Math.round(sh * S);
+    const toPx = (k, p) => { const [u, v] = VIEWS[k](p); return [(place[k][0] + u - bbox[k].x0) * S, (place[k][1] + v - bbox[k].y0) * S]; };
+    const viewPx = (k, u, v) => [(place[k][0] + u) * S, (place[k][1] + v) * S];
+
+    const uv = new Float32Array(n * 6);
+    tri.forEach((t, i) => t.forEach((p, j) => {
+      const [px, py] = PRINTED.includes(group[i]) ? toPx(group[i], p) : [2, 2];
+      uv[(i * 3 + j) * 2] = px / W; uv[(i * 3 + j) * 2 + 1] = 1 - py / H;
+    }));
+    bodyGeo.setAttribute("uv", new THREE.BufferAttribute(uv, 2));
+
+    function paintFaces(g, fill, stroke) {
+      tri.forEach((t, i) => {
+        if (!PRINTED.includes(group[i])) return;
+        const q = t.map(p => toPx(group[i], p));
+        g.beginPath(); g.moveTo(q[0][0], q[0][1]); g.lineTo(q[1][0], q[1][1]); g.lineTo(q[2][0], q[2][1]); g.closePath();
+        if (fill) { g.fillStyle = fill; g.fill(); }
+        if (stroke) { g.strokeStyle = stroke; g.lineWidth = 0.6; g.stroke(); }
+      });
+    }
+    const tpl = document.createElement("canvas"); tpl.width = W; tpl.height = H;
+    const tg = tpl.getContext("2d");
+    tg.fillStyle = "#ffffff"; tg.fillRect(0, 0, W, H);
+    paintFaces(tg, "#e3e8ed", null); paintFaces(tg, null, "rgba(150,160,172,0.35)");
+    const LABEL = { left: "왼쪽 옆면  앞 ▶", right: "오른쪽 옆면  ◀ 앞", top: "위  앞 ▶", front: "앞", rear: "뒤" };
+    tg.fillStyle = "#28303a"; tg.textBaseline = "alphabetic"; tg.textAlign = "left";
+    tg.font = "600 " + Math.round(M * 0.42 * S) + "px " + FONT;
+    PRINTED.forEach(k => { const [lx, ly] = viewPx(k, 0, -M * 0.35); tg.fillText(LABEL[k], lx, ly); });
+    tg.font = "700 " + Math.round(M * 0.6 * S) + "px " + FONT;
+    tg.fillText("차곡 미니카 랩 전개도 · 더 뉴 그랜저 · " + W + "×" + H + "px", M * S, M * 1.15 * S);
+    tg.fillStyle = "#5a6470"; tg.font = "400 " + Math.round(M * 0.3 * S) + "px " + FONT;
+    tg.fillText("회색 면이 차체 도장입니다. 유리·램프·그릴·바퀴는 별도 부품이라 입혀지지 않습니다. 투명한 곳은 차체 색이 보입니다.", M * S, H - M * 0.7 * S);
+
+    // Example fleet livery clipped to the body faces.
+    const liv = document.createElement("canvas"); liv.width = W; liv.height = H;
+    const lg = liv.getContext("2d");
+    ["left", "right", "front", "rear"].forEach(k => {
+      const [x0, y0] = viewPx(k, 0, bbox[k].h * 0.66), [x1, y1] = viewPx(k, bbox[k].w, bbox[k].h * 0.76);
+      lg.fillStyle = "#0b7a3b"; lg.fillRect(x0, y0, x1 - x0, y1 - y0);
+    });
+    lg.textAlign = "center"; lg.textBaseline = "middle"; lg.fillStyle = "#0e1a14";
+    ["left", "right"].forEach(k => {
+      const [cx, cy] = viewPx(k, bbox[k].w * 0.5, bbox[k].h * 0.56);
+      lg.font = "800 " + Math.round(bbox[k].h * 0.11 * S) + "px " + FONT; lg.fillText("한결물류", cx, cy);
+    });
+    const [tx, ty] = viewPx("top", bbox.top.w * 0.86, bbox.top.h * 0.5);
+    lg.fillStyle = "#0b7a3b"; lg.font = "800 " + Math.round(bbox.top.h * 0.3 * S) + "px " + FONT; lg.fillText("07", tx, ty);
+    // Clip with one finished mask: destination-in per triangle would keep only the last triangle.
+    const mask = document.createElement("canvas"); mask.width = W; mask.height = H;
+    paintFaces(mask.getContext("2d"), "#000", null);
+    lg.globalCompositeOperation = "destination-in"; lg.drawImage(mask, 0, 0); lg.globalCompositeOperation = "source-over";
+    return { W, H, template: tpl, livery: liv };
+  })();
+
+  const tplURL = SHEET.template.toDataURL("image/png");
+  document.getElementById("tplThumb").src = tplURL;
+  document.getElementById("tplBig").src = tplURL;
+  document.getElementById("tplThumb").width = SHEET.W; document.getElementById("tplThumb").height = SHEET.H;
+  const dlg = document.getElementById("tplDialog");
+  document.getElementById("tplOpen").addEventListener("click", () => dlg.showModal());
+  document.getElementById("tplClose").addEventListener("click", () => dlg.close());
+  document.getElementById("tplHint").textContent = "전개도를 크게 열어 이미지를 저장한 뒤 회색 면 위에 디자인하고, 같은 크기(" + SHEET.W + "×" + SHEET.H + "px) PNG로 올리면 차에 입혀집니다. 투명한 곳은 차체 색이 보입니다.";
+
+  /* ---------- state, paint, wrap, ambient ---------- */
+  const state = { paint: "#e8e8e4", matte: false, wrap: "none", ambient: "#2979ff", wrapImage: null };
+  let wrapTexture = null;
+  const cmdEl = document.getElementById("cmd");
+
+  function applyPaint() {
+    if (wrapTexture) { wrapTexture.dispose(); wrapTexture = null; }
+    if (state.wrap === "full") {
+      const c = document.createElement("canvas"); c.width = 1024; c.height = Math.round(1024 * SHEET.H / SHEET.W);
+      const g = c.getContext("2d"); g.fillStyle = state.paint; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(state.wrapImage || SHEET.livery, 0, 0, c.width, c.height);
+      wrapTexture = new THREE.CanvasTexture(c); wrapTexture.encoding = THREE.sRGBEncoding; wrapTexture.anisotropy = 4;
+      bodyMat.map = wrapTexture; bodyMat.color.set(0xffffff);
+    } else {
+      bodyMat.map = null; bodyMat.color.set(state.paint); bodyMat.color.convertSRGBToLinear();
+    }
+    bodyMat.roughness = state.matte ? 0.62 : 0.22; bodyMat.metalness = state.matte ? 0.2 : 0.45; bodyMat.clearcoat = state.matte ? 0 : 1;
+    bodyMat.needsUpdate = true;
+    updateBytes();
+  }
+  function applyAmbient() {
+    cabinLight.color.set(state.ambient); groundGlow.material.color.set(state.ambient);
+    const rgb = state.ambient.replace("#", "").toUpperCase();
+    const r = parseInt(rgb.slice(0, 2), 16), g = parseInt(rgb.slice(2, 4), 16), b = parseInt(rgb.slice(4, 6), 16);
+    cmdEl.textContent = "val cabin = SeatArea(ROW_1_LEFT, ROW_1_RIGHT,\n    ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT) // 0x75\n" +
+      "light.setAmbientLightSwitch(cabin, LightSwitch.ON)\n" +
+      "light.setAmbientLightBrightnessColor(cabin, 0x" + rgb + ")\n" +
+      "// HAL: set ambient lights color: r,g,b: (" + r + ", " + g + ", " + b + ")";
+    updateBytes();
+  }
+
+  /* ---------- stickers ---------- */
+  const stickers = [];
+  let selected = null, pending = null, dragging = false;
+  const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
+  const UP = new THREE.Vector3(0, 1, 0), FWD = new THREE.Vector3(1, 0, 0);
+  const toast = (function () {
+    const el = document.getElementById("toast"); let t = 0;
+    return msg => { el.textContent = msg; el.hidden = false; clearTimeout(t); t = setTimeout(() => { el.hidden = true; }, 1800); };
+  })();
+
+  function orient(normal, rot) {
+    const up = Math.abs(normal.dot(UP)) > 0.85 ? FWD : UP;
+    const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(new THREE.Vector3(), normal.clone().negate(), up));
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(rot)));
+    return new THREE.Euler().setFromQuaternion(q);
+  }
+  function buildSticker(s) {
+    if (s.mesh) { car.remove(s.mesh); s.mesh.geometry.dispose(); }
+    const w = s.widthCm / 100 * 0.84;           // toy is about 84% of real length
+    const geo = new THREE.DecalGeometry(bodyMesh, s.point, orient(s.normal, s.rot), new THREE.Vector3(w, w * s.art.height / s.art.width, Math.max(0.25, w * 0.6)));
+    if (!s.material) {
+      const tex = new THREE.CanvasTexture(s.art); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+      s.material = new THREE.MeshStandardMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, roughness: 0.4, metalness: 0.05, emissive: new THREE.Color(0) });
+    }
+    s.mesh = new THREE.Mesh(geo, s.material); s.mesh.renderOrder = 2; s.mesh.userData.sticker = s;
+    car.add(s.mesh);
+  }
+  function addSticker(artCanvas, artId, point, normal, widthCm) {
+    const s = { art: artCanvas, artId, point: point.clone(), normal: normal.clone(), widthCm, rot: 0, mesh: null, material: null };
+    buildSticker(s); stickers.push(s); select(s); updateBytes(); return s;
+  }
+  function removeSticker(s) {
+    car.remove(s.mesh); s.mesh.geometry.dispose(); s.material.map.dispose(); s.material.dispose();
+    stickers.splice(stickers.indexOf(s), 1); if (selected === s) select(null); updateBytes();
+  }
+  function select(s) {
+    if (selected && selected.material) selected.material.emissive.set(0);
+    selected = s; document.getElementById("editor").hidden = !s;
+    if (!s) return;
+    s.material.emissive.set(0x1a2a44);
+    document.getElementById("sizeRange").value = s.widthCm; document.getElementById("rotRange").value = s.rot;
+    document.getElementById("sizeOut").textContent = s.widthCm + " cm"; document.getElementById("rotOut").textContent = s.rot + "°";
+  }
+  function updateBytes() {
+    const data = { model: "grandeur-gn7-fl", paint: state.paint, finish: state.matte ? "matte" : "gloss", ambient: state.ambient, wrap: state.wrap,
+      stickers: stickers.map(s => ({ art: s.artId, p: s.point.toArray().map(v => +v.toFixed(3)), n: s.normal.toArray().map(v => +v.toFixed(3)), w: s.widthCm, r: s.rot })) };
+    document.getElementById("bytes").textContent = "스티커 " + stickers.length + "개 · 스킨 데이터 " + new TextEncoder().encode(JSON.stringify(data)).length + " B";
+  }
+  function hit(e, objs) {
+    const r = canvas.getBoundingClientRect();
+    pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObjects(objs, false)[0];
+  }
+  const worldNormal = h => h.face.normal.clone().transformDirection(bodyMesh.matrixWorld);
+
+  canvas.addEventListener("pointerdown", e => {
+    if (pending) {
+      const h = hit(e, [bodyMesh]);
+      if (h) {
+        controls.enabled = false;
+        addSticker(pending.art, pending.id, car.worldToLocal(h.point.clone()), worldNormal(h), pending.w);
+        pending = null; canvas.classList.remove("placing");
+        document.querySelectorAll(".sticker").forEach(b => b.setAttribute("aria-pressed", "false"));
+        dragging = true; canvas.setPointerCapture(e.pointerId); toast("붙였습니다. 끌어서 옮길 수 있어요");
+      }
+      return;
+    }
+    const h = hit(e, stickers.map(s => s.mesh));
+    if (h) { controls.enabled = false; select(h.object.userData.sticker); dragging = true; canvas.setPointerCapture(e.pointerId); }
+  }, { capture: true });
+  canvas.addEventListener("pointermove", e => {
+    if (!dragging || !selected) return;
+    const h = hit(e, [bodyMesh]); if (!h) return;
+    selected.point.copy(car.worldToLocal(h.point.clone())); selected.normal.copy(worldNormal(h)); buildSticker(selected);
+  });
+  function endDrag(e) {
+    if (!dragging) return; dragging = false; controls.enabled = true;
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    updateBytes();
+  }
+  canvas.addEventListener("pointerup", endDrag); canvas.addEventListener("pointercancel", endDrag);
+
+  function startPlacing(item) {
+    pending = item; canvas.classList.add("placing"); setSpin(false);
+    toast("차를 누르면 '" + item.name + "' 스티커가 붙습니다");
+  }
+  const libEl = document.getElementById("stickerLib");
+  LIBRARY.forEach(item => {
+    const b = document.createElement("button"); b.className = "sticker"; b.setAttribute("aria-pressed", "false");
+    b.appendChild(art(item)); b.appendChild(document.createTextNode(item.name));
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".sticker").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      startPlacing({ id: item.id, name: item.name, art: art(item), w: item.w });
+    });
+    libEl.appendChild(b);
+  });
+  function loadImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+  function readFile(input, cb) {
+    const f = input.files && input.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = () => loadImage(r.result).then(img => cb(img, f)); r.readAsDataURL(f); input.value = "";
+  }
+  document.getElementById("addText").addEventListener("click", () => {
+    const s = document.getElementById("stickerText").value.trim(); if (!s) { toast("문구를 입력하세요"); return; }
+    startPlacing({ id: "text:" + s, name: s, art: textSticker(s), w: Math.min(120, 12 * s.length) });
+  });
+  document.getElementById("stickerFile").addEventListener("change", e => readFile(e.target, (img, f) => {
+    const c = document.createElement("canvas"), k = Math.min(1, 1024 / Math.max(img.width, img.height));
+    c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    startPlacing({ id: "upload:" + f.name, name: f.name, art: c, w: 40 });
+  }));
+  document.getElementById("sizeRange").addEventListener("input", e => { if (!selected) return; selected.widthCm = +e.target.value; document.getElementById("sizeOut").textContent = selected.widthCm + " cm"; buildSticker(selected); updateBytes(); });
+  document.getElementById("rotRange").addEventListener("input", e => { if (!selected) return; selected.rot = +e.target.value; document.getElementById("rotOut").textContent = selected.rot + "°"; buildSticker(selected); updateBytes(); });
+  document.getElementById("deleteSticker").addEventListener("click", () => selected && removeSticker(selected));
+  document.getElementById("deselect").addEventListener("click", () => select(null));
+  document.getElementById("clearStickers").addEventListener("click", () => { while (stickers.length) removeSticker(stickers[0]); });
+
+  function placeAt(lib, side, widthCm) {
+    const item = LIBRARY.find(i => i.id === lib);
+    const dir = { rear: new THREE.Vector3(1, 0, 0), left: new THREE.Vector3(0, 0, -1), right: new THREE.Vector3(0, 0, 1) }[side];
+    const origin = dir.clone().multiplyScalar(-4);
+    origin.y = side === "rear" ? 0.58 : 0.72; if (side !== "rear") origin.x = -0.62;
+    car.updateMatrixWorld(true);
+    raycaster.set(origin, dir);
+    const h = raycaster.intersectObject(bodyMesh, false)[0];
+    if (h) addSticker(art(item), item.id, h.point, worldNormal(h), widthCm);
+  }
+
+  /* ---------- UI wiring ---------- */
+  function syncUI() {
+    document.querySelectorAll("#paints .swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hex === state.paint)));
+    document.querySelectorAll("#ambients .swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hex === state.ambient)));
+    document.getElementById("gloss").setAttribute("aria-pressed", String(!state.matte));
+    document.getElementById("matte").setAttribute("aria-pressed", String(state.matte));
+    document.getElementById("wrapNone").setAttribute("aria-pressed", String(state.wrap === "none"));
+    document.getElementById("wrapFull").setAttribute("aria-pressed", String(state.wrap === "full"));
+    document.getElementById("fullRow").hidden = state.wrap !== "full";
+    document.getElementById("paintPick").value = state.paint;
+  }
+  function swatchButtons(el, list, onPick) {
+    list.forEach(item => {
+      const b = document.createElement("button"); b.className = "swatch"; b.dataset.hex = item.hex; b.setAttribute("aria-pressed", "false");
+      b.innerHTML = '<i style="background:' + item.hex + '"></i>' + item.name; b.addEventListener("click", () => onPick(item)); el.appendChild(b);
+    });
+  }
+  const clearPreset = () => document.querySelectorAll(".preset").forEach(p => p.setAttribute("aria-pressed", "false"));
+  swatchButtons(document.getElementById("paints"), PAINTS, p => { state.paint = p.hex; clearPreset(); applyPaint(); syncUI(); });
+  swatchButtons(document.getElementById("ambients"), AMBIENTS, a => { state.ambient = a.hex; clearPreset(); applyAmbient(); syncUI(); });
+  document.getElementById("paintPick").addEventListener("input", e => { state.paint = e.target.value; clearPreset(); applyPaint(); syncUI(); });
+  document.getElementById("gloss").addEventListener("click", () => { state.matte = false; applyPaint(); syncUI(); });
+  document.getElementById("matte").addEventListener("click", () => { state.matte = true; applyPaint(); syncUI(); });
+  const setWrap = m => { state.wrap = m; clearPreset(); applyPaint(); syncUI(); };
+  document.getElementById("wrapNone").addEventListener("click", () => setWrap("none"));
+  document.getElementById("wrapFull").addEventListener("click", () => setWrap("full"));
+  document.getElementById("wrapExample").addEventListener("click", () => { state.wrapImage = null; setWrap("full"); });
+  document.getElementById("wrapFile").addEventListener("change", e => readFile(e.target, img => { state.wrapImage = img; setWrap("full"); }));
+
+  const PRESETS = {
+    personal: { paint: "#e8e8e4", wrap: "none", ambient: "#2979ff", stickers: [["beginner", "rear", 30], ["bolt", "left", 22], ["bolt", "right", 22]] },
+    fleet: { paint: "#e8e8e4", wrap: "full", ambient: "#00c853", stickers: [] }
+  };
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    Object.assign(state, { paint: p.paint, matte: false, wrap: p.wrap, ambient: p.ambient, wrapImage: null });
+    while (stickers.length) removeSticker(stickers[0]);
+    p.stickers.forEach(s => placeAt(...s)); select(null);
+    document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === name)));
+    applyPaint(); applyAmbient(); syncUI();
+  }
+  document.querySelectorAll(".preset").forEach(b => b.addEventListener("click", () => applyPreset(b.dataset.preset)));
+
+  const spinBtn = document.getElementById("spin");
+  function setSpin(on) { controls.autoRotate = on; spinBtn.setAttribute("aria-pressed", String(on)); }
+  spinBtn.addEventListener("click", () => setSpin(!controls.autoRotate));
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) setSpin(false);
+  const VIEWS3 = { front34: [7.4, 2.8, 6.0], side: [0, 1.3, 10.4], rear34: [-7.6, 2.9, 5.6] };
+  document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => {
+    setSpin(false); camera.position.set(...VIEWS3[b.dataset.view]); controls.update();
+  }));
+
+  camera.position.set(...VIEWS3.front34);
+  controls.minDistance = 4.5; controls.maxDistance = 16; controls.update();
+  applyPreset("personal");
+  resize();
+
+  (function loop() {
+    controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop);
+  })();
+})();
+</script>

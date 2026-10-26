@@ -9,6 +9,7 @@
 | `app/` | Pleos Connect(AAOS) 차량 앱. 독립 Gradle 프로젝트 |
 | `backend/` | 서버. NestJS, PostgreSQL(Prisma), Redis(BullMQ) |
 | `docs/` | 기획·설계·조사 문서 |
+| `archive/` | 보류한 기능의 시제품. 다시 꺼낼 때 각 폴더 README부터 본다 ([차량 스킨](archive/skin-prototype/README.md)) |
 
 ## 앱 빌드
 
@@ -38,3 +39,4 @@ npm run start:dev
 - [아키텍처](docs/ARCHITECTURE.md)
 - [앱 설계 원칙](docs/APP_DESIGN_PRINCIPLES.md), [앱 설계 가이드](docs/APP_DESIGN_GUIDE.md), [UI 디자인 가이드](docs/UI_DESIGN_GUIDE.md)
 - [Pleos 플랫폼·공모전 조사 노트](docs/PLEOS_PLATFORM_RESEARCH.md)
+- [기획 기반 정리](docs/PLANNING_FOUNDATION.md), [기획서 초안](docs/PROPOSAL_DRAFT.md), [Pleos API 개방 제안](docs/PLEOS_API_PROPOSAL.md)

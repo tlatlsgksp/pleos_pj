@@ -464,6 +464,49 @@ vehicle.release()                       // 콜백이 끝난 뒤, 예를 들어 o
   - ❓ **연비, 연료량(%), 주행모드, 에어백 전개를 콘솔에서 조작할 수 있는지는 확인하지 못했다.** 시연 시나리오의 핵심이므로 Virtual Console 사용자 가이드나 실제 실행으로 확인해야 한다.
 - 블루투스 동글은 지원하지 않는다. 미디어 코덱은 실차와 다를 수 있다.
 
+### 11.1 실제 설치 결과 (2026-10-26, Apple M5 Mac, 명령줄 설치)
+
+- 이미지: `crp_car_arm64_emulator.zip`(4.7GB, 압축 해제 약 19GB, 이미지 빌드 2026-10-16). Android Studio 없이 SDK `system-images/android-34/pleos_car_emulator/arm64-v8a`에 풀고 `avdmanager`로 AVD를 만들면 된다. 기기 정의는 `Pleos_Connect_v2_0`(2560×1440).
+- **`-gpu host`로는 부팅 직후 멈추고 죽는다**(`Failed to find ColorBuffer` → exit 139). **`-gpu swiftshader_indirect`로는 안정적**이다. 부팅에 약 4분 걸린다.
+- 내비 앱이 있다: `ai.umos.maps.android.navigation.app`(Navi42) + `ai.pleos.playground.service.navi` ✅. §3.4의 "에뮬레이터에 내비 앱이 있는가"는 해소.
+- Vehicle 서비스(`ai.pleos.playground.service.vehicle`)가 선언한 권한은 `CAR_DRIVE`, `PRIVATE_CAR_*`, `CONTROL_CAR_*`까지 **전부 `prot=normal`**이다. 3rd-party 앱도 매니페스트 선언만으로 받을 수 있다 🟡(실제 호출 결과는 아직 미확인).
+- Gleo 비서 앱이 있다: `ai.umos.ambientai`(`ASSIST`, `VoiceInteractionService`). 내비 앱이 Gleo 함수 호출을 받는 `ActionCallsReceiver`(`ADD_WAYPOINT`, `ASK_ROUTE_INFO` 등)를 갖고 있어서 **App Schema 방식이 이 이미지에서 실제로 쓰인다** ✅. 다만 Gleo가 선언한 `ai.umos.gleo.permission.APP_ACTION`은 `prot=signature`라 3rd-party 앱이 붙을 수 있는지는 ❓. 내비 앱은 이 권한을 요청하지 않는다.
+- Virtual Console: `adb forward tcp:8088 tcp:8088` 후 `http://127.0.0.1:8088/`이 HTTP 200으로 열린다.
+
+### 11.2 시험 앱으로 실제 값 읽기 (2026-10-26)
+
+Vehicle SDK 2.3.2와 AAOS `CarPropertyManager`로 값을 읽는 임시 앱을 설치해 확인했다. `adb shell cmd car_service get-property-value`는 user 빌드라 막혀 있어서 앱으로만 읽을 수 있다.
+
+- **총 주행거리 ✅ 끝까지 동작한다.** 콘솔에서 12345km로 바꾸면(`POST /vehicle/odometer?traveled_distance_km=12345`) SDK `getCurrentDistanceDriven`이 바로 `12345.0`을 준다. 권한은 `pleos.car.permission.CAR_DRIVE` 선언만으로 충분했다. §2.2의 ❓는 해소.
+- 같은 값을 AAOS `PERF_ODOMETER`로 읽으면 `CAR_MILEAGE` 권한이 없어서 막힌다(설치 시 부여되지 않음). **주행거리는 Pleos SDK로 읽는다.**
+- **이 에뮬레이터 차량은 전기차 구성이다.** 콘솔 기능 63개에 배터리·충전은 있고 연료는 없다.
+- 이 에뮬레이터에서 **지원하지 않는 값**(SDK가 "지원 안 하는 속성" 오류를 준다): 연료 %, 순간·누적·주유 후·현재 연비, 주행 모드, 에어백 전개, 이번 주행·주유 후 거리.
+- 읽히는 값: 기어(`GEAR_PARK`), 브레이크 페달(true/false), 엔진 이상 경고(false), 남은 주행거리(콘솔 `range-remaining`), AAOS 차속(0.0, 콘솔에 차속 조작 항목은 없음), VIN·등록번호(`"invalid"`, 에뮬레이터라 값이 없음).
+- 공조는 운전석 영역(`ROW_1_LEFT`)으로 부르면 "영역 미지원" 오류가 난다. 다른 영역 ID로 다시 확인해야 한다 ❓.
+- 콘솔 기능 목록은 `GET /vehicle/catalog`, 현재 상태는 `GET /vehicle/state`로 볼 수 있다. 데모 자동화에 쓸 수 있다.
+- 전기차 값: 배터리 잔량 %(`getEvBatteryStateOfCharge`), 배터리 에너지·용량(77400, 콘솔 단위 kWh로 표기되나 값으로 보아 Wh 🟡), 충전구 열림, 충전 스위치는 읽힌다 ✅. **전비 4종(순간·누적·충전 후·현재)은 "지원 안 함"**이라 앱이 주행거리 증가 ÷ 배터리 에너지 감소로 계산한다.
+- **마이크 ✅**: `RECORD_AUDIO` 권한으로 `AudioRecord`(16kHz mono)가 실제 소리 값(0이 아닌 RMS)을 받는다. 에뮬레이터는 `adb emu avd hostmicon`으로 Mac 마이크를 연결해야 한다.
+- **시동 상태 ✗**: SDK에 `IgnitionState` 상수(LOCK/OFF/ACC/ON/START)는 있지만 이 값을 돌려주는 API가 없다. AAOS `IGNITION_STATE`는 "지원 안 함"이다. 콘솔 `power-system`(Off/StandBy/Ready/On/Driving)은 차량 속성 연결이 없다.
+- **하이패스 ✗(앱에서)**: 차량 내부 ETCS 상태에는 활성화, 카드, 잔액, 마지막 거래(요금소 ID·이름)까지 있다. 하지만 Vehicle SDK `Toll`이 주는 것은 하이패스 안내 음량뿐이고 콘솔 항목에도 차량 속성 연결이 없다. 앱이 통행 거래를 받을 경로는 확인되지 않았다 ❓.
+- **콘솔 쓰기 조건**: 콘솔 HTTP API로 값을 바꾸려면 상태가 `emulator_active: true`여야 한다. 브라우저에서 콘솔 페이지를 열어 둔 동안만 활성으로 보이고, 아니면 `{"error":"emulator_inactive"}`가 온다 🟡. 콘솔 앱(`ai.pleos.connectwebconsole`)이 꺼지면 다시 실행해야 한다.
+- 에뮬레이터 기본 앱 `ai.umos.drivingview`(Unreal)가 소프트웨어 렌더링에서 반복해서 죽는다. 동작에는 영향이 없다.
+- **부팅 시 자동 실행 (재부팅 2회 시험)**:
+  - `BOOT_COMPLETED`는 받는다 ✅(사용자 10).
+  - 받은 자리에서 화면(Activity)을 띄우면 **막힌다** ✗(`Background activity launch blocked`, `BAL_BLOCK`).
+  - 포그라운드 서비스(`specialUse`)는 시작되고, 그 안에서 Vehicle SDK로 주행거리를 읽었다 ✅(재부팅으로 에뮬레이터 값이 0으로 돌아가 `0.0`).
+  - 재부팅 전에 우리 앱을 화면 앞에 두어도 재부팅 후에는 내비 앱이 뜬다. **직전 앱을 다시 띄워 주지 않는다** ✗.
+  - 실차의 전원 켜기가 부팅이 아니라 절전 복귀(Suspend-to-RAM)라면 `BOOT_COMPLETED`가 오지 않을 수 있다 ❓. 상주 서비스가 앱 마켓 정책상 허용되는지도 ❓(§12 질문).
+- **핸들 리모컨 키**:
+  - 앱 전체에서 키를 감시하는 권한(`pleos.car.permission.HID_INPUT_MONITOR`)은 `signature|privileged`라 쓸 수 없다 ✗.
+  - **우리 앱이 화면 앞(포커스)일 때는 키를 받는다** ✅. `cmd car_service inject-key`(차량 키 경로)와 `input keyevent`로 넣은 `MEDIA_PLAY_PAUSE`, `CALL`, `MEDIA_NEXT`, `HEADSETHOOK`, `F1`, `BUTTON_1`이 모두 들어왔다. 길게 누르면 DOWN → DOWN(repeat=1) → UP으로 와서 누르고 있는 동안을 알 수 있다.
+  - `VOICE_ASSIST`(음성 버튼)는 들어오지 않는다. Gleo가 가져간다.
+  - 실차 핸들에 어떤 키가 있고 각각 어떤 키코드로 오는지는 ❓.
+  - **사용자 지정 키(현대·기아 ★ 버튼류)**: 에뮬레이터 차량 신호층에는 일반 키 입력(`HW_KEY_INPUT`)만 있고 사용자 지정 키 속성(`HW_CUSTOM_INPUT`)이 없다. 차량 설정 앱(`ai.umos.vehiclecontrol`)의 "운전대" 메뉴는 핸들 위치 조절뿐이고, 주행·디스플레이 메뉴에도 버튼 지정 항목이 없다. Pleos 앱들이 공개한 인텐트에도 키 관련 항목이 없다. AAOS에서 사용자 지정 키 이벤트를 받는 `CarInputManager`는 `CAR_MONITOR_INPUT`(signature) 권한이 필요하다. **3rd-party 앱이 사용자 지정 키를 쓸 경로는 확인되지 않았다** ❓ → 설명회 질문.
+- **좌석 영역 값**: 공조·앰비언트 조명은 영역 `0x75`(1열 좌·우 + 2열 좌·중·우)로만 지원한다. SDK에서는 `SeatArea(ROW_1_LEFT, ROW_1_RIGHT, ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT)`로 부른다. 좌석 하나(`ROW_1_LEFT`)로 부르면 "영역 미지원" 오류가 난다. 지원 영역은 `adb shell dumpsys car_service`의 `areaId`로 확인할 수 있다.
+- **앰비언트 조명 제어 ✅(명령 전달까지)**: `pleos.car.permission.CONTROL_CAR_LIGHTS`(normal)로 `setAmbientLightSwitch(ON)`, `setAmbientLightBrightnessColor(0x2979FF)`가 성공 응답을 받고, 차량 HAL 로그에 `set ambient lights color: r,g,b: (41, 121, 255)`가 찍힌다. 다시 읽으면 여전히 `ffffff`인데, 에뮬레이터에서 실제 상태는 콘솔 시뮬레이션이 정하기 때문으로 보인다 🟡. 콘솔 페이지를 열어 둔 상태에서 반영되는지 다시 확인한다.
+- **주행 화면 3D 차량(DrivingView, Unreal 엔진)**: 외부에서 받는 것은 날씨 설정(`SET_WEATHER`)뿐이고 이것도 `signature|privileged` 권한이 필요하다. 3D 차량 모델·색상을 3rd-party 앱이 바꿀 경로는 없다 ✗. 소프트웨어 렌더링 에뮬레이터에서는 반복해서 죽는다.
+- **오디오 포커스 ✅**: 음악(`USAGE_MEDIA`, `GAIN`)을 재생하는 중에 음성 통신(`USAGE_VOICE_COMMUNICATION`, `GAIN_TRANSIENT`)을 요청하면 차량 오디오 포커스 정책(`CarAudioFocus`)이 승인하고 음악 쪽에 `LOSS_TRANSIENT`(일시정지)를 보낸다. 반납하면 음악 쪽에 `GAIN`(재개)을 보낸다. 다만 이 시험은 두 요청 모두 같은 앱에서 했다. 실제 미디어 앱이 `LOSS_TRANSIENT`를 받고 멈추는지는 미디어 앱 재생 상태에서 다시 확인한다 🟡.
+
 ## 12. 미해결 질문 (설명회 Q&A나 메일 문의용)
 
 우선순위 순이다.

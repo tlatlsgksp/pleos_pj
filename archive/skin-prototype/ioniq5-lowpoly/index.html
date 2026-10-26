@@ -1,0 +1,713 @@
+<title>차곡 스킨 스튜디오</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a showroom stage (3D car) beside a spec-sheet panel; stacks on phones. */
+:root {
+  --bg: #eef0f2;
+  --stage: #dfe3e7;
+  --panel: #ffffff;
+  --fg: #16191d;
+  --muted: #5d6670;
+  --line: #d4d9de;
+  --accent: #0a5cd6;
+  --accent-fg: #ffffff;
+  --chip: #f3f5f7;
+  --sheet: #ffffff;
+  --font-display: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1215; --stage: #171b20; --panel: #14181c; --fg: #e8ebee; --muted: #98a1aa;
+    --line: #283038; --accent: #5b9bff; --accent-fg: #071225; --chip: #1c2228; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1215; --stage: #171b20; --panel: #14181c; --fg: #e8ebee; --muted: #98a1aa;
+  --line: #283038; --accent: #5b9bff; --accent-fg: #071225; --chip: #1c2228; color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.app {
+  display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; min-height: 100%;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+.stage { position: sticky; top: 16px; align-self: start; height: calc(100vh - 32px); min-height: 460px; background: var(--stage); border-radius: 14px; overflow: hidden; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#view.placing { cursor: crosshair; }
+.stage-head { position: absolute; left: 20px; top: 16px; right: 20px; display: flex; justify-content: space-between; gap: 12px; pointer-events: none; }
+.stage-head h1 { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.stage-head p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.status { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; }
+.toast { position: absolute; left: 50%; top: 70px; transform: translateX(-50%); background: var(--fg); color: var(--bg); font-size: 13px; padding: 7px 14px; border-radius: 999px; pointer-events: none; white-space: nowrap; }
+.stage-foot { position: absolute; left: 20px; bottom: 14px; right: 20px; display: flex; justify-content: space-between; align-items: end; gap: 12px; }
+.credit { font-size: 11px; color: var(--muted); }
+.credit a { color: inherit; }
+.toggle { pointer-events: auto; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+button, .filebtn {
+  font: inherit; color: var(--fg); background: var(--chip); border: 1px solid var(--line);
+  border-radius: 10px; padding: 9px 12px; cursor: pointer; text-align: left;
+}
+button:hover, .filebtn:hover { border-color: var(--muted); }
+button:focus-visible, .filebtn:focus-within, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+.preset strong { display: block; font-size: 14px; }
+.preset span { display: block; font-size: 12px; color: var(--muted); }
+.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.swatch { display: flex; flex-direction: column; gap: 6px; padding: 8px; font-size: 12px; line-height: 1.3; }
+.swatch i { display: block; height: 26px; border-radius: 6px; border: 1px solid rgba(127,127,127,.35); }
+.stickers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.sticker { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; font-size: 11px; line-height: 1.25; text-align: center; }
+.sticker canvas { width: 100%; height: 44px; object-fit: contain; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; background: transparent; padding: 7px 12px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); box-shadow: none; }
+.filebtn input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.filebtn { position: relative; display: inline-block; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+.cmd { font-family: var(--font-mono); font-size: 12px; background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; white-space: pre; margin: 0; }
+.tpl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; }
+.tpl-img { display: block; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--sheet); }
+.tpl-img img { display: block; width: 100%; height: auto; }
+.tpl-text { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; min-width: 0; }
+.editor { display: flex; flex-direction: column; gap: 8px; background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.editor label { display: grid; grid-template-columns: 52px minmax(0, 1fr) 64px; gap: 8px; align-items: center; font-size: 13px; }
+.editor output { font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.editor input[type="range"] { width: 100%; }
+.bytes { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+input[type="color"] { width: 44px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--chip); padding: 2px; cursor: pointer; }
+input[type="text"] { font: inherit; color: var(--fg); background: var(--chip); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 0; flex: 1; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .stage { position: relative; top: auto; height: auto; min-height: 340px; aspect-ratio: 4 / 3; max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <section class="stage" aria-label="3D 차량 미리보기">
+    <canvas id="view"></canvas>
+    <div class="stage-head">
+      <div>
+        <h1>스킨 스튜디오</h1>
+        <p>앱 속 내 차와 실내 무드등이 함께 바뀝니다</p>
+      </div>
+      <div class="status" id="status">모델 불러오는 중…</div>
+    </div>
+    <div class="toast" id="toast" hidden></div>
+    <div class="stage-foot">
+      <div class="credit">
+        대체 모델: <a href="https://sketchfab.com/3d-models/hyundai-ioniq-5-lowpoly-675e78311e8440d88714bd212cb7a8fb" target="_blank" rel="noopener">Hyundai Ioniq 5 - Lowpoly</a>
+        by andikapratamaw, CC BY 4.0. 탑재 차종(그랜저) 모델 확보 전 시연용.
+      </div>
+      <div class="seg toggle" role="group" aria-label="회전">
+        <button id="spin" aria-pressed="true">자동 회전</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="section">
+      <h2>스킨 예시</h2>
+      <div class="presets">
+        <button class="preset" data-preset="personal" aria-pressed="true"><strong>개인</strong><span>루시드 블루 · 스티커 · 블루 무드등</span></button>
+        <button class="preset" data-preset="fleet" aria-pressed="false"><strong>법인 예시</strong><span>화이트 · 회사 리버리 전체 랩</span></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>차체 색</h2>
+      <div class="swatches" id="paints"></div>
+      <div class="row">
+        <div class="seg" role="group" aria-label="도장 질감">
+          <button id="gloss" aria-pressed="true">유광</button>
+          <button id="matte" aria-pressed="false">무광</button>
+        </div>
+        <label class="row" for="paintPick" style="gap:6px"><input type="color" id="paintPick" value="#3d6fa8"><span class="hint">직접 고르기</span></label>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>스티커</h2>
+      <div class="stickers" id="stickerLib"></div>
+      <div class="row">
+        <input type="text" id="stickerText" value="차곡차곡" aria-label="문구 스티커 내용" maxlength="12">
+        <button id="addText">문구 스티커</button>
+        <label class="filebtn" for="stickerFile">내 라벨 올리기<input type="file" id="stickerFile" accept="image/png,image/jpeg,image/svg+xml,image/webp"></label>
+      </div>
+      <p class="hint" id="stickerHint">스티커를 고른 뒤 차를 누르면 붙습니다. 붙은 스티커는 끌어서 옮깁니다.</p>
+      <div class="editor" id="editor" hidden>
+        <label for="sizeRange">크기 <input type="range" id="sizeRange" min="8" max="180" step="1"><output id="sizeOut"></output></label>
+        <label for="rotRange">회전 <input type="range" id="rotRange" min="-180" max="180" step="1"><output id="rotOut"></output></label>
+        <div class="row">
+          <button id="deleteSticker">이 스티커 떼기</button>
+          <button id="deselect">선택 해제</button>
+        </div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <span class="bytes" id="bytes"></span>
+        <button id="clearStickers">모두 떼기</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>전체 랩</h2>
+      <div class="seg" role="group" aria-label="전체 랩">
+        <button id="wrapNone" aria-pressed="true">없음</button>
+        <button id="wrapFull" aria-pressed="false">전체 랩</button>
+      </div>
+      <div class="tpl" id="fullRow" hidden>
+        <a href="template.png" target="_blank" rel="noopener" class="tpl-img"><img src="template.png" alt="차체 랩 전개도: 왼쪽 옆면, 오른쪽 옆면, 위, 앞, 뒤를 실제 축척으로 편 도면" width="1970" height="2956"></a>
+        <div class="tpl-text">
+          <p class="hint">전개도를 열어 저장한 뒤 회색 면 위에 디자인하고, 같은 크기(1970×2956px) PNG로 올리면 차에 입혀집니다. 투명한 곳은 차체 색이 보입니다. 1px = 2.5mm.</p>
+          <label class="filebtn" for="wrapFile">랩 이미지 올리기<input type="file" id="wrapFile" accept="image/png,image/jpeg"></label>
+          <button id="wrapExample">예시 랩으로 되돌리기</button>
+        </div>
+      </div>
+      <p class="hint" id="wrapHint">디자이너용입니다. 전개도 한 장에 차 전체를 디자인해 입힙니다.</p>
+    </div>
+
+    <div class="section">
+      <h2>실내 무드등</h2>
+      <div class="swatches" id="ambients"></div>
+      <p class="hint">스킨을 고르면 실제 차량에 아래 명령을 보냅니다. 에뮬레이터에서 차량 HAL까지 전달되는 것을 확인했습니다.</p>
+      <pre class="cmd" id="cmd"></pre>
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/geometries/DecalGeometry.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/environments/RoomEnvironment.js"></script>
+<script>
+(function () {
+  const PAINTS = [
+    { name: "그래비티 골드 매트", hex: "#8f8577", matte: true },
+    { name: "아틀라스 화이트", hex: "#e9eaea" },
+    { name: "어비스 블랙", hex: "#15171b" },
+    { name: "루시드 블루", hex: "#3d6fa8" },
+    { name: "디지털 틸", hex: "#4f7d79" },
+    { name: "사이버 그레이", hex: "#6e7377" },
+    { name: "미스틱 올리브", hex: "#5c6449" },
+    { name: "얼티밋 레드", hex: "#8e1c22" }
+  ];
+  // The four colours the Pleos Virtual Console offers for INTERIOR_LIGHTS_AMBIENT_BRIGHTNESS_COLOR, plus two extras.
+  const AMBIENTS = [
+    { name: "시안", hex: "#00e5ff" },
+    { name: "블루", hex: "#2979ff" },
+    { name: "퍼플", hex: "#aa00ff" },
+    { name: "화이트", hex: "#ffffff" },
+    { name: "앰버", hex: "#ffab00" },
+    { name: "그린", hex: "#00c853" }
+  ];
+  const FONT = "'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+
+  // Built-in sticker art, drawn on canvas. w = default printed width in centimetres.
+  const LIBRARY = [
+    { id: "beginner", name: "초보운전", w: 30, draw: (g, c) => {
+      c.width = 600; c.height = 240;
+      round(g, 0, 0, 600, 240, 28, "#ffd400"); g.strokeStyle = "#111"; g.lineWidth = 14; g.strokeRect(14, 14, 572, 212);
+      text(g, "초보운전", 300, 128, 132, "#111", 800);
+    } },
+    { id: "baby", name: "아이가 타고 있어요", w: 26, draw: (g, c) => {
+      c.width = 560; c.height = 300;
+      round(g, 0, 0, 560, 300, 40, "#ff8fb1");
+      text(g, "아이가", 280, 100, 92, "#fff", 800); text(g, "타고 있어요", 280, 205, 92, "#fff", 800);
+    } },
+    { id: "stripes", name: "레이싱 스트라이프", w: 160, draw: (g, c) => {
+      c.width = 1200; c.height = 300;
+      g.fillStyle = "#f4f4f4"; g.fillRect(0, 30, 1200, 90); g.fillRect(0, 180, 1200, 90);
+      g.fillStyle = "#c8102e"; g.fillRect(0, 60, 1200, 30); g.fillRect(0, 210, 1200, 30);
+    } },
+    { id: "roundel", name: "번호 07", w: 45, draw: (g, c) => {
+      c.width = 500; c.height = 500;
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(250, 250, 240, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = "#111"; g.lineWidth = 20; g.stroke();
+      text(g, "07", 250, 268, 250, "#111", 800);
+    } },
+    { id: "fleet", name: "회사 로고 예시", w: 70, draw: (g, c) => {
+      c.width = 900; c.height = 300;
+      g.fillStyle = "#0b7a3b"; g.fillRect(0, 230, 900, 40);
+      text(g, "한결물류", 450, 120, 150, "#0e1a14", 800); text(g, "FLEET 07 · 1588-0000", 450, 205, 46, "#0e1a14", 600);
+    } },
+    { id: "checker", name: "체커 플래그", w: 40, draw: (g, c) => {
+      c.width = 480; c.height = 320;
+      for (let y = 0; y < 4; y++) for (let x = 0; x < 6; x++) { g.fillStyle = (x + y) % 2 ? "#111" : "#fff"; g.fillRect(x * 80, y * 80, 80, 80); }
+    } },
+    { id: "bolt", name: "EV 번개", w: 22, draw: (g, c) => {
+      c.width = 300; c.height = 420;
+      g.fillStyle = "#00c2ff"; g.beginPath();
+      [[180, 0], [40, 240], [140, 240], [100, 420], [260, 160], [160, 160], [220, 0]].forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]));
+      g.closePath(); g.fill(); g.strokeStyle = "#04324a"; g.lineWidth = 10; g.stroke();
+    } },
+    { id: "heart", name: "하트", w: 18, draw: (g, c) => {
+      c.width = 400; c.height = 360;
+      g.fillStyle = "#e5193f"; g.beginPath(); g.moveTo(200, 340);
+      g.bezierCurveTo(-60, 160, 60, -40, 200, 90); g.bezierCurveTo(340, -40, 460, 160, 200, 340); g.fill();
+    } }
+  ];
+
+  function round(g, x, y, w, h, r, fill) {
+    g.fillStyle = fill; g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fill();
+  }
+  function text(g, s, x, y, size, color, weight) {
+    g.fillStyle = color; g.font = weight + " " + size + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(s, x, y);
+  }
+  function textSticker(s) {
+    const c = document.createElement("canvas"); const g = c.getContext("2d");
+    g.font = "800 140px " + FONT;
+    c.width = Math.max(300, Math.ceil(g.measureText(s).width) + 80); c.height = 220;
+    text(g, s, c.width / 2, 116, 140, "#ffffff", 800);
+    g.lineWidth = 10; g.strokeStyle = "#111"; g.font = "800 140px " + FONT; g.strokeText(s, c.width / 2, 116);
+    text(g, s, c.width / 2, 116, 140, "#ffffff", 800);
+    return c;
+  }
+  function art(item) { const c = document.createElement("canvas"); item.draw(c.getContext("2d"), c); return c; }
+
+  const PRESETS = {
+    personal: { paint: "#3d6fa8", matte: false, wrap: "none", ambient: "#2979ff",
+      stickers: [{ lib: "beginner", at: "rear", w: 30 }, { lib: "bolt", at: "left", w: 22 }, { lib: "bolt", at: "right", w: 22 }] },
+    fleet: { paint: "#e9eaea", matte: false, wrap: "full", ambient: "#00c853", stickers: [] }
+  };
+
+  const canvas = document.getElementById("view");
+  const statusEl = document.getElementById("status");
+  const cmdEl = document.getElementById("cmd");
+  const toastEl = document.getElementById("toast");
+  const state = { paint: "#3d6fa8", matte: false, wrap: "none", ambient: "#2979ff", wrapImage: null };
+  const WRAP_W = 1970, WRAP_H = 2956;   // template.png size; body UVs map onto this sheet
+  let bodyUV = null, exampleWrap = null, wrapTexture = null;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 200);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.8;
+  controls.enablePan = false;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444a50, 0.6));
+  const key = new THREE.DirectionalLight(0xffffff, 1.2);
+  key.position.set(4, 6, 3);
+  scene.add(key);
+  const cabinLight = new THREE.PointLight(0x2979ff, 2.2, 3.2, 2);
+  scene.add(cabinLight);
+
+  let bodyMesh = null, bodyMat = null, carBox = null, groundGlow = null;
+
+  function resize() {
+    const r = canvas.getBoundingClientRect();
+    const w = Math.max(1, r.width), h = Math.max(1, r.height);
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(canvas);
+
+  let toastTimer = 0;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.hidden = true; }, 1800);
+  }
+
+  /* ---------- stickers ---------- */
+  // A sticker is {art canvas, texture, point, normal, widthCm, rot, mesh}. Only point/normal/size/rot/art id leave the device.
+  const stickers = [];
+  let selected = null, pending = null, dragging = false;
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  const UP = new THREE.Vector3(0, 1, 0), FWD = new THREE.Vector3(0, 0, 1);
+
+  function stickerOrientation(normal, rotDeg) {
+    const up = Math.abs(normal.dot(UP)) > 0.85 ? FWD : UP;
+    const m = new THREE.Matrix4().lookAt(new THREE.Vector3(), normal.clone().negate(), up);
+    const q = new THREE.Quaternion().setFromRotationMatrix(m);
+    q.multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(rotDeg)));
+    return new THREE.Euler().setFromQuaternion(q);
+  }
+
+  function buildSticker(s) {
+    if (s.mesh) { scene.remove(s.mesh); s.mesh.geometry.dispose(); }
+    const w = s.widthCm / 100;
+    const h = w * s.art.height / s.art.width;
+    const size = new THREE.Vector3(w, h, Math.max(0.25, w * 0.6));
+    const geo = new THREE.DecalGeometry(bodyMesh, s.point, stickerOrientation(s.normal, s.rot), size);
+    if (!s.material) {
+      const tex = new THREE.CanvasTexture(s.art);
+      tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
+      s.material = new THREE.MeshStandardMaterial({
+        map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4,
+        roughness: 0.4, metalness: 0.05, emissive: new THREE.Color(0x000000)
+      });
+    }
+    s.mesh = new THREE.Mesh(geo, s.material);
+    s.mesh.renderOrder = 2;
+    s.mesh.userData.sticker = s;
+    scene.add(s.mesh);
+  }
+
+  function addSticker(artCanvas, artId, point, normal, widthCm) {
+    const s = { art: artCanvas, artId, point: point.clone(), normal: normal.clone(), widthCm, rot: 0, mesh: null, material: null };
+    buildSticker(s);
+    stickers.push(s);
+    select(s);
+    updateBytes();
+    return s;
+  }
+
+  function removeSticker(s) {
+    scene.remove(s.mesh); s.mesh.geometry.dispose(); s.material.map.dispose(); s.material.dispose();
+    stickers.splice(stickers.indexOf(s), 1);
+    if (selected === s) select(null);
+    updateBytes();
+  }
+
+  function select(s) {
+    if (selected && selected.material) selected.material.emissive.set(0x000000);
+    selected = s;
+    const ed = document.getElementById("editor");
+    ed.hidden = !s;
+    if (!s) return;
+    s.material.emissive.set(0x1a2a44);
+    document.getElementById("sizeRange").value = s.widthCm;
+    document.getElementById("rotRange").value = s.rot;
+    document.getElementById("sizeOut").textContent = s.widthCm + " cm";
+    document.getElementById("rotOut").textContent = s.rot + "°";
+  }
+
+  // What the app would sync for this skin: settings only, never the 3D model.
+  function updateBytes() {
+    const data = {
+      paint: state.paint, finish: state.matte ? "matte" : "gloss", ambient: state.ambient, wrap: state.wrap,
+      stickers: stickers.map(s => ({ art: s.artId, p: s.point.toArray().map(v => +v.toFixed(3)), n: s.normal.toArray().map(v => +v.toFixed(3)), w: s.widthCm, r: s.rot }))
+    };
+    const bytes = new TextEncoder().encode(JSON.stringify(data)).length;
+    document.getElementById("bytes").textContent = "스티커 " + stickers.length + "개 · 스킨 데이터 " + bytes + " B";
+  }
+
+  function hitFrom(e, objects) {
+    const r = canvas.getBoundingClientRect();
+    pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObjects(objects, false)[0];
+  }
+  function worldNormal(hit) { return hit.face.normal.clone().transformDirection(bodyMesh.matrixWorld); }
+
+  // Capture phase so we can turn the orbit controls off before they see a press that lands on a sticker.
+  canvas.addEventListener("pointerdown", e => {
+    if (!bodyMesh) return;
+    if (pending) {
+      const hit = hitFrom(e, [bodyMesh]);
+      if (hit) {
+        controls.enabled = false;
+        addSticker(pending.art, pending.id, hit.point, worldNormal(hit), pending.w);
+        pending = null; canvas.classList.remove("placing");
+        document.querySelectorAll(".sticker").forEach(b => b.setAttribute("aria-pressed", "false"));
+        dragging = true; canvas.setPointerCapture(e.pointerId);
+        toast("붙였습니다. 끌어서 옮길 수 있어요");
+      }
+      return;
+    }
+    const sHit = hitFrom(e, stickers.map(s => s.mesh));
+    if (sHit) {
+      controls.enabled = false;
+      select(sHit.object.userData.sticker);
+      dragging = true; canvas.setPointerCapture(e.pointerId);
+    }
+  }, { capture: true });
+
+  canvas.addEventListener("pointermove", e => {
+    if (!dragging || !selected) return;
+    const hit = hitFrom(e, [bodyMesh]);
+    if (!hit) return;
+    selected.point.copy(hit.point);
+    selected.normal.copy(worldNormal(hit));
+    buildSticker(selected);
+  });
+  function endDrag(e) {
+    if (!dragging) return;
+    dragging = false; controls.enabled = true;
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+    updateBytes();
+  }
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+
+  function startPlacing(item) {
+    pending = item;
+    canvas.classList.add("placing");
+    controls.autoRotate = false;
+    document.getElementById("spin").setAttribute("aria-pressed", "false");
+    toast("차를 누르면 '" + item.name + "' 스티커가 붙습니다");
+  }
+
+  const libEl = document.getElementById("stickerLib");
+  LIBRARY.forEach(item => {
+    const b = document.createElement("button");
+    b.className = "sticker"; b.setAttribute("aria-pressed", "false");
+    const preview = art(item);
+    item.art = preview;
+    b.appendChild(preview);
+    b.appendChild(document.createTextNode(item.name));
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".sticker").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      startPlacing({ id: item.id, name: item.name, art: art(item), w: item.w });
+    });
+    libEl.appendChild(b);
+  });
+  document.getElementById("addText").addEventListener("click", () => {
+    const s = document.getElementById("stickerText").value.trim();
+    if (!s) { toast("문구를 입력하세요"); return; }
+    startPlacing({ id: "text:" + s, name: s, art: textSticker(s), w: Math.min(120, 12 * s.length) });
+  });
+  document.getElementById("stickerFile").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => loadImage(reader.result).then(img => {
+      const c = document.createElement("canvas");
+      const k = Math.min(1, 1024 / Math.max(img.width, img.height));
+      c.width = Math.max(1, Math.round(img.width * k)); c.height = Math.max(1, Math.round(img.height * k));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      startPlacing({ id: "upload:" + f.name, name: f.name, art: c, w: 40 });
+    });
+    reader.readAsDataURL(f);
+    e.target.value = "";
+  });
+  document.getElementById("sizeRange").addEventListener("input", e => {
+    if (!selected) return;
+    selected.widthCm = +e.target.value; document.getElementById("sizeOut").textContent = selected.widthCm + " cm";
+    buildSticker(selected); updateBytes();
+  });
+  document.getElementById("rotRange").addEventListener("input", e => {
+    if (!selected) return;
+    selected.rot = +e.target.value; document.getElementById("rotOut").textContent = selected.rot + "°";
+    buildSticker(selected); updateBytes();
+  });
+  document.getElementById("deleteSticker").addEventListener("click", () => selected && removeSticker(selected));
+  document.getElementById("deselect").addEventListener("click", () => select(null));
+  document.getElementById("clearStickers").addEventListener("click", () => { while (stickers.length) removeSticker(stickers[0]); });
+
+  // Places a sticker by casting a ray at the body from one side; used for presets.
+  function placeAt(lib, side, widthCm) {
+    const item = LIBRARY.find(i => i.id === lib);
+    const size = carBox.getSize(new THREE.Vector3()), c = carBox.getCenter(new THREE.Vector3());
+    const dir = { rear: new THREE.Vector3(0, 0, 1), left: new THREE.Vector3(-1, 0, 0), right: new THREE.Vector3(1, 0, 0) }[side];
+    const origin = c.clone().addScaledVector(dir, -Math.max(size.x, size.z));
+    origin.y = carBox.min.y + size.y * (side === "rear" ? 0.5 : 0.38);
+    if (side !== "rear") origin.z = c.z - size.z * 0.18;
+    raycaster.set(origin, dir);
+    const hit = raycaster.intersectObject(bodyMesh, false)[0];
+    if (hit) { addSticker(art(item), item.id, hit.point, worldNormal(hit), widthCm); }
+  }
+
+  /* ---------- paint, wrap, ambient ---------- */
+  function wrapCanvas(img) {
+    const c = document.createElement("canvas");
+    c.width = 1024; c.height = Math.round(1024 * WRAP_H / WRAP_W);
+    const g = c.getContext("2d");
+    g.fillStyle = state.paint; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(img, 0, 0, c.width, c.height);
+    return c;
+  }
+  function loadImage(src) {
+    return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+  }
+
+  function applyPaint() {
+    if (!bodyMat) return;
+    if (wrapTexture) { wrapTexture.dispose(); wrapTexture = null; }
+    const img = state.wrapImage || exampleWrap;
+    if (state.wrap === "full" && bodyUV && img) {
+      wrapTexture = new THREE.CanvasTexture(wrapCanvas(img));
+      wrapTexture.encoding = THREE.sRGBEncoding; wrapTexture.anisotropy = 4;
+      bodyMat.map = wrapTexture; bodyMat.color.set(0xffffff);
+    } else {
+      bodyMat.map = null; bodyMat.color.set(state.paint); bodyMat.color.convertSRGBToLinear();
+    }
+    bodyMat.roughness = state.matte ? 0.62 : 0.18;
+    bodyMat.metalness = state.matte ? 0.25 : 0.55;
+    bodyMat.clearcoat = state.matte ? 0 : 1;
+    bodyMat.needsUpdate = true;
+    updateBytes();
+  }
+
+  function applyAmbient() {
+    cabinLight.color.set(state.ambient);
+    if (groundGlow) groundGlow.material.color.set(state.ambient);
+    const rgb = state.ambient.replace("#", "").toUpperCase();
+    const r = parseInt(rgb.slice(0, 2), 16), g = parseInt(rgb.slice(2, 4), 16), b = parseInt(rgb.slice(4, 6), 16);
+    cmdEl.textContent =
+      "val cabin = SeatArea(ROW_1_LEFT, ROW_1_RIGHT,\n    ROW_2_LEFT, ROW_2_CENTER, ROW_2_RIGHT) // 0x75\n" +
+      "light.setAmbientLightSwitch(cabin, LightSwitch.ON)\n" +
+      "light.setAmbientLightBrightnessColor(cabin, 0x" + rgb + ")\n" +
+      "// HAL: set ambient lights color: r,g,b: (" + r + ", " + g + ", " + b + ")";
+    updateBytes();
+  }
+
+  function syncUI() {
+    document.querySelectorAll("#paints .swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hex === state.paint)));
+    document.querySelectorAll("#ambients .swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.hex === state.ambient)));
+    document.getElementById("gloss").setAttribute("aria-pressed", String(!state.matte));
+    document.getElementById("matte").setAttribute("aria-pressed", String(state.matte));
+    document.getElementById("wrapNone").setAttribute("aria-pressed", String(state.wrap === "none"));
+    document.getElementById("wrapFull").setAttribute("aria-pressed", String(state.wrap === "full"));
+    document.getElementById("fullRow").hidden = state.wrap !== "full";
+    document.getElementById("paintPick").value = state.paint;
+  }
+
+  function swatchButtons(el, list, onPick) {
+    list.forEach(item => {
+      const b = document.createElement("button");
+      b.className = "swatch"; b.dataset.hex = item.hex; b.setAttribute("aria-pressed", "false");
+      b.innerHTML = '<i style="background:' + item.hex + '"></i>' + item.name;
+      b.addEventListener("click", () => onPick(item));
+      el.appendChild(b);
+    });
+  }
+  function clearPreset() { document.querySelectorAll(".preset").forEach(p => p.setAttribute("aria-pressed", "false")); }
+
+  swatchButtons(document.getElementById("paints"), PAINTS, p => { state.paint = p.hex; state.matte = !!p.matte; clearPreset(); applyPaint(); syncUI(); });
+  swatchButtons(document.getElementById("ambients"), AMBIENTS, a => { state.ambient = a.hex; clearPreset(); applyAmbient(); syncUI(); });
+  document.getElementById("paintPick").addEventListener("input", e => { state.paint = e.target.value; clearPreset(); applyPaint(); syncUI(); });
+  document.getElementById("gloss").addEventListener("click", () => { state.matte = false; applyPaint(); syncUI(); });
+  document.getElementById("matte").addEventListener("click", () => { state.matte = true; applyPaint(); syncUI(); });
+  function setWrap(mode) { state.wrap = mode; clearPreset(); applyPaint(); syncUI(); }
+  document.getElementById("wrapNone").addEventListener("click", () => setWrap("none"));
+  document.getElementById("wrapFull").addEventListener("click", () => setWrap("full"));
+  document.getElementById("wrapExample").addEventListener("click", () => { state.wrapImage = null; setWrap("full"); });
+  document.getElementById("wrapFile").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => loadImage(reader.result).then(img => { state.wrapImage = img; setWrap("full"); });
+    reader.readAsDataURL(f);
+  });
+
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    Object.assign(state, { paint: p.paint, matte: p.matte, wrap: p.wrap, ambient: p.ambient });
+    while (stickers.length) removeSticker(stickers[0]);
+    if (bodyMesh) p.stickers.forEach(s => placeAt(s.lib, s.at, s.w));
+    select(null);
+    document.querySelectorAll(".preset").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.preset === name)));
+    applyPaint(); applyAmbient(); syncUI();
+  }
+  document.querySelectorAll(".preset").forEach(btn => btn.addEventListener("click", () => applyPreset(btn.dataset.preset)));
+
+  const spinBtn = document.getElementById("spin");
+  spinBtn.addEventListener("click", () => {
+    controls.autoRotate = !controls.autoRotate;
+    spinBtn.setAttribute("aria-pressed", String(controls.autoRotate));
+  });
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { controls.autoRotate = false; spinBtn.setAttribute("aria-pressed", "false"); }
+
+  /* ---------- model ---------- */
+  function decode(b64) {
+    const bin = atob(b64.trim());
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+
+  Promise.all([
+    fetch("ioniq5.glb").then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.arrayBuffer(); }),
+    fetch("bodyuv.txt").then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); }),
+    loadImage("wrap-fleet.png")
+  ]).then(([glb, uvText, wrapImg]) => new Promise((res, rej) =>
+    new THREE.GLTFLoader().parse(glb, "", gltf => res([gltf, uvText, wrapImg]), rej)
+  )).then(([gltf, uvText, wrapImg]) => {
+    const root = gltf.scene;
+    scene.add(root);
+    root.updateMatrixWorld(true);
+    const atlasMeshes = [];
+    root.traverse(o => {
+      if (o.isMesh && o.material && o.material.name === "M_Gravity_Gold_Matte") {
+        bodyMesh = o;
+        bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.08 });
+        o.material = bodyMat;
+      }
+      if (o.isMesh && o.material && o.material.name === "M_Ioniq") atlasMeshes.push(o);
+    });
+    // M_Ioniq packs opaque trim and glass into one texture marked BLEND, so opaque parts never wrote depth
+    // and showed through each other. Draw it twice: opaque texels with depth, then only the glass texels blended.
+    atlasMeshes.forEach(o => {
+      const src = o.material;
+      const opaque = src.clone();
+      opaque.transparent = false; opaque.alphaTest = 0.5; opaque.depthWrite = true;
+      o.material = opaque;
+      const glass = src.clone();
+      glass.transparent = true; glass.depthWrite = false;
+      glass.onBeforeCompile = shader => {
+        shader.fragmentShader = shader.fragmentShader.replace(
+          "#include <alphatest_fragment>", "#include <alphatest_fragment>\n\tif ( diffuseColor.a >= 0.5 ) discard;");
+      };
+      const glassMesh = new THREE.Mesh(o.geometry, glass);
+      glassMesh.renderOrder = 1;
+      o.add(glassMesh);
+    });
+
+    // Swap the model's fragmented body UVs for the wrap-sheet UVs (one pair per vertex, in index order).
+    const uvs = new Float32Array(decode(uvText));
+    const flat = bodyMesh.geometry.index ? bodyMesh.geometry.toNonIndexed() : bodyMesh.geometry;
+    if (flat.attributes.position.count * 2 === uvs.length) {
+      flat.setAttribute("uv", new THREE.BufferAttribute(uvs, 2));
+      bodyMesh.geometry = flat;
+      bodyUV = uvs;
+      exampleWrap = wrapImg;
+    } else {
+      document.getElementById("wrapHint").textContent = "이 모델에는 전개도 데이터가 맞지 않아 전체 랩을 쓸 수 없습니다.";
+    }
+
+    carBox = new THREE.Box3().setFromObject(root);
+    const size = carBox.getSize(new THREE.Vector3());
+    const center = carBox.getCenter(new THREE.Vector3());
+    cabinLight.position.set(center.x, carBox.min.y + size.y * 0.62, center.z);
+    cabinLight.distance = Math.max(size.x, size.z) * 0.9;
+    groundGlow = new THREE.Mesh(new THREE.CircleGeometry(Math.max(size.x, size.z) * 0.62, 64),
+      new THREE.MeshBasicMaterial({ color: state.ambient, transparent: true, opacity: 0.12, depthWrite: false }));
+    groundGlow.rotation.x = -Math.PI / 2;
+    groundGlow.position.set(center.x, carBox.min.y + 0.002, center.z);
+    scene.add(groundGlow);
+    const dist = Math.max(size.x, size.y, size.z) * 2.1;
+    camera.position.set(center.x - dist * 0.75, center.y + dist * 0.32, center.z - dist * 0.75);
+    controls.target.copy(center);
+    controls.minDistance = dist * 0.45;
+    controls.maxDistance = dist * 2;
+    controls.update();
+    statusEl.textContent = "면 1.2만 · 3.7MB";
+    applyPreset("personal");
+  }).catch(err => {
+    statusEl.textContent = "모델을 불러오지 못했습니다. 새로고침해 주세요.";
+    console.error(err);
+  });
+
+  resize();
+  syncUI();
+  (function loop() {
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
