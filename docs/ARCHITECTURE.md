@@ -22,6 +22,7 @@
 | API 계약 | OpenAPI. `@nestjs/swagger`로 생성해 `docs/api/openapi.json`에 커밋 |
 | 외부 API | 앱은 외부 API(오피넷 등)를 직접 호출하지 않는다. 전부 백엔드를 거친다 |
 | Pleos SDK | 앱(AAOS)에서만 호출한다. 백엔드는 SDK를 모른다 |
+| 비밀 값 | sops + age로 암호화해 `secret/`에 커밋한다. 환경은 하나(dev/prod 분리 없음). 평문은 `backend/.env`와 `app/secrets.properties`에만 풀린다. 절차는 [README](../README.md#비밀-값) |
 
 ## 1. 전체 구성
 
@@ -278,7 +279,7 @@ modules/fuel-logs/
 ```sh
 cd backend
 docker compose up -d            # PostgreSQL 17, Redis 7
-cp .env.example .env            # 기본값이 compose와 맞춰져 있다
+sh ../secret/decrypt.sh         # .env 생성. age 키가 없으면 cp .env.example .env (기본값이 compose와 맞춰져 있다)
 npm install
 npx prisma migrate dev
 npm run start:dev

@@ -25,13 +25,38 @@ cd app
 ## 백엔드 실행
 
 ```sh
+sh secret/decrypt.sh            # backend/.env 생성. age 키가 없으면 cp backend/.env.example backend/.env
 cd backend
 docker compose up -d
-cp .env.example .env
 npm install
 npx prisma migrate dev
 npm run start:dev
 ```
+
+## 비밀 값
+
+API 키 같은 비밀 값은 `secret/`에 [sops](https://github.com/getsops/sops)와 age로 암호화해 커밋한다. 환경은 하나다(dev/prod를 나누지 않는다).
+
+| 암호화 파일 (커밋) | 평문이 풀리는 위치 (gitignore) | 내용 |
+|---|---|---|
+| `secret/backend.env` | `backend/.env` | DB·Redis URL, VIN HMAC 키, 네이버 Maps 클라이언트 ID·Secret |
+| `secret/app.env` | `app/secrets.properties` | Pleos Playground 인증 정보, 네이버 Maps 클라이언트 ID |
+
+```sh
+sh secret/decrypt.sh    # 풀기. age 개인키가 있어야 한다
+sh secret/encrypt.sh    # 평문을 고친 뒤 다시 잠그기. 내용이 같으면 파일을 건드리지 않는다
+```
+
+PowerShell에서는 스크립트 대신 sops를 직접 부른다. `>` 리다이렉션은 UTF-16으로 저장되므로 쓰지 않는다.
+
+```sh
+sops -d --output backend/.env secret/backend.env
+sops -d --output app/secrets.properties secret/app.env
+```
+
+age 개인키는 sops 기본 경로에 둔다: Windows `%APPDATA%\sops\age\keys.txt`, macOS `~/Library/Application Support/sops/age/keys.txt`, Linux `~/.config/sops/age/keys.txt`. 새 사람에게 접근을 주려면 그 사람이 `age-keygen`으로 만든 공개키를 `.sops.yaml`에 추가하고, 기존 키 보유자가 `sops updatekeys secret/backend.env secret/app.env`를 실행한다.
+
+네이버 Maps 클라이언트 ID는 앱 패키지 이름에 묶여 있어 앱에 넣어도 되지만, Secret은 Geocoding을 호출하는 백엔드에만 둔다.
 
 ## 문서
 

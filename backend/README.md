@@ -13,8 +13,8 @@
 ## 실행
 
 ```sh
+sh ../secret/decrypt.sh     # .env 생성. age 키가 없으면 cp .env.example .env
 docker compose up -d        # PostgreSQL 17, Redis 7
-cp .env.example .env
 npm install
 npx prisma migrate dev
 npm run start:dev

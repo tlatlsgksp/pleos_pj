@@ -1,0 +1,6 @@
+# sops settings. Files under secret/ are encrypted for the age recipients below.
+# To add a person: append their public key here, then run
+#   sops updatekeys secret/backend.env secret/app.env
+creation_rules:
+  - path_regex: 'secret[/\\][^/\\]+\.env$'
+    age: age1hcdrqny9afjqpxe7heeh06hgskjsly67u4n4zcn7fcmswlyl3edsn5a5xw
