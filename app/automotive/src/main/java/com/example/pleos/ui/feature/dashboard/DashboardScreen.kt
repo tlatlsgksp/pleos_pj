@@ -8,15 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,11 +28,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.pleos.R
-import com.example.pleos.domain.model.DrivingMode
+import com.example.pleos.domain.model.CareStatus
 import com.example.pleos.domain.model.VehicleWarning
+import com.example.pleos.ui.common.Format
+import com.example.pleos.ui.feature.care.CareItemCard
+import com.example.pleos.ui.feature.care.CareItemUi
 import com.example.pleos.ui.theme.PleosTheme
+import java.time.LocalDate
 
-/** Stateless dashboard. Everything it shows comes from [state]; everything it does goes out as an event. */
+/** Stateless home. Everything it shows comes from [state]; everything it does goes out as an event. */
 @Composable
 fun DashboardScreen(
     state: DashboardState,
@@ -44,14 +52,12 @@ fun DashboardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.dashboard_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
+                Text(text = stringResource(R.string.dashboard_title), style = MaterialTheme.typography.headlineMedium)
                 if (state.isDemo) {
                     Spacer(Modifier.width(12.dp))
                     AssistChip(onClick = {}, label = { Text(stringResource(R.string.dashboard_demo_badge)) })
@@ -59,28 +65,28 @@ fun DashboardScreen(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-                ValueCard(
-                    label = stringResource(R.string.dashboard_fuel),
-                    value = state.fuelPercent?.let { "$it%" },
-                    modifier = Modifier.weight(1f),
-                )
-                ValueCard(
-                    label = stringResource(R.string.dashboard_range),
-                    value = state.rangeKm?.let { "$it km" },
-                    modifier = Modifier.weight(1f),
-                )
-                ValueCard(
-                    label = stringResource(R.string.dashboard_driving_mode),
-                    value = state.drivingMode?.let { it.label() },
-                    modifier = Modifier.weight(1f),
-                )
+                if (state.batteryPercent != null || state.fuelPercent == null) {
+                    ValueCard(stringResource(R.string.dashboard_battery), state.batteryPercent?.let { "$it%" }, Modifier.weight(1f))
+                } else {
+                    ValueCard(stringResource(R.string.dashboard_fuel), "${state.fuelPercent}%", Modifier.weight(1f))
+                }
+                ValueCard(stringResource(R.string.dashboard_range), state.rangeKm?.let { Format.km(it.toDouble()) }, Modifier.weight(1f))
+                ValueCard(stringResource(R.string.dashboard_odometer), state.odometerKm?.let(Format::km), Modifier.weight(1f))
             }
 
-            ValueCard(
-                label = stringResource(R.string.dashboard_trip_since_refill),
-                value = state.tripSinceRefillKm?.let { "%.1f km".format(it) },
-                modifier = Modifier.fillMaxWidth(),
-            )
+            state.pendingCharge?.let { PendingChargeCard(it, onOpen = { onEvent(DashboardEvent.OpenChargeTapped) }) }
+
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.care_title), style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
+                        TextButton(onClick = { onEvent(DashboardEvent.OpenCareTapped) }) {
+                            Text(stringResource(R.string.dashboard_care_all), style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                    state.careItems.forEach { CareItemCard(item = it, saving = false, onServiced = null) }
+                }
+            }
 
             if (state.warnings.isNotEmpty()) {
                 Card(modifier = Modifier.fillMaxWidth()) {
@@ -119,6 +125,30 @@ fun DashboardScreen(
 }
 
 @Composable
+private fun PendingChargeCard(charge: PendingChargeUi, onOpen: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary),
+    ) {
+        Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    stringResource(if (charge.isEv) R.string.dashboard_charge_detected else R.string.dashboard_refuel_detected),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                )
+                val amount = charge.amount?.let { if (charge.isEv) Format.kwh(it) else "%.1f L".format(it) }
+                val parts = listOfNotNull(amount, charge.estimatedWon?.let(Format::won))
+                Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSecondary)
+            }
+            Button(onClick = onOpen) {
+                Text(stringResource(R.string.dashboard_charge_open), style = MaterialTheme.typography.labelLarge)
+            }
+        }
+    }
+}
+
+@Composable
 private fun ValueCard(label: String, value: String?, modifier: Modifier = Modifier) {
     Card(modifier = modifier) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -130,18 +160,6 @@ private fun ValueCard(label: String, value: String?, modifier: Modifier = Modifi
         }
     }
 }
-
-@Composable
-private fun DrivingMode.label(): String = stringResource(
-    when (this) {
-        DrivingMode.ECO -> R.string.driving_mode_eco
-        DrivingMode.NORMAL -> R.string.driving_mode_normal
-        DrivingMode.SPORT -> R.string.driving_mode_sport
-        DrivingMode.SNOW -> R.string.driving_mode_snow
-        DrivingMode.CUSTOM -> R.string.driving_mode_custom
-        DrivingMode.UNKNOWN -> R.string.driving_mode_unknown
-    },
-)
 
 @Composable
 private fun VehicleWarning.label(): String = stringResource(
@@ -157,17 +175,20 @@ private fun VehicleWarning.label(): String = stringResource(
     },
 )
 
-@Preview(showBackground = true, widthDp = 1024, heightDp = 600)
+@Preview(showBackground = true, widthDp = 1024, heightDp = 1000)
 @Composable
 private fun DashboardScreenPreview() {
     PleosTheme {
         DashboardScreen(
             state = DashboardState(
-                fuelPercent = 91,
-                rangeKm = 660,
-                drivingMode = DrivingMode.ECO,
-                tripSinceRefillKm = 24.0,
-                warnings = setOf(VehicleWarning.ENGINE_OIL),
+                batteryPercent = 69,
+                rangeKm = 267,
+                odometerKm = 12_370.0,
+                pendingCharge = PendingChargeUi("r1", 40.0, isEv = true, estimatedWon = 12_976),
+                careItems = listOf(
+                    CareItemUi("cabin_filter", "에어컨 필터", CareStatus.DUE_SOON, 0.85, 2_250.0, LocalDate.of(2027, 3, 1), 15_000, 12),
+                    CareItemUi("wiper", "와이퍼", CareStatus.UNKNOWN, null, null, null, null, 12),
+                ),
                 isDemo = true,
             ),
             onEvent = {},

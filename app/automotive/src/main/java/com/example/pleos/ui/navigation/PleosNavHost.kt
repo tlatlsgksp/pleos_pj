@@ -23,7 +23,12 @@ object Routes {
 @Composable
 fun PleosNavHost(navController: NavHostController = rememberNavController()) {
     NavHost(navController = navController, startDestination = Routes.DASHBOARD) {
-        composable(Routes.DASHBOARD) { DashboardRoute() }
+        composable(Routes.DASHBOARD) {
+            DashboardRoute(
+                onOpenCare = { navController.navigate(Routes.CARE) { launchSingleTop = true } },
+                onOpenCharge = { id -> navController.navigate(Routes.charge(id)) { launchSingleTop = true } },
+            )
+        }
         composable(Routes.CARE) {
             CareRoute(onBack = { navController.popBackStack() })
         }
