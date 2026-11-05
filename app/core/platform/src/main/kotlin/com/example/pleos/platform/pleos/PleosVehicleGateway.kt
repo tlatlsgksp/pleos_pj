@@ -2,6 +2,7 @@ package com.example.pleos.platform.pleos
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import ai.pleos.playground.vehicle.Vehicle
 import ai.pleos.playground.vehicle.api.model.area.SeatArea
 import ai.pleos.playground.vehicle.constant.area.SeatValue
@@ -17,6 +18,7 @@ import com.example.pleos.domain.model.VehicleSnapshot
 import com.example.pleos.domain.model.VehicleWarning
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -29,13 +31,16 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * [VehicleGateway] on the Pleos Vehicle SDK 2.3.2.
  *
  * Polls the getters every [POLL_INTERVAL_MS]: listener support is not listed in the Playground
- * console, and polling behaves the same on every vehicle. The charge port has no getter, so it
+ * console, and polling behaves the same on every vehicle. Calls are made on the main thread, as
+ * the SDK sample does. A read that fails or gets no answer is logged under [TAG]; when every read
+ * times out, the vehicle service is not active yet (on the emulator a reboot fixed it). The charge port has no getter, so it
  * comes from its listener. A value the vehicle does not support stays null.
  *
  * Units, from the emulator measurements in PLEOS_PLATFORM_RESEARCH 11.2: odometer is km; battery
@@ -68,13 +73,13 @@ internal class PleosVehicleGateway(
         }
         runCatching { vehicle.getEvBattery().registerEvChargePortOpen(portListener) }
 
-        launch {
+        launch(Dispatchers.Main) {
             var cycle = 0
             var capacityWh: Double? = null
             var warnings = emptySet<VehicleWarning>()
             while (isActive) {
                 if (capacityWh == null) {
-                    capacityWh = read<Float> { ok, fail -> vehicle.getEvBattery().getEvBatteryCapacity(ok, fail) }?.toDouble()
+                    capacityWh = read<Float>("getEvBatteryCapacity") { ok, fail -> vehicle.getEvBattery().getEvBatteryCapacity(ok, fail) }?.toDouble()
                 }
                 if (cycle % WARNING_EVERY_N_POLLS == 0) warnings = readWarnings(vehicle)
                 val s = readSnapshot(vehicle, capacityWh, portOpen.value, warnings)
@@ -108,13 +113,13 @@ internal class PleosVehicleGateway(
     }
 
     /** The emulator answers "invalid"; that and blanks count as no VIN. */
-    override suspend fun vin(): String? {
+    override suspend fun vin(): String? = withContext(Dispatchers.Main) {
         val vehicle = Vehicle(appContext)
         vehicle.initialize()
-        return try {
+        try {
             repeat(VIN_ATTEMPTS) {
-                val vin = read<String> { ok, fail -> vehicle.getCarInfo().getVINInfo(ok, fail) }
-                if (vin != null) return vin.trim().takeUnless { it.isEmpty() || it.equals("invalid", ignoreCase = true) }
+                val vin = read<String>("getVINInfo") { ok, fail -> vehicle.getCarInfo().getVINInfo(ok, fail) }
+                if (vin != null) return@withContext vin.trim().takeUnless { it.isEmpty() || it.equals("invalid", ignoreCase = true) }
                 delay(VIN_RETRY_MS)
             }
             null
@@ -130,19 +135,19 @@ internal class PleosVehicleGateway(
         warnings: Set<VehicleWarning>,
     ): VehicleSnapshot {
         val ev = vehicle.getEvBattery()
-        val levelWh = read<Float> { ok, fail -> ev.getEvBatteryLevel(ok, fail) }?.toDouble()
+        val levelWh = read<Float>("getEvBatteryLevel") { ok, fail -> ev.getEvBatteryLevel(ok, fail) }?.toDouble()
         val wattHours = capacityWh == null || capacityWh > WH_THRESHOLD
         val toKwh = { v: Double -> if (wattHours) v / 1000.0 else v }
-        val range = read<Float> { ok, fail -> vehicle.getOdometer().getRangeRemainingDistance(ok, fail) }?.toDouble()
+        val range = read<Float>("getRangeRemainingDistance") { ok, fail -> vehicle.getOdometer().getRangeRemainingDistance(ok, fail) }?.toDouble()
         return VehicleSnapshot(
-            fuelPercent = read<Int> { ok, fail -> vehicle.getFuel().getFuelPercent(ok, fail) },
-            cumulativeDistanceKm = read<Float> { ok, fail -> vehicle.getOdometer().getCurrentDistanceDriven(ok, fail) }?.toDouble(),
+            fuelPercent = read<Int>("getFuelPercent") { ok, fail -> vehicle.getFuel().getFuelPercent(ok, fail) },
+            cumulativeDistanceKm = read<Float>("getCurrentDistanceDriven") { ok, fail -> vehicle.getOdometer().getCurrentDistanceDriven(ok, fail) }?.toDouble(),
             warnings = warnings,
-            gear = read<VehicleGear> { ok, fail -> vehicle.getGear().getCurrentGearSelectionState(ok, fail) }?.toDomain(),
-            brakePedalPressed = read<Boolean> { ok, fail -> vehicle.getBrake().getCurrentBrakePedalStatus(ok, fail) },
-            hvacOn = read<Boolean> { ok, fail -> vehicle.getHVAC().getHvacAcState(ALL_SEATS, ok, fail) },
+            gear = read<VehicleGear>("getCurrentGearSelectionState") { ok, fail -> vehicle.getGear().getCurrentGearSelectionState(ok, fail) }?.toDomain(),
+            brakePedalPressed = read<Boolean>("getCurrentBrakePedalStatus") { ok, fail -> vehicle.getBrake().getCurrentBrakePedalStatus(ok, fail) },
+            hvacOn = read<Boolean>("getHvacAcState") { ok, fail -> vehicle.getHVAC().getHvacAcState(ALL_SEATS, ok, fail) },
             rangeRemainingKm = range?.let { if (it > RANGE_METRES_THRESHOLD) it / 1000.0 else it },
-            batteryPercent = read<Int> { ok, fail -> ev.getEvBatteryStateOfCharge(ok, fail) }?.toDouble(),
+            batteryPercent = read<Int>("getEvBatteryStateOfCharge") { ok, fail -> ev.getEvBatteryStateOfCharge(ok, fail) }?.toDouble(),
             batteryEnergyKwh = levelWh?.let(toKwh),
             batteryCapacityKwh = capacityWh?.let(toKwh),
             chargePortOpen = portOpen,
@@ -153,25 +158,34 @@ internal class PleosVehicleGateway(
         val safety = vehicle.getSafety()
         fun OilLevelState?.isLow() = this == OilLevelState.LOW || this == OilLevelState.CRITICALLY_LOW
         return buildSet {
-            if (read<OilLevelState> { ok, fail -> safety.getEngineOilLevelState(ok, fail) }.isLow()) add(VehicleWarning.ENGINE_OIL)
-            if (read<OilLevelState> { ok, fail -> safety.getBrakeFluidLevelState(ok, fail) }.isLow()) add(VehicleWarning.BRAKE_FLUID)
-            if (read<OilLevelState> { ok, fail -> safety.getTransmissionOilLevelState(ok, fail) }.isLow()) add(VehicleWarning.TRANSMISSION_OIL)
-            if (read<Boolean> { ok, fail -> safety.hasLowWasherFluidWarning(ok, fail) } == true) add(VehicleWarning.WASHER_FLUID)
-            if (read<Boolean> { ok, fail -> safety.hasPowerDownWarningIndicator(ok, fail) } == true) add(VehicleWarning.POWER_DOWN)
+            if (read<OilLevelState>("getEngineOilLevelState") { ok, fail -> safety.getEngineOilLevelState(ok, fail) }.isLow()) add(VehicleWarning.ENGINE_OIL)
+            if (read<OilLevelState>("getBrakeFluidLevelState") { ok, fail -> safety.getBrakeFluidLevelState(ok, fail) }.isLow()) add(VehicleWarning.BRAKE_FLUID)
+            if (read<OilLevelState>("getTransmissionOilLevelState") { ok, fail -> safety.getTransmissionOilLevelState(ok, fail) }.isLow()) add(VehicleWarning.TRANSMISSION_OIL)
+            if (read<Boolean>("hasLowWasherFluidWarning") { ok, fail -> safety.hasLowWasherFluidWarning(ok, fail) } == true) add(VehicleWarning.WASHER_FLUID)
+            if (read<Boolean>("hasPowerDownWarningIndicator") { ok, fail -> safety.hasPowerDownWarningIndicator(ok, fail) } == true) add(VehicleWarning.POWER_DOWN)
         }
     }
 
     /** One SDK getter as a suspend call. Failure, an exception or no answer in time gives null. */
-    private suspend fun <T : Any> read(call: (onComplete: (T?) -> Unit, onFailed: (Exception) -> Unit) -> Unit): T? =
-        withTimeoutOrNull(READ_TIMEOUT_MS) {
-            suspendCancellableCoroutine<T?> { cont ->
+    private suspend fun <T : Any> read(
+        name: String,
+        call: (onComplete: (T?) -> Unit, onFailed: (Exception) -> Unit) -> Unit,
+    ): T? {
+        val value = withTimeoutOrNull(READ_TIMEOUT_MS) {
+            suspendCancellableCoroutine<Result<T?>> { cont ->
                 try {
-                    call({ value -> if (cont.isActive) cont.resume(value) }, { if (cont.isActive) cont.resume(null) })
+                    call({ if (cont.isActive) cont.resume(Result.success(it)) }, { if (cont.isActive) cont.resume(Result.failure(it)) })
                 } catch (e: Exception) {
-                    if (cont.isActive) cont.resume(null)
+                    if (cont.isActive) cont.resume(Result.failure(e))
                 }
             }
         }
+        when {
+            value == null -> Log.d(TAG, "$name: no answer in ${READ_TIMEOUT_MS}ms")
+            value.isFailure -> Log.d(TAG, "$name: ${value.exceptionOrNull()}")
+        }
+        return value?.getOrNull()
+    }
 
     private fun VehicleGear.toDomain(): Gear = when (this) {
         VehicleGear.GEAR_PARK -> Gear.PARK
@@ -183,6 +197,7 @@ internal class PleosVehicleGateway(
     }
 
     companion object {
+        private const val TAG = "PleosVehicle"
         private const val POLL_INTERVAL_MS = 1_000L
         private const val READ_TIMEOUT_MS = 1_500L
         private const val STOP_TIMEOUT_MS = 5_000L
