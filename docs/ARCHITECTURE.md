@@ -218,7 +218,8 @@ apps/backend/
       fuel-logs/            주유 기록
       maintenance/          정비·지출 기록, 경고 이력
       stats/                집계 job(processor), 차종별 통계·순위 API
-      poi/                  오피넷 프록시, 주유소 검색, 캐시
+      fuel-prices/          오피넷 유가·주유소. OpinetClient가 연동 지점이고, 공모전 빌드는 StubOpinetClient(픽스처)로 응답한다
+      poi/                  주유소·충전소 검색, 캐시 (예정)
     generated/prisma/       Prisma 생성 코드 (gitignore)
   test/                     e2e
 ```

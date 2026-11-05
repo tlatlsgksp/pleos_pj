@@ -35,6 +35,135 @@
           "vehicles"
         ]
       }
+    },
+    "/v1/fuel-prices/averages": {
+      "get": {
+        "operationId": "FuelPricesController_averages_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProductAverageDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "fuel-prices"
+        ]
+      }
+    },
+    "/v1/fuel-prices/stations/nearby": {
+      "get": {
+        "operationId": "FuelPricesController_nearby_v1",
+        "parameters": [
+          {
+            "name": "lat",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": 37.5547,
+              "type": "number"
+            }
+          },
+          {
+            "name": "lng",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": 126.9707,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "description": "metres",
+            "schema": {
+              "maximum": 5000,
+              "default": 3000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "product",
+            "required": false,
+            "in": "query",
+            "description": "B027 보통휘발유, D047 경유, B034 고급휘발유, K015 LPG",
+            "schema": {
+              "default": "B027",
+              "type": "string",
+              "enum": [
+                "B034",
+                "B027",
+                "D047",
+                "C004",
+                "K015"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "price",
+              "type": "string",
+              "enum": [
+                "price",
+                "distance"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NearbyStationDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "fuel-prices"
+        ]
+      }
+    },
+    "/v1/fuel-prices/stations/{id}": {
+      "get": {
+        "operationId": "FuelPricesController_station_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StationDetailDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "fuel-prices"
+        ]
+      }
     }
   },
   "info": {
@@ -80,6 +209,169 @@
           "modelKey",
           "consentAt",
           "createdAt"
+        ]
+      },
+      "ProductAverageDto": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string",
+            "enum": [
+              "B034",
+              "B027",
+              "D047",
+              "C004",
+              "K015"
+            ]
+          },
+          "productName": {
+            "type": "string",
+            "example": "보통휘발유"
+          },
+          "price": {
+            "type": "number",
+            "example": 1668.42
+          },
+          "diff": {
+            "type": "number",
+            "example": -0.87
+          },
+          "date": {
+            "type": "string",
+            "example": "2026-11-05"
+          }
+        },
+        "required": [
+          "product",
+          "productName",
+          "price",
+          "diff",
+          "date"
+        ]
+      },
+      "NearbyStationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "A9900002"
+          },
+          "name": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string",
+            "example": "RTO"
+          },
+          "price": {
+            "type": "number",
+            "example": 1704
+          },
+          "distanceM": {
+            "type": "number",
+            "example": 512
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brand",
+          "price",
+          "distanceM",
+          "lat",
+          "lng"
+        ]
+      },
+      "StationPriceDto": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "type": "string",
+            "enum": [
+              "B034",
+              "B027",
+              "D047",
+              "C004",
+              "K015"
+            ]
+          },
+          "price": {
+            "type": "number"
+          },
+          "reportedAt": {
+            "type": "string",
+            "example": "2026-11-05T16:00:00"
+          }
+        },
+        "required": [
+          "product",
+          "price",
+          "reportedAt"
+        ]
+      },
+      "StationDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string"
+          },
+          "tel": {
+            "type": "string"
+          },
+          "isLpg": {
+            "type": "boolean"
+          },
+          "hasCarWash": {
+            "type": "boolean"
+          },
+          "hasMaintenance": {
+            "type": "boolean"
+          },
+          "hasConvenienceStore": {
+            "type": "boolean"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StationPriceDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brand",
+          "address",
+          "tel",
+          "isLpg",
+          "hasCarWash",
+          "hasMaintenance",
+          "hasConvenienceStore",
+          "lat",
+          "lng",
+          "prices"
         ]
       }
     }
