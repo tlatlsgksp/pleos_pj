@@ -520,6 +520,10 @@ Windows 11, i5-14400F, RAM 32GB, RTX 5060 Ti, 명령줄 설치. Android Studio �
   emulator -avd PleosConnect -gpu swiftshader_indirect -no-snapshot -no-boot-anim -no-audio
   ```
   첫 부팅은 약 1분이다.
+- **이 PC(RTX 5060 Ti)에서는 `-gpu host`가 동작한다** ✅. 시작할 때 `Failed to find ColorBuffer` 오류가 몇 줄 찍히지만 죽지 않았다.
+  - 소프트웨어 렌더링(`swiftshader_indirect`)에서는 load average가 30~48까지 올라 앱 시작이 ANR로 죽고 터치가 15초씩 밀렸다.
+  - `-gpu host`에서는 load average 6~8, 부팅 1분 미만, 주행 화면 3D 차량과 내비 지도가 정상으로 그려졌다.
+  - Mac(11.1)에서 죽었던 것은 호스트 GPU 쪽 문제로 보인다. 다른 PC에서는 먼저 `-gpu host`로 시도하고, 죽으면 swiftshader로 돌아간다.
 - **첫 부팅에서 Vehicle SDK 조회가 전부 응답 없음 ✗ → 재부팅으로 해결 ✅**
   - 차량 서비스 로그에 요청마다 `isActive false`가 찍히고 결과가 오지 않았다.
   - 같은 부팅에서 Car 서비스가 사용자 초기화 중 죽었다 재시작했다(`CarUserService ... InitialUserSetter`).
@@ -537,6 +541,10 @@ Windows 11, i5-14400F, RAM 32GB, RTX 5060 Ti, 명령줄 설치. Android Studio �
   - `am force-stop --user 10 ai.umos.drivingview`로 멈추면 탭이 들어온다.
   - 다만 다시 살아나면서 화면 합성이 검게 멈춘 적이 있다. 이때는 재부팅했다.
 - 화면이 자주 꺼진다: `adb shell svc power stayon true`.
+- **영상 흐름 1·2 실측 확인 ✅ (2026-11-06, `-gpu host`)**
+  - 관리항목에서 에어컨 필터를 0km에 교체 기록 → 콘솔에서 총 주행거리 12,345km → "곧 교체, 2,655km 남음"으로 바뀌었다.
+  - 내비가 앱을 덮은 상태에서 콘솔로 배터리 20kWh → 충전구 열림 → 60kWh → 닫힘 → 홈에 "40.0kWh · 12,976원" 충전 카드가 떴다.
+  - 확인 화면에서 저장하면 기록이 CONFIRMED로 바뀌고 주행거리 도장(12,345km, VEHICLE)과 무결성 해시가 남는다.
 - **다른 앱이 화면을 덮으면 우리 앱 프로세스가 얼어붙는다** ✗ → 포그라운드 서비스로 해결 ✅
   - 내비가 앱 창을 덮은 직후 `ActivityManager: freezing com.example.pleos`가 찍히고, 그동안 차량 조회와 충전 감지가 모두 멈췄다.
   - `specialUse` 포그라운드 서비스(`VehicleRecordingService`)를 앱 화면에서 시작한 뒤에는 얼지 않고 조회가 계속됐다.
