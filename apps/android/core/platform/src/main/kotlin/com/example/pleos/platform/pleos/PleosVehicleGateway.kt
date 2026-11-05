@@ -46,8 +46,8 @@ import kotlinx.coroutines.withTimeoutOrNull
  * comes from its listener. A value the vehicle does not support stays null.
  *
  * Units, from the emulator measurements in PLEOS_PLATFORM_RESEARCH 11.2: odometer is km; battery
- * energy and capacity come in Wh (77,400 for a 77.4 kWh pack) and are turned into kWh. The range
- * unit is not documented; AAOS uses metres, so a value too large to be kilometres is divided by 1000.
+ * energy and capacity come in Wh (77,400 for a 77.4 kWh pack) and are turned into kWh. Range comes
+ * in metres, as in AAOS RANGE_REMAINING and the Virtual Console (remaining_range_m).
  */
 internal class PleosVehicleGateway(
     context: Context,
@@ -160,7 +160,7 @@ internal class PleosVehicleGateway(
             gear = gear.await()?.toDomain(),
             brakePedalPressed = brake.await(),
             hvacOn = hvac.await(),
-            rangeRemainingKm = range.await()?.toDouble()?.let { if (it > RANGE_METRES_THRESHOLD) it / 1000.0 else it },
+            rangeRemainingKm = range.await()?.toDouble()?.let { it / 1000.0 },
             batteryPercent = soc.await()?.toDouble(),
             batteryEnergyKwh = level.await()?.toDouble()?.let(toKwh),
             batteryCapacityKwh = capacityWh?.let(toKwh),
@@ -229,9 +229,6 @@ internal class PleosVehicleGateway(
 
         /** A pack above 1,000 is in Wh; no car battery is 1,000 kWh. */
         private const val WH_THRESHOLD = 1_000.0
-
-        /** No car has 3,000 km of range, so a larger value is metres. */
-        private const val RANGE_METRES_THRESHOLD = 3_000.0
 
         /** The emulator only accepts the whole cabin for HVAC (research notes 11.2). */
         private val ALL_SEATS = SeatArea(
