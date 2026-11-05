@@ -13,6 +13,8 @@
     <string name="dashboard_airbag_deployed">에어백이 전개됐어요. 보험사 연락이 필요하면 알려 주세요.</string>
     <string name="dashboard_demo_play">데모 시나리오 재생</string>
     <string name="dashboard_demo_stop">데모 중지</string>
+    <string name="dashboard_use_demo">데모로 보기</string>
+    <string name="dashboard_use_real">실제 차량으로 보기</string>
     <string name="dashboard_value_unknown">-</string>
     <string name="dashboard_care_all">전체 보기</string>
     <string name="dashboard_charge_detected">충전 기록이 준비됐어요</string>

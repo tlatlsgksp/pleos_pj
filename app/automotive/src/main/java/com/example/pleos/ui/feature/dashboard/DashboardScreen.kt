@@ -62,6 +62,13 @@ fun DashboardScreen(
                     Spacer(Modifier.width(12.dp))
                     AssistChip(onClick = {}, label = { Text(stringResource(R.string.dashboard_demo_badge)) })
                 }
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = { onEvent(DashboardEvent.SourceToggleTapped) }) {
+                    Text(
+                        stringResource(if (state.isDemo) R.string.dashboard_use_real else R.string.dashboard_use_demo),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {

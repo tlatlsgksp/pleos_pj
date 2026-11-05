@@ -7,6 +7,7 @@ import com.example.pleos.domain.model.VehicleSnapshot
 import com.example.pleos.domain.testing.InMemoryCareRepository
 import com.example.pleos.domain.testing.InMemoryDriveSessionRepository
 import com.example.pleos.domain.testing.InMemoryRecordRepository
+import com.example.pleos.domain.testing.InMemorySettingsRepository
 import com.example.pleos.domain.testing.InMemoryVehicleRepository
 import com.example.pleos.domain.testing.MutableCarPropertySource
 import com.example.pleos.domain.testing.MutableClock
@@ -37,6 +38,7 @@ class TestApp {
     val sessions = InMemoryDriveSessionRepository()
     val ids = SequentialIds()
     val demo = FakeDemoController()
+    val settings = InMemorySettingsRepository()
 
     val observeDashboard get() = ObserveDashboardUseCase(gateway, car)
     val observeCare get() = ObserveCareItemsUseCase(vehicles, care, gateway, clock)

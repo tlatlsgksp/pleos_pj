@@ -1,6 +1,7 @@
 package com.example.pleos.ui.feature.dashboard
 
 import app.cash.turbine.test
+import com.example.pleos.domain.model.DataSourceMode
 import com.example.pleos.domain.model.EnergyType
 import com.example.pleos.domain.model.Record
 import com.example.pleos.domain.model.RecordDetail
@@ -39,7 +40,7 @@ class DashboardViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = DashboardViewModel(app.observeDashboard, app.observePendingDraft, app.observeCare, app.demo)
+    private fun viewModel() = DashboardViewModel(app.observeDashboard, app.observePendingDraft, app.observeCare, app.demo, app.settings)
 
     private fun draft(id: String) = Record(
         id = id, vehicleId = "v1", type = RecordType.ENERGY, occurredAt = app.clock.now, amountWon = 12_976,
@@ -91,6 +92,18 @@ class DashboardViewModelTest {
         vm.effects.test {
             vm.onEvent(DashboardEvent.OpenCareTapped)
             assertEquals(DashboardEffect.NavigateToCare, awaitItem())
+        }
+    }
+
+    @Test
+    fun `the source toggle asks for the real vehicle from the demo and back`() = runTest {
+        val vm = viewModel()
+        app.settings.dataSourceMode.test {
+            assertEquals(DataSourceMode.DEMO, awaitItem())
+
+            vm.onEvent(DashboardEvent.SourceToggleTapped)
+            assertEquals(DataSourceMode.REAL, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

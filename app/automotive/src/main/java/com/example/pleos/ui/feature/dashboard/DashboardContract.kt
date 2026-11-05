@@ -40,6 +40,8 @@ sealed interface DashboardEvent {
     data object StopDemoTapped : DashboardEvent
     data object OpenCareTapped : DashboardEvent
     data object OpenChargeTapped : DashboardEvent
+    /** Switch between the real vehicle and the demo scenario. */
+    data object SourceToggleTapped : DashboardEvent
 
     // System input, raised by the ViewModel from collected flows
     data class DashboardChanged(val data: DashboardData) : DashboardEvent

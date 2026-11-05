@@ -8,6 +8,7 @@ import com.example.pleos.domain.model.DataSourceMode
 import com.example.pleos.domain.model.EnergyType
 import com.example.pleos.domain.model.Record
 import com.example.pleos.domain.model.RecordDetail
+import com.example.pleos.domain.repository.SettingsRepository
 import com.example.pleos.domain.usecase.ObserveCareItemsUseCase
 import com.example.pleos.domain.usecase.ObserveDashboardUseCase
 import com.example.pleos.domain.usecase.ObservePendingDraftUseCase
@@ -30,6 +31,7 @@ class DashboardViewModel @Inject constructor(
     observePendingDraft: ObservePendingDraftUseCase,
     observeCareItems: ObserveCareItemsUseCase,
     private val demo: DemoScenarioController,
+    private val settings: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -72,6 +74,11 @@ class DashboardViewModel @Inject constructor(
                 _effects.trySend(DashboardEffect.ShowMessage("데모 시나리오를 시작했어요"))
             }
             DashboardEvent.StopDemoTapped -> demo.stop()
+            DashboardEvent.SourceToggleTapped -> {
+                val target = if (_state.value.isDemo) DataSourceMode.REAL else DataSourceMode.DEMO
+                if (target == DataSourceMode.REAL) demo.stop()
+                viewModelScope.launch { settings.setDataSourceMode(target) }
+            }
             DashboardEvent.OpenCareTapped -> _effects.trySend(DashboardEffect.NavigateToCare)
             DashboardEvent.OpenChargeTapped -> _state.value.pendingCharge?.let {
                 _effects.trySend(DashboardEffect.NavigateToCharge(it.recordId))
