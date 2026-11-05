@@ -507,6 +507,45 @@ Vehicle SDK 2.3.2와 AAOS `CarPropertyManager`로 값을 읽는 임시 앱을 �
 - **주행 화면 3D 차량(DrivingView, Unreal 엔진)**: 외부에서 받는 것은 날씨 설정(`SET_WEATHER`)뿐이고 이것도 `signature|privileged` 권한이 필요하다. 3D 차량 모델·색상을 3rd-party 앱이 바꿀 경로는 없다 ✗. 소프트웨어 렌더링 에뮬레이터에서는 반복해서 죽는다.
 - **오디오 포커스 ✅**: 음악(`USAGE_MEDIA`, `GAIN`)을 재생하는 중에 음성 통신(`USAGE_VOICE_COMMUNICATION`, `GAIN_TRANSIENT`)을 요청하면 차량 오디오 포커스 정책(`CarAudioFocus`)이 승인하고 음악 쪽에 `LOSS_TRANSIENT`(일시정지)를 보낸다. 반납하면 음악 쪽에 `GAIN`(재개)을 보낸다. 다만 이 시험은 두 요청 모두 같은 앱에서 했다. 실제 미디어 앱이 `LOSS_TRANSIENT`를 받고 멈추는지는 미디어 앱 재생 상태에서 다시 확인한다 🟡.
 
+### 11.3 Windows에서 설치하고 앱을 붙인 결과 (2026-11-05)
+
+Windows 11, i5-14400F, RAM 32GB, RTX 5060 Ti, 명령줄 설치. Android Studio 없이 했다.
+
+- 이미지: SDK 업데이트 사이트 XML(`.../connect-avd/2.x/crp-sys-img.xml`)에 있는 `crp_car_emulator.zip`(x86_64, 4.1GB, 압축 해제 약 19GB)을 받는다.
+  - `system-images/android-34/pleos_car_emulator/x86_64`에 푼다.
+  - 이미지 안의 `devices.xml` 값(2560×1440, 160dpi)으로 AVD를 만든다.
+  - 가속은 WHPX가 그대로 동작했다(`emulator -accel-check`).
+- 실행:
+  ```
+  emulator -avd PleosConnect -gpu swiftshader_indirect -no-snapshot -no-boot-anim -no-audio
+  ```
+  첫 부팅은 약 1분이다.
+- **첫 부팅에서 Vehicle SDK 조회가 전부 응답 없음 ✗ → 재부팅으로 해결 ✅**
+  - 차량 서비스 로그에 요청마다 `isActive false`가 찍히고 결과가 오지 않았다.
+  - 같은 부팅에서 Car 서비스가 사용자 초기화 중 죽었다 재시작했다(`CarUserService ... InitialUserSetter`).
+  - 콘솔 활성화, 전원 상태 On, 차량 서비스 강제 재시작으로는 풀리지 않았다.
+  - `adb reboot` 뒤에는 바로 응답했다. 미지원 값(연료 %, 오일류)은 즉시 "지원 안 함" 오류가 온다.
+  - 앱의 `PleosVehicle` 로그 태그에 실패한 조회가 메서드 이름과 함께 찍힌다.
+- **Virtual Console의 DDS 연결이 부팅마다 다르다.**
+  - `eth0`가 DOWN이거나 IPv4 주소(10.0.2.15)가 아직 없으면 `VehicleApiDdsEmu`가 `Participant was not created`를 반복한다. 콜드 부팅 직후에는 주소가 1~2분 늦게 붙기도 한다.
+  - 이때 콘솔 페이지에 "DDS OFFLINE"이 뜨고 값 변경이 `emulator_inactive`로 거절된다.
+  - user 빌드라 인터페이스를 직접 올릴 수 없다. 주소가 붙을 때까지 기다리고, 안 붙으면 에뮬레이터를 끄고 다시 콜드 부팅한다(`adb emu kill`).
+  - 확인: `adb shell ip -br addr`에서 `eth0`가 UP이고 `10.0.2.15`가 있는지 본다. 붙으면 몇 초 안에 콘솔이 활성으로 바뀐다.
+- **콘솔은 브라우저 탭이 앞에 있어야 활성이다.** 백그라운드 탭에서는 몇 초 뒤 `emulator_inactive`로 돌아간다.
+- **주행 화면(DrivingView, Unreal)이 소프트웨어 렌더링에서 터치를 막는다.**
+  - 제스처 모니터가 터치 하나에 15초씩 걸리다 ANR이 나서 앱 화면 탭이 먹지 않는다.
+  - `am force-stop --user 10 ai.umos.drivingview`로 멈추면 탭이 들어온다.
+  - 다만 다시 살아나면서 화면 합성이 검게 멈춘 적이 있다. 이때는 재부팅했다.
+- 화면이 자주 꺼진다: `adb shell svc power stayon true`.
+- **다른 앱이 화면을 덮으면 우리 앱 프로세스가 얼어붙는다** ✗ → 포그라운드 서비스로 해결 ✅
+  - 내비가 앱 창을 덮은 직후 `ActivityManager: freezing com.example.pleos`가 찍히고, 그동안 차량 조회와 충전 감지가 모두 멈췄다.
+  - `specialUse` 포그라운드 서비스(`VehicleRecordingService`)를 앱 화면에서 시작한 뒤에는 얼지 않고 조회가 계속됐다.
+- 실측 값:
+  - 콘솔 기본값은 배터리 77.4kWh(100%), 주행 가능 거리 500km, 총 주행거리 0km다. 재부팅하면 콘솔 값이 초기화된다.
+  - 콘솔의 배터리 에너지 항목은 kWh로 조작하고, SDK는 Wh로 준다(11.2와 같음).
+  - 남은 주행거리는 앱에 500km로 표시됐다. 단위 처리(3,000 초과면 m로 간주)가 맞게 동작했다.
+- 앱 실행 위치: 홈 화면에서 실행하면 오른쪽 앱 창(약 1682×1210)에 열린다. `am start`로 띄우면 전체 화면 작업으로 열릴 때가 있다.
+
 ## 12. 미해결 질문 (설명회 Q&A나 메일 문의용)
 
 우선순위 순이다.
