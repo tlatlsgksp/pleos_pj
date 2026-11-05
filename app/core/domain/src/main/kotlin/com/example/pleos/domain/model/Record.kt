@@ -31,6 +31,12 @@ sealed interface RecordDetail {
         /** [CareItemDef.id]s serviced in this visit. */
         val itemIds: List<String>,
         val shopName: String? = null,
+        /**
+         * Odometer the user says the service happened at, for a past service entered later.
+         * null means the service happened when the record was made, so the stamp's odometer applies.
+         * The stamp itself always stays the vehicle reading at entry time.
+         */
+        val serviceOdometerKm: Double? = null,
     ) : RecordDetail
 
     data class Expense(

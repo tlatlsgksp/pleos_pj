@@ -1,6 +1,8 @@
 // Pure Kotlin/JVM module. No Android, no Pleos SDK. Everything the app "means" lives here.
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    // In-memory repositories shared by the domain tests and the ViewModel tests.
+    `java-test-fixtures`
 }
 
 java {
