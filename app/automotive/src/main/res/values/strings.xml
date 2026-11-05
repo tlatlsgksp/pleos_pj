@@ -28,4 +28,17 @@
     <string name="warning_power_down">엔진 이상(전원 차단 경고)</string>
     <string name="warning_airbag_fault">에어백 이상</string>
     <string name="warning_seat_belt">안전벨트 미착용</string>
+
+    <string name="common_back">뒤로</string>
+
+    <string name="care_title">관리항목</string>
+    <string name="care_status_ok">양호</string>
+    <string name="care_status_due_soon">곧 교체</string>
+    <string name="care_status_overdue">교체 필요</string>
+    <string name="care_status_unknown">기록 없음</string>
+    <string name="care_remaining_km">%1$s 남음</string>
+    <string name="care_over_km">%1$s 지남</string>
+    <string name="care_due_date">%1$s까지</string>
+    <string name="care_unknown_hint">마지막 교체 시점을 알려 주세요</string>
+    <string name="care_serviced_now">오늘 교체했어요</string>
 </resources>
