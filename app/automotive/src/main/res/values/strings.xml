@@ -41,4 +41,13 @@
     <string name="care_due_date">%1$s까지</string>
     <string name="care_unknown_hint">마지막 교체 시점을 알려 주세요</string>
     <string name="care_serviced_now">오늘 교체했어요</string>
+
+    <string name="charge_title">충전 기록 확인</string>
+    <string name="charge_missing">이미 처리했거나 없는 기록이에요.</string>
+    <string name="charge_level">배터리 %1$s → %2$s</string>
+    <string name="charge_vehicle_checked">주행거리와 시각은 차량에서 읽은 값이에요</string>
+    <string name="charge_amount_label">결제 금액</string>
+    <string name="charge_estimate_hint">kWh당 %1$s원으로 계산한 예상 금액이에요</string>
+    <string name="charge_confirm">이대로 저장</string>
+    <string name="charge_dismiss">기록 안 함</string>
 </resources>
