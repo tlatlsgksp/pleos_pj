@@ -3,6 +3,8 @@ package com.example.pleos.ui.feature.dashboard
 import app.cash.turbine.test
 import com.example.pleos.domain.model.DataSourceMode
 import com.example.pleos.domain.model.EnergyType
+import com.example.pleos.domain.model.NavEvent
+import com.example.pleos.domain.model.WaypointSlot
 import com.example.pleos.domain.model.Record
 import com.example.pleos.domain.model.RecordDetail
 import com.example.pleos.domain.model.RecordOrigin
@@ -14,6 +16,7 @@ import com.example.pleos.domain.model.VehicleWarning
 import com.example.pleos.ui.testing.TestApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -40,7 +43,7 @@ class DashboardViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = DashboardViewModel(app.observeDashboard, app.observePendingDraft, app.observeCare, app.demo, app.settings)
+    private fun viewModel() = DashboardViewModel(app.observeDashboard, app.observePendingDraft, app.observeCare, app.demo, app.settings, app.chargeStops)
 
     private fun draft(id: String) = Record(
         id = id, vehicleId = "v1", type = RecordType.ENERGY, occurredAt = app.clock.now, amountWon = 12_976,
@@ -105,6 +108,25 @@ class DashboardViewModelTest {
             assertEquals(DataSourceMode.REAL, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `low range on a long route shows a charger card that adds the first waypoint`() = runTest(UnconfinedTestDispatcher()) {
+        backgroundScope.launch { app.chargeStops.run() }
+        val vm = viewModel()
+        app.gateway.update { it.copy(rangeRemainingKm = 90.0) }
+
+        vm.effects.test {
+            app.navigation.emit(NavEvent.RouteStarted("대전", 160.0, null))
+            val stop = vm.state.value.chargeStop!!
+            assertEquals("시연용 충전소 · 강남역", stop.name)
+            assertTrue(stop.isDemoData)
+
+            vm.onEvent(DashboardEvent.AddChargeStopTapped)
+            assertEquals(DashboardEffect.ShowMessage("충전소를 내비 경유지로 넣었어요"), awaitItem())
+        }
+        assertEquals(WaypointSlot.FIRST, app.navigation.waypoints.single().second)
+        assertNull(vm.state.value.chargeStop)
     }
 
     @Test

@@ -81,6 +81,15 @@ fun DashboardScreen(
                 ValueCard(stringResource(R.string.dashboard_odometer), state.odometerKm?.let(Format::km), Modifier.weight(1f))
             }
 
+            state.chargeStop?.let { stop ->
+                ChargeStopCard(
+                    stop = stop,
+                    adding = state.isAddingStop,
+                    onAdd = { onEvent(DashboardEvent.AddChargeStopTapped) },
+                    onDismiss = { onEvent(DashboardEvent.DismissChargeStopTapped) },
+                )
+            }
+
             state.pendingCharge?.let { PendingChargeCard(it, onOpen = { onEvent(DashboardEvent.OpenChargeTapped) }) }
 
             Card(modifier = Modifier.fillMaxWidth()) {
@@ -125,6 +134,46 @@ fun DashboardScreen(
                     Button(onClick = { onEvent(DashboardEvent.PlayDemoTapped) }) {
                         Text(stringResource(R.string.dashboard_demo_play))
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChargeStopCard(stop: ChargeStopUi, adding: Boolean, onAdd: () -> Unit, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.error),
+    ) {
+        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val onError = MaterialTheme.colorScheme.onError
+            Text(
+                stringResource(R.string.dashboard_stop_title, Format.km(stop.rangeKm)),
+                style = MaterialTheme.typography.titleSmall,
+                color = onError,
+            )
+            stop.remainingKm?.let {
+                Text(
+                    stringResource(R.string.dashboard_stop_route, stop.destinationName ?: "", Format.km(it)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = onError,
+                )
+            }
+            Text(
+                stringResource(R.string.dashboard_stop_candidate, stop.name, "%.1f km".format(stop.distanceKm)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = onError,
+            )
+            if (stop.isDemoData) {
+                Text(stringResource(R.string.dashboard_stop_demo_data), style = MaterialTheme.typography.labelMedium, color = onError)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(onClick = onAdd, enabled = !adding) {
+                    Text(stringResource(R.string.dashboard_stop_add), style = MaterialTheme.typography.labelLarge)
+                }
+                TextButton(onClick = onDismiss, enabled = !adding) {
+                    Text(stringResource(R.string.dashboard_stop_dismiss), style = MaterialTheme.typography.labelLarge, color = onError)
                 }
             }
         }
@@ -192,6 +241,7 @@ private fun DashboardScreenPreview() {
                 rangeKm = 267,
                 odometerKm = 12_370.0,
                 pendingCharge = PendingChargeUi("r1", 40.0, isEv = true, estimatedWon = 12_976),
+                chargeStop = ChargeStopUi("시연용 충전소 · 강남역", 8.1, 90.0, 160.0, "대전", isDemoData = true),
                 careItems = listOf(
                     CareItemUi("cabin_filter", "에어컨 필터", CareStatus.DUE_SOON, 0.85, 2_250.0, LocalDate.of(2027, 3, 1), 15_000, 12),
                     CareItemUi("wiper", "와이퍼", CareStatus.UNKNOWN, null, null, null, null, 12),

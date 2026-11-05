@@ -1,8 +1,10 @@
 package com.example.pleos.platform.demo
 
 import com.example.pleos.domain.gateway.DemoScenarioController
+import com.example.pleos.domain.model.NavEvent
 import com.example.pleos.platform.di.DemoScope
 import com.example.pleos.platform.fake.FakeCarPropertySource
+import com.example.pleos.platform.fake.FakeNavigationGateway
 import com.example.pleos.platform.fake.FakeVehicleGateway
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 internal class DemoScenarioPlayer @Inject constructor(
     private val vehicle: FakeVehicleGateway,
     private val car: FakeCarPropertySource,
+    private val nav: FakeNavigationGateway,
     @DemoScope private val scope: CoroutineScope,
 ) : DemoScenarioController {
 
@@ -37,11 +40,12 @@ internal class DemoScenarioPlayer @Inject constructor(
         _isPlaying.value = true
         vehicle.reset(scenario.initialVehicle)
         car.reset(scenario.initialCar)
+        nav.emit(NavEvent.RouteCancelled)
         job = scope.launch {
             try {
                 scenario.steps.forEach { step ->
                     delay(step.delayMillis)
-                    step.apply(vehicle, car)
+                    step.apply(vehicle, car, nav)
                     _currentStep.value = step
                 }
             } finally {

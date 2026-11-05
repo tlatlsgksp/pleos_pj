@@ -12,4 +12,8 @@
     <uses-permission android:name="pleos.car.permission.CAR_INFO" />
     <!-- Oil level, washer fluid and power-down warnings. -->
     <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
+
+    <!-- PleosNavigationGateway: route events and current location; adding a charger waypoint. -->
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
 </manifest>

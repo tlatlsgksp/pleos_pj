@@ -11,6 +11,7 @@ import com.example.pleos.domain.testing.InMemoryVehicleRepository
 import com.example.pleos.domain.testing.MutableClock
 import com.example.pleos.domain.testing.SequentialIds
 import com.example.pleos.platform.fake.FakeCarPropertySource
+import com.example.pleos.platform.fake.FakeNavigationGateway
 import com.example.pleos.platform.fake.FakeVehicleGateway
 import java.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,7 +41,7 @@ class EvDemoScenarioTest {
 
         scenario.steps.forEach { step ->
             clock.advance(Duration.ofMillis(step.delayMillis))
-            step.apply(vehicle, car)
+            step.apply(vehicle, car, FakeNavigationGateway())
         }
 
         val draft = records.all.value.values.single()

@@ -6,13 +6,14 @@ import com.example.pleos.domain.model.Gear
 import com.example.pleos.domain.model.VehicleSnapshot
 import com.example.pleos.domain.model.VehicleWarning
 import com.example.pleos.platform.fake.FakeCarPropertySource
+import com.example.pleos.platform.fake.FakeNavigationGateway
 import com.example.pleos.platform.fake.FakeVehicleGateway
 
 /** One step of a demo: wait [delayMillis] after the previous step, then mutate the fakes. */
 data class DemoStep(
     val label: String,
     val delayMillis: Long,
-    val apply: (vehicle: FakeVehicleGateway, car: FakeCarPropertySource) -> Unit,
+    val apply: (vehicle: FakeVehicleGateway, car: FakeCarPropertySource, nav: FakeNavigationGateway) -> Unit,
 )
 
 /** An ordered, timed script that drives the Fake gateways so the core flows can be shown on demand. */
@@ -32,8 +33,9 @@ data class DemoScenario(
 
         /**
          * The EV flows the video shows, on the same odometer the emulator console starts from:
-         * drive, park, charge (a draft appears), drive again, then a time skip that pushes the care
-         * items towards their interval.
+         * a long route on a low battery (a charger is offered as a waypoint), drive, park, charge
+         * (a draft appears), drive again, then a time skip that pushes the care items towards
+         * their interval.
          */
         fun evCoreFlow(): DemoScenario = DemoScenario(
             name = "ev-core-flow",
@@ -53,40 +55,43 @@ data class DemoScenario(
             ),
             initialCar = CarProperties(speedKmh = 0.0, ignitionOn = true),
             steps = listOf(
-                DemoStep("출발: 기어 D", delayMillis = 3_000) { vehicle, car ->
+                DemoStep("목적지 설정: 대전 160km, 주행 가능 90km", delayMillis = 3_000) { _, _, nav ->
+                    nav.startRoute("대전", 160.0)
+                },
+                DemoStep("출발: 기어 D", delayMillis = 3_000) { vehicle, car, _ ->
                     vehicle.setGear(Gear.DRIVE)
                     vehicle.setHvacOn(true)
                     car.setSpeedKmh(40.0)
                 },
-                DemoStep("주행: 25km", delayMillis = 4_000) { vehicle, car ->
+                DemoStep("주행: 25km", delayMillis = 4_000) { vehicle, car, _ ->
                     vehicle.driveEv(km = 25.0, kwhUsed = 4.5)
                     vehicle.syncRange()
                     car.setSpeedKmh(62.0)
                 },
-                DemoStep("충전소 도착: 기어 P", delayMillis = 4_000) { vehicle, car ->
+                DemoStep("충전소 도착: 기어 P", delayMillis = 4_000) { vehicle, car, _ ->
                     car.setSpeedKmh(0.0)
                     vehicle.setGear(Gear.PARK)
                     vehicle.setHvacOn(false)
                 },
-                DemoStep("충전구 열림", delayMillis = 3_000) { vehicle, _ ->
+                DemoStep("충전구 열림", delayMillis = 3_000) { vehicle, _, _ ->
                     vehicle.setChargePortOpen(true)
                 },
-                DemoStep("충전 중: 배터리 +20kWh", delayMillis = 3_000) { vehicle, _ ->
+                DemoStep("충전 중: 배터리 +20kWh", delayMillis = 3_000) { vehicle, _, _ ->
                     vehicle.setBatteryEnergyKwh((vehicle.current.batteryEnergyKwh ?: 0.0) + 20.0)
                     vehicle.syncRange()
                 },
-                DemoStep("충전 중: 배터리 +20kWh", delayMillis = 3_000) { vehicle, _ ->
+                DemoStep("충전 중: 배터리 +20kWh", delayMillis = 3_000) { vehicle, _, _ ->
                     vehicle.setBatteryEnergyKwh((vehicle.current.batteryEnergyKwh ?: 0.0) + 20.0)
                     vehicle.syncRange()
                 },
-                DemoStep("충전구 닫힘: 충전 기록 초안", delayMillis = 3_000) { vehicle, _ ->
+                DemoStep("충전구 닫힘: 충전 기록 초안", delayMillis = 3_000) { vehicle, _, _ ->
                     vehicle.setChargePortOpen(false)
                 },
-                DemoStep("다시 출발: 기어 D", delayMillis = 4_000) { vehicle, car ->
+                DemoStep("다시 출발: 기어 D", delayMillis = 4_000) { vehicle, car, _ ->
                     vehicle.setGear(Gear.DRIVE)
                     car.setSpeedKmh(50.0)
                 },
-                DemoStep("몇 달 뒤: 주행거리 +12,000km", delayMillis = 4_000) { vehicle, _ ->
+                DemoStep("몇 달 뒤: 주행거리 +12,000km", delayMillis = 4_000) { vehicle, _, _ ->
                     vehicle.driveEv(km = 12_000.0, kwhUsed = 0.0)
                 },
             ),
@@ -115,23 +120,23 @@ data class DemoScenario(
                 fuelCapacityL = 60.0,
             ),
             steps = listOf(
-                DemoStep("주유: 연료 95%, 주유 후 거리 0km", delayMillis = 3_000) { vehicle, _ ->
+                DemoStep("주유: 연료 95%, 주유 후 거리 0km", delayMillis = 3_000) { vehicle, _, _ ->
                     vehicle.refuel(toPercent = 95)
                 },
-                DemoStep("주행: 24km, 에코 모드", delayMillis = 4_000) { vehicle, car ->
+                DemoStep("주행: 24km, 에코 모드", delayMillis = 4_000) { vehicle, car, _ ->
                     vehicle.setDrivingMode(DrivingMode.ECO)
                     vehicle.drive(km = 24.0, fuelPercentUsed = 4)
                     vehicle.setFuelEconomy(instantKmPerL = 14.3, currentKmPerL = 12.1)
                     car.setSpeedKmh(62.0)
                 },
-                DemoStep("엔진오일 경고등 점등", delayMillis = 4_000) { vehicle, _ ->
+                DemoStep("엔진오일 경고등 점등", delayMillis = 4_000) { vehicle, _, _ ->
                     vehicle.addWarning(VehicleWarning.ENGINE_OIL)
                 },
-                DemoStep("정비소 도착: 정차, 시동 off", delayMillis = 4_000) { _, car ->
+                DemoStep("정비소 도착: 정차, 시동 off", delayMillis = 4_000) { _, car, _ ->
                     car.setSpeedKmh(0.0)
                     car.setIgnitionOn(false)
                 },
-                DemoStep("재시동: 경고등 소등", delayMillis = 3_000) { vehicle, car ->
+                DemoStep("재시동: 경고등 소등", delayMillis = 3_000) { vehicle, car, _ ->
                     car.setIgnitionOn(true)
                     vehicle.clearWarning(VehicleWarning.ENGINE_OIL)
                 },

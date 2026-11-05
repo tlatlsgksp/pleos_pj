@@ -24,6 +24,7 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 turbine = "1.2.1"
 pleosVehicle = "2.3.2"
+pleosNaviHelper = "3.0.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -71,6 +72,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 pleos-vehicle = { group = "ai.pleos.playground", name = "Vehicle", version.ref = "pleosVehicle" }
+pleos-navihelper = { group = "ai.pleos.playground", name = "NaviHelper", version.ref = "pleosNaviHelper" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -20,6 +20,12 @@
     <string name="dashboard_charge_detected">충전 기록이 준비됐어요</string>
     <string name="dashboard_refuel_detected">주유 기록이 준비됐어요</string>
     <string name="dashboard_charge_open">확인하기</string>
+    <string name="dashboard_stop_title">배터리가 부족해요. 주행 가능 %1$s</string>
+    <string name="dashboard_stop_route">%1$s까지 %2$s 남았어요</string>
+    <string name="dashboard_stop_candidate">가는 길 충전소: %1$s (%2$s)</string>
+    <string name="dashboard_stop_demo_data">시연용 충전소 목록이에요. 실제 충전소 정보는 서버 연결 후 제공돼요.</string>
+    <string name="dashboard_stop_add">경유지로 추가</string>
+    <string name="dashboard_stop_dismiss">괜찮아요</string>
 
     <string name="care_title">관리항목</string>
     <string name="care_status_ok">양호</string>

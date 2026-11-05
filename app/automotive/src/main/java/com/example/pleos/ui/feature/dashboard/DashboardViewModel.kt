@@ -9,6 +9,8 @@ import com.example.pleos.domain.model.EnergyType
 import com.example.pleos.domain.model.Record
 import com.example.pleos.domain.model.RecordDetail
 import com.example.pleos.domain.repository.SettingsRepository
+import com.example.pleos.domain.route.ChargeStopAdvisor
+import com.example.pleos.domain.route.ChargeStopSuggestion
 import com.example.pleos.domain.usecase.ObserveCareItemsUseCase
 import com.example.pleos.domain.usecase.ObserveDashboardUseCase
 import com.example.pleos.domain.usecase.ObservePendingDraftUseCase
@@ -32,6 +34,7 @@ class DashboardViewModel @Inject constructor(
     observeCareItems: ObserveCareItemsUseCase,
     private val demo: DemoScenarioController,
     private val settings: SettingsRepository,
+    private val chargeStops: ChargeStopAdvisor,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardState())
@@ -49,6 +52,9 @@ class DashboardViewModel @Inject constructor(
         }
         viewModelScope.launch {
             observePendingDraft().collect { onEvent(DashboardEvent.PendingChargeChanged(it?.toPendingCharge())) }
+        }
+        viewModelScope.launch {
+            chargeStops.suggestion.collect { onEvent(DashboardEvent.ChargeStopChanged(it?.toUi())) }
         }
         viewModelScope.launch {
             observeCareItems().collect { items ->
@@ -69,6 +75,17 @@ class DashboardViewModel @Inject constructor(
                 }
             }
             is DashboardEvent.CareChanged -> _state.update { it.copy(careItems = event.items) }
+            is DashboardEvent.ChargeStopChanged -> _state.update { it.copy(chargeStop = event.stop) }
+            DashboardEvent.AddChargeStopTapped -> {
+                if (_state.value.isAddingStop || _state.value.chargeStop == null) return
+                _state.update { it.copy(isAddingStop = true) }
+                viewModelScope.launch { onEvent(DashboardEvent.ChargeStopAdded(chargeStops.accept())) }
+            }
+            is DashboardEvent.ChargeStopAdded -> {
+                _state.update { it.copy(isAddingStop = false) }
+                if (event.added) _effects.trySend(DashboardEffect.ShowMessage("충전소를 내비 경유지로 넣었어요"))
+            }
+            DashboardEvent.DismissChargeStopTapped -> chargeStops.dismiss()
             DashboardEvent.PlayDemoTapped -> {
                 demo.play()
                 _effects.trySend(DashboardEffect.ShowMessage("데모 시나리오를 시작했어요"))
@@ -103,3 +120,12 @@ internal fun Record.toPendingCharge(): PendingChargeUi? {
     val energy = detail as? RecordDetail.Energy ?: return null
     return PendingChargeUi(id, energy.amount, energy.kind == EnergyType.EV, amountWon)
 }
+
+internal fun ChargeStopSuggestion.toUi() = ChargeStopUi(
+    name = candidate.place.name,
+    distanceKm = candidate.distanceKm,
+    rangeKm = rangeKm,
+    remainingKm = remainingKm,
+    destinationName = destinationName,
+    isDemoData = candidate.isDemoData,
+)

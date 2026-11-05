@@ -2,14 +2,20 @@ package com.example.pleos.platform.di
 
 import android.content.Context
 import com.example.pleos.domain.gateway.CarPropertySource
+import com.example.pleos.domain.gateway.ChargerSource
 import com.example.pleos.domain.gateway.DemoScenarioController
+import com.example.pleos.domain.gateway.NavigationGateway
 import com.example.pleos.domain.gateway.VehicleGateway
 import com.example.pleos.domain.repository.SettingsRepository
 import com.example.pleos.platform.demo.DemoScenarioPlayer
+import com.example.pleos.platform.demo.BundledChargerSource
 import com.example.pleos.platform.fake.FakeCarPropertySource
+import com.example.pleos.platform.fake.FakeNavigationGateway
 import com.example.pleos.platform.fake.FakeVehicleGateway
 import com.example.pleos.platform.pleos.PleosVehicleGateway
+import com.example.pleos.platform.pleos.PleosNavigationGateway
 import com.example.pleos.platform.switching.SwitchingCarPropertySource
+import com.example.pleos.platform.switching.SwitchingNavigationGateway
 import com.example.pleos.platform.switching.SwitchingVehicleGateway
 import dagger.Binds
 import dagger.BindsOptionalOf
@@ -59,6 +65,27 @@ internal object PlatformModule {
     @Provides
     @Singleton
     fun fakeCarPropertySource(): FakeCarPropertySource = FakeCarPropertySource()
+
+    @Provides
+    @Singleton
+    fun fakeNavigationGateway(): FakeNavigationGateway = FakeNavigationGateway()
+
+    /** NaviHelper where the Pleos navigation is installed; the demo navigation elsewhere. */
+    @Provides
+    @Singleton
+    fun navigationGateway(
+        @ApplicationContext context: Context,
+        settings: SettingsRepository,
+        fake: FakeNavigationGateway,
+    ): NavigationGateway {
+        val real = if (PleosNavigationGateway.isAvailable(context)) PleosNavigationGateway(context) else null
+        return SwitchingNavigationGateway(settings.dataSourceMode, real, fake)
+    }
+
+    /** Demo list for both modes until the backend serves chargers. */
+    @Provides
+    @Singleton
+    fun chargerSource(): ChargerSource = BundledChargerSource()
 
     /** The Pleos SDK gateway exists only where the Pleos vehicle service is installed; elsewhere the demo runs. */
     @Provides

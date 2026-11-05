@@ -8,6 +8,10 @@ import com.example.pleos.domain.testing.InMemoryCareRepository
 import com.example.pleos.domain.testing.InMemoryDriveSessionRepository
 import com.example.pleos.domain.testing.InMemoryRecordRepository
 import com.example.pleos.domain.testing.InMemorySettingsRepository
+import com.example.pleos.domain.testing.ListChargerSource
+import com.example.pleos.domain.testing.RecordingNavigationGateway
+import com.example.pleos.domain.route.ChargeStopAdvisor
+import com.example.pleos.domain.model.Place
 import com.example.pleos.domain.testing.InMemoryVehicleRepository
 import com.example.pleos.domain.testing.MutableCarPropertySource
 import com.example.pleos.domain.testing.MutableClock
@@ -39,6 +43,8 @@ class TestApp {
     val ids = SequentialIds()
     val demo = FakeDemoController()
     val settings = InMemorySettingsRepository()
+    val navigation = RecordingNavigationGateway()
+    val chargeStops = ChargeStopAdvisor(gateway, car, navigation, ListChargerSource(listOf(Place("시연용 충전소 · 강남역", 37.4979, 127.0276))))
 
     val observeDashboard get() = ObserveDashboardUseCase(gateway, car)
     val observeCare get() = ObserveCareItemsUseCase(vehicles, care, gateway, clock)
