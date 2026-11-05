@@ -201,7 +201,7 @@ internal class PleosVehicleGateway(
             value == null -> Log.d(TAG, "$name: no answer in ${READ_TIMEOUT_MS}ms")
             value.isFailure -> {
                 val error = value.exceptionOrNull()
-                Log.d(TAG, "$name: $error")
+                Log.d(TAG, "$name: $error", error)
                 // The car will not start supporting it later; stop asking (saves a call per poll).
                 if (error?.message?.contains("not supported") == true) unsupported += name
             }

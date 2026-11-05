@@ -10,3 +10,18 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Pleos SDKs (Vehicle, NaviHelper) look up their permission annotations with Kotlin reflection.
+# Optimizing kotlin.** broke every vehicle read in the release build (InvocationTargetException),
+# so the SDKs, Kotlin metadata and kotlin-reflect stay as they are.
+-keep class ai.pleos.** { *; }
+-keep interface ai.pleos.** { *; }
+-keep class kotlin.Metadata { *; }
+-keep class kotlin.reflect.** { *; }
+-keep class kotlin.jvm.internal.** { *; }
+# kotlin-reflect reads @Deprecated(replaceWith = ...) on SDK methods; once R8 renamed kotlin.Deprecated
+# and dropped its elements every read failed with IncompleteAnnotationException.
+-keep @interface kotlin.** { *; }
+-keep class kotlin.ReplaceWith { *; }
+-keep enum kotlin.DeprecationLevel { *; }
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,RuntimeVisibleAnnotations
