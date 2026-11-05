@@ -75,18 +75,18 @@ data class DashboardState(
     val fuelPercent: Int? = null,          // null = 아직 모름 또는 미지원
     val rangeKm: Int? = null,
     val drivingMode: DrivingMode? = null,
-    val pendingRefuel: RefuelDraft? = null,
+    val pendingCharge: Record? = null,     // status = DRAFT, detail = Energy
     val warnings: Set<VehicleWarning> = emptySet(),
     val isDemo: Boolean = false,
 )
 
 sealed interface DashboardEvent {
     // 사용자 입력
-    data object RefuelConfirmTapped : DashboardEvent
-    data class RefuelAmountEntered(val won: Int) : DashboardEvent
+    data object ChargeConfirmTapped : DashboardEvent
+    data class ChargeAmountEntered(val won: Long) : DashboardEvent
     // 시스템 입력 (ViewModel 내부에서 Flow를 collect해 발생)
     data class VehicleSnapshotChanged(val snapshot: VehicleSnapshot) : DashboardEvent
-    data class RefuelDetected(val draft: RefuelDraft) : DashboardEvent
+    data class ChargeDetected(val draft: Record) : DashboardEvent
 }
 
 sealed interface DashboardEffect {

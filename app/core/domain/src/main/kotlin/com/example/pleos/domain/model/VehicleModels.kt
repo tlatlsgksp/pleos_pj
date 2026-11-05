@@ -90,14 +90,5 @@ data class CarProperties(
     val fuelCapacityL: Double? = null,
 )
 
-/** A refuel detected from vehicle signals, waiting for the user to add the amount paid (won). */
-data class RefuelDraft(
-    val detectedAtEpochMillis: Long,
-    val odometerKm: Double?,
-    val fuelPercentBefore: Int?,
-    val fuelPercentAfter: Int?,
-    val estimatedLiters: Double?,
-)
-
 /** Where vehicle data comes from. DEMO is the Fake gateways driven by a scenario. */
 enum class DataSourceMode { REAL, DEMO }
