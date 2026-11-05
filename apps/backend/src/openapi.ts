@@ -9,7 +9,7 @@ import { buildOpenApiDocument, configureApp } from './app.setup.js';
 
 const outputPath = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  '../../docs/api/openapi.json',
+  '../../../docs/api/openapi.json',
 );
 
 // NestFactory.create instantiates providers but does not run lifecycle hooks

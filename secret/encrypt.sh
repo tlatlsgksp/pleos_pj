@@ -18,5 +18,5 @@ lock() { # lock <plaintext> <encrypted>
   echo "updated    $2"
 }
 
-lock backend/.env secret/backend.env
-lock app/secrets.properties secret/app.env
+lock apps/backend/.env secret/backend.env
+lock apps/android/secrets.properties secret/android.env

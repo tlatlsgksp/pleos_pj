@@ -22,7 +22,7 @@
 | API 계약 | OpenAPI. `@nestjs/swagger`로 생성해 `docs/api/openapi.json`에 커밋 |
 | 외부 API | 앱은 외부 API(오피넷 등)를 직접 호출하지 않는다. 전부 백엔드를 거친다 |
 | Pleos SDK | 앱(AAOS)에서만 호출한다. 백엔드는 SDK를 모른다 |
-| 비밀 값 | sops + age로 암호화해 `secret/`에 커밋한다. 환경은 하나(dev/prod 분리 없음). 평문은 `backend/.env`와 `app/secrets.properties`에만 풀린다. 절차는 [README](../README.md#비밀-값) |
+| 비밀 값 | sops + age로 암호화해 `secret/`에 커밋한다. 환경은 하나(dev/prod 분리 없음). 평문은 `apps/backend/.env`와 `apps/android/secrets.properties`에만 풀린다. 절차는 [README](../README.md#비밀-값) |
 
 ## 1. 전체 구성
 
@@ -163,7 +163,7 @@ domain에 인터페이스를 두고 platform에서 구현한다. **Pleos SDK, AA
 
 ### 2.6 주요 의존성
 
-버전은 `app/gradle/libs.versions.toml`에서 관리한다.
+버전은 `apps/android/gradle/libs.versions.toml`에서 관리한다.
 
 | 용도 | 라이브러리 |
 |---|---|
@@ -197,7 +197,7 @@ domain에 인터페이스를 두고 platform에서 구현한다. **Pleos SDK, AA
 ### 3.2 디렉터리 구조
 
 ```
-backend/
+apps/backend/
   prisma/
     schema.prisma
     migrations/
@@ -277,9 +277,9 @@ modules/fuel-logs/
 ### 3.7 로컬 환경
 
 ```sh
-cd backend
+cd apps/backend
 docker compose up -d            # PostgreSQL 17, Redis 7
-sh ../secret/decrypt.sh         # .env 생성. age 키가 없으면 cp .env.example .env (기본값이 compose와 맞춰져 있다)
+sh ../../secret/decrypt.sh      # .env 생성. age 키가 없으면 cp .env.example .env (기본값이 compose와 맞춰져 있다)
 npm install
 npx prisma migrate dev
 npm run start:dev

@@ -206,7 +206,7 @@ Maven 저장소: `https://nexus-playground.pleos.ai/repository/maven-releases/`
 우리 프로젝트(2026-10-24 생성):
 - 이름 "AutoMotive", 카테고리 모빌리티 서비스, 개발사 프마노
 - Project ID: `8a5323da-1694-4e0a-b765-861df94b78d8`
-- Client ID와 Client Secret은 문서에 적지 않는다. `app/local.properties`(gitignore 대상)의 `pleos.clientId`, `pleos.clientSecret`에 둔다.
+- Client ID와 Client Secret은 문서에 적지 않는다. `apps/android/secrets.properties`(gitignore 대상, `secret/android.env`에서 복호화)의 `pleos.clientId`, `pleos.clientSecret`에 둔다.
 - 콘솔에는 CRN과 데브박스 입력용 adb 명령도 나온다. 에뮬레이터 2.1.0부터는 CRN이 필요 없다.
 - Vehicle Data API는 신청 시 **법인 인증이 필요**하고 유럽 지역 전용이다(사용자 확인). 공모전에서는 쓰지 않는다.
 

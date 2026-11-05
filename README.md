@@ -6,17 +6,17 @@
 
 | 경로 | 내용 |
 |---|---|
-| `app/` | Pleos Connect(AAOS) 차량 앱. 독립 Gradle 프로젝트 |
-| `backend/` | 서버. NestJS, PostgreSQL(Prisma), Redis(BullMQ) |
+| `apps/android/` | Pleos Connect(AAOS) 차량 앱. 독립 Gradle 프로젝트 |
+| `apps/backend/` | 서버. NestJS, PostgreSQL(Prisma), Redis(BullMQ) |
 | `docs/` | 기획·설계·조사 문서 |
 | `archive/` | 보류한 기능의 시제품. 다시 꺼낼 때 각 폴더 README부터 본다 ([차량 스킨](archive/skin-prototype/README.md)) |
 
 ## 앱 빌드
 
-Android Studio에서 `app/` 폴더를 연다. CLI는 다음과 같다.
+Android Studio에서 `apps/android/` 폴더를 연다. CLI는 다음과 같다.
 
 ```sh
-cd app
+cd apps/android
 ./gradlew :automotive:assembleDebug
 ```
 
@@ -25,8 +25,8 @@ cd app
 ## 백엔드 실행
 
 ```sh
-sh secret/decrypt.sh            # backend/.env 생성. age 키가 없으면 cp backend/.env.example backend/.env
-cd backend
+sh secret/decrypt.sh            # apps/backend/.env 생성. age 키가 없으면 cp apps/backend/.env.example apps/backend/.env
+cd apps/backend
 docker compose up -d
 npm install
 npx prisma migrate dev
@@ -39,8 +39,8 @@ API 키 같은 비밀 값은 `secret/`에 [sops](https://github.com/getsops/sops
 
 | 암호화 파일 (커밋) | 평문이 풀리는 위치 (gitignore) | 내용 |
 |---|---|---|
-| `secret/backend.env` | `backend/.env` | DB·Redis URL, VIN HMAC 키, 네이버 Maps 클라이언트 ID·Secret |
-| `secret/app.env` | `app/secrets.properties` | Pleos Playground 인증 정보, 네이버 Maps 클라이언트 ID |
+| `secret/backend.env` | `apps/backend/.env` | DB·Redis URL, VIN HMAC 키, 네이버 Maps 클라이언트 ID·Secret |
+| `secret/android.env` | `apps/android/secrets.properties` | Pleos Playground 인증 정보, 네이버 Maps 클라이언트 ID |
 
 ```sh
 sh secret/decrypt.sh    # 풀기. age 개인키가 있어야 한다
@@ -50,11 +50,11 @@ sh secret/encrypt.sh    # 평문을 고친 뒤 다시 잠그기. 내용이 같�
 PowerShell에서는 스크립트 대신 sops를 직접 부른다. `>` 리다이렉션은 UTF-16으로 저장되므로 쓰지 않는다.
 
 ```sh
-sops -d --output backend/.env secret/backend.env
-sops -d --output app/secrets.properties secret/app.env
+sops -d --output apps/backend/.env secret/backend.env
+sops -d --output apps/android/secrets.properties secret/android.env
 ```
 
-age 개인키는 sops 기본 경로에 둔다: Windows `%APPDATA%\sops\age\keys.txt`, macOS `~/Library/Application Support/sops/age/keys.txt`, Linux `~/.config/sops/age/keys.txt`. 새 사람에게 접근을 주려면 그 사람이 `age-keygen`으로 만든 공개키를 `.sops.yaml`에 추가하고, 기존 키 보유자가 `sops updatekeys secret/backend.env secret/app.env`를 실행한다.
+age 개인키는 sops 기본 경로에 둔다: Windows `%APPDATA%\sops\age\keys.txt`, macOS `~/Library/Application Support/sops/age/keys.txt`, Linux `~/.config/sops/age/keys.txt`. 새 사람에게 접근을 주려면 그 사람이 `age-keygen`으로 만든 공개키를 `.sops.yaml`에 추가하고, 기존 키 보유자가 `sops updatekeys secret/backend.env secret/android.env`를 실행한다.
 
 네이버 Maps 클라이언트 ID는 앱 패키지 이름에 묶여 있어 앱에 넣어도 되지만, Secret은 Geocoding을 호출하는 백엔드에만 둔다.
 
