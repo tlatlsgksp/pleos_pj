@@ -24,9 +24,13 @@ class ObserveDashboardUseCase @Inject constructor(
         }
 }
 
-/** AAOS range if the vehicle reports it; otherwise fuel % × tank capacity × current economy; null if any input is missing. */
+/**
+ * AAOS range if reported, then the Vehicle SDK range (the EV emulator reports this one),
+ * otherwise fuel % × tank capacity × current economy; null if any input is missing.
+ */
 fun estimateRangeKm(snapshot: VehicleSnapshot, properties: CarProperties): Double? {
     properties.rangeRemainingKm?.let { return it }
+    snapshot.rangeRemainingKm?.let { return it }
     val percent = snapshot.fuelPercent ?: return null
     val capacityL = properties.fuelCapacityL ?: return null
     val economy = snapshot.currentFuelEconomyKmPerL ?: return null

@@ -4,6 +4,7 @@ import com.example.pleos.domain.gateway.VehicleGateway
 import com.example.pleos.domain.model.Capability
 import com.example.pleos.domain.model.DataSourceMode
 import com.example.pleos.domain.model.DrivingMode
+import com.example.pleos.domain.model.Gear
 import com.example.pleos.domain.model.VehicleFeature
 import com.example.pleos.domain.model.VehicleSnapshot
 import com.example.pleos.domain.model.VehicleWarning
@@ -71,4 +72,28 @@ class FakeVehicleGateway(
 
     /** Simulates a refuel: the since-refill trip resets, as the real vehicle does. */
     fun refuel(toPercent: Int) = update { it.copy(fuelPercent = toPercent, tripSinceRefillKm = 0.0) }
+
+    fun setGear(gear: Gear?) = update { it.copy(gear = gear) }
+
+    fun setBrakePedalPressed(pressed: Boolean?) = update { it.copy(brakePedalPressed = pressed) }
+
+    fun setHvacOn(on: Boolean?) = update { it.copy(hvacOn = on) }
+
+    fun setRangeRemainingKm(km: Double?) = update { it.copy(rangeRemainingKm = km) }
+
+    fun setChargePortOpen(open: Boolean?) = update { it.copy(chargePortOpen = open) }
+
+    /** Sets battery energy and keeps the state of charge consistent with the capacity. */
+    fun setBatteryEnergyKwh(kwh: Double) = update {
+        it.copy(
+            batteryEnergyKwh = kwh,
+            batteryPercent = it.batteryCapacityKwh?.takeIf { cap -> cap > 0 }?.let { cap -> kwh / cap * 100.0 },
+        )
+    }
+
+    /** EV drive: adds distance and drains the battery. */
+    fun driveEv(km: Double, kwhUsed: Double) {
+        update { it.copy(cumulativeDistanceKm = (it.cumulativeDistanceKm ?: 0.0) + km) }
+        setBatteryEnergyKwh(((current.batteryEnergyKwh ?: 0.0) - kwhUsed).coerceAtLeast(0.0))
+    }
 }

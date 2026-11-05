@@ -56,6 +56,13 @@ class ObserveDashboardUseCaseTest {
     }
 
     @Test
+    fun `uses the Vehicle SDK range on an EV without AAOS range`() {
+        val ev = VehicleSnapshot(batteryPercent = 64.0, rangeRemainingKm = 312.0)
+
+        assertEquals(312.0, estimateRangeKm(ev, CarProperties()))
+    }
+
+    @Test
     fun `range is null when an input is missing and re-emits on vehicle change`() = runTest {
         val vehicle = TestVehicleGateway(VehicleSnapshot(fuelPercent = 50))
         val car = TestCarPropertySource(CarProperties(fuelCapacityL = 60.0))
