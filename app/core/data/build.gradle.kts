@@ -22,6 +22,11 @@ android {
     }
 }
 
+ksp {
+    // Exported schemas are committed so later versions can write tested migrations.
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     api(project(":core:domain"))
     implementation(libs.kotlinx.coroutines.android)
