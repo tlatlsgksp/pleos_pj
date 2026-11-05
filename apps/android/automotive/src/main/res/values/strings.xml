@@ -3,6 +3,10 @@
 
     <string name="common_back">뒤로</string>
 
+    <string name="recording_channel">주행·충전 기록</string>
+    <string name="recording_title">차계부가 주행과 충전을 기록하고 있어요</string>
+    <string name="recording_text">차량 신호로 주행거리와 충전을 자동으로 남겨요</string>
+
     <string name="dashboard_title">차계부</string>
     <string name="dashboard_demo_badge">데모 모드</string>
     <string name="dashboard_battery">배터리</string>

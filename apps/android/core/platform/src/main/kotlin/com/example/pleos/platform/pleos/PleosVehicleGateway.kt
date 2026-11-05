@@ -18,6 +18,8 @@ import com.example.pleos.domain.model.VehicleSnapshot
 import com.example.pleos.domain.model.VehicleWarning
 import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -58,6 +60,9 @@ internal class PleosVehicleGateway(
 
     @Volatile
     private var lastSnapshot: VehicleSnapshot? = null
+
+    /** Reads the vehicle answered with "not supported". Only touched on the main thread. */
+    private val unsupported = mutableSetOf<String>()
 
     override val snapshot: Flow<VehicleSnapshot> = callbackFlow {
         val vehicle = Vehicle(appContext)
@@ -133,25 +138,36 @@ internal class PleosVehicleGateway(
         capacityWh: Double?,
         portOpen: Boolean?,
         warnings: Set<VehicleWarning>,
-    ): VehicleSnapshot {
+    ): VehicleSnapshot = coroutineScope {
+        // All reads in parallel: one slow answer must not delay the others, or short events
+        // (a charge port opening) fall between two samples.
         val ev = vehicle.getEvBattery()
-        val levelWh = read<Float>("getEvBatteryLevel") { ok, fail -> ev.getEvBatteryLevel(ok, fail) }?.toDouble()
+        val level = async { read<Float>("getEvBatteryLevel") { ok, fail -> ev.getEvBatteryLevel(ok, fail) } }
+        val range = async { read<Float>("getRangeRemainingDistance") { ok, fail -> vehicle.getOdometer().getRangeRemainingDistance(ok, fail) } }
+        val fuel = async { read<Int>("getFuelPercent") { ok, fail -> vehicle.getFuel().getFuelPercent(ok, fail) } }
+        val odometer = async { read<Float>("getCurrentDistanceDriven") { ok, fail -> vehicle.getOdometer().getCurrentDistanceDriven(ok, fail) } }
+        val gear = async { read<VehicleGear>("getCurrentGearSelectionState") { ok, fail -> vehicle.getGear().getCurrentGearSelectionState(ok, fail) } }
+        val brake = async { read<Boolean>("getCurrentBrakePedalStatus") { ok, fail -> vehicle.getBrake().getCurrentBrakePedalStatus(ok, fail) } }
+        val hvac = async { read<Boolean>("getHvacAcState") { ok, fail -> vehicle.getHVAC().getHvacAcState(ALL_SEATS, ok, fail) } }
+        val soc = async { read<Int>("getEvBatteryStateOfCharge") { ok, fail -> ev.getEvBatteryStateOfCharge(ok, fail) } }
+
         val wattHours = capacityWh == null || capacityWh > WH_THRESHOLD
         val toKwh = { v: Double -> if (wattHours) v / 1000.0 else v }
-        val range = read<Float>("getRangeRemainingDistance") { ok, fail -> vehicle.getOdometer().getRangeRemainingDistance(ok, fail) }?.toDouble()
-        return VehicleSnapshot(
-            fuelPercent = read<Int>("getFuelPercent") { ok, fail -> vehicle.getFuel().getFuelPercent(ok, fail) },
-            cumulativeDistanceKm = read<Float>("getCurrentDistanceDriven") { ok, fail -> vehicle.getOdometer().getCurrentDistanceDriven(ok, fail) }?.toDouble(),
+        VehicleSnapshot(
+            fuelPercent = fuel.await(),
+            cumulativeDistanceKm = odometer.await()?.toDouble(),
             warnings = warnings,
-            gear = read<VehicleGear>("getCurrentGearSelectionState") { ok, fail -> vehicle.getGear().getCurrentGearSelectionState(ok, fail) }?.toDomain(),
-            brakePedalPressed = read<Boolean>("getCurrentBrakePedalStatus") { ok, fail -> vehicle.getBrake().getCurrentBrakePedalStatus(ok, fail) },
-            hvacOn = read<Boolean>("getHvacAcState") { ok, fail -> vehicle.getHVAC().getHvacAcState(ALL_SEATS, ok, fail) },
-            rangeRemainingKm = range?.let { if (it > RANGE_METRES_THRESHOLD) it / 1000.0 else it },
-            batteryPercent = read<Int>("getEvBatteryStateOfCharge") { ok, fail -> ev.getEvBatteryStateOfCharge(ok, fail) }?.toDouble(),
-            batteryEnergyKwh = levelWh?.let(toKwh),
+            gear = gear.await()?.toDomain(),
+            brakePedalPressed = brake.await(),
+            hvacOn = hvac.await(),
+            rangeRemainingKm = range.await()?.toDouble()?.let { if (it > RANGE_METRES_THRESHOLD) it / 1000.0 else it },
+            batteryPercent = soc.await()?.toDouble(),
+            batteryEnergyKwh = level.await()?.toDouble()?.let(toKwh),
             batteryCapacityKwh = capacityWh?.let(toKwh),
             chargePortOpen = portOpen,
-        )
+        ).also {
+            Log.d(TAG, "snapshot odo=${it.cumulativeDistanceKm} kWh=${it.batteryEnergyKwh} soc=${it.batteryPercent} port=${it.chargePortOpen} gear=${it.gear} range=${it.rangeRemainingKm}")
+        }
     }
 
     private suspend fun readWarnings(vehicle: Vehicle): Set<VehicleWarning> {
@@ -171,6 +187,7 @@ internal class PleosVehicleGateway(
         name: String,
         call: (onComplete: (T?) -> Unit, onFailed: (Exception) -> Unit) -> Unit,
     ): T? {
+        if (name in unsupported) return null
         val value = withTimeoutOrNull(READ_TIMEOUT_MS) {
             suspendCancellableCoroutine<Result<T?>> { cont ->
                 try {
@@ -182,7 +199,12 @@ internal class PleosVehicleGateway(
         }
         when {
             value == null -> Log.d(TAG, "$name: no answer in ${READ_TIMEOUT_MS}ms")
-            value.isFailure -> Log.d(TAG, "$name: ${value.exceptionOrNull()}")
+            value.isFailure -> {
+                val error = value.exceptionOrNull()
+                Log.d(TAG, "$name: $error")
+                // The car will not start supporting it later; stop asking (saves a call per poll).
+                if (error?.message?.contains("not supported") == true) unsupported += name
+            }
         }
         return value?.getOrNull()
     }
