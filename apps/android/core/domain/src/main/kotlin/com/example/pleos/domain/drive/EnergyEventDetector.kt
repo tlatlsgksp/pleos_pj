@@ -105,9 +105,14 @@ class EnergyEventDetector(
         EnergyType.FUEL -> s.fuelPercent?.toDouble()
     }
 
+    /**
+     * Battery % from energy / capacity when both are known, so the levels always match the kWh
+     * amount; the reported state of charge otherwise. The emulator console moves energy without
+     * moving the state of charge, which left a 40 kWh charge reading 100% -> 100%.
+     */
     private fun percentOf(s: VehicleSnapshot): Double? = when (energyType) {
-        EnergyType.EV -> s.batteryPercent
-            ?: s.batteryEnergyKwh?.let { e -> s.batteryCapacityKwh?.takeIf { it > 0 }?.let { e / it * 100.0 } }
+        EnergyType.EV -> s.batteryEnergyKwh?.let { e -> s.batteryCapacityKwh?.takeIf { it > 0 }?.let { e / it * 100.0 } }
+            ?: s.batteryPercent
         EnergyType.FUEL -> s.fuelPercent?.toDouble()
     }
 
