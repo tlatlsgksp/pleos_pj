@@ -42,6 +42,15 @@ class ChargeStopTest {
     }
 
     @Test
+    fun `no offer when the navigation already routes to a charger`() {
+        val toCharger = RouteState(active = true, routeId = 1, destinationName = "경기창조경제혁신센터 전기차충전소", remainingKm = 2.3)
+        val toEpit = RouteState(active = true, routeId = 1, destinationName = "안성휴게소 (부산방향) E-pit", remainingKm = 47.0)
+
+        assertFalse(ChargeStopRules.shouldSuggest(30.0, toCharger))
+        assertFalse(ChargeStopRules.shouldSuggest(30.0, toEpit))
+    }
+
+    @Test
     fun `route state follows the navigation events`() {
         var s = RouteState()
         s = s.reduce(NavEvent.RouteStarted("대전", 160.0, 7_000))

@@ -50,9 +50,14 @@ object ChargeStopRules {
     /** Candidates more than this many degrees off the heading are behind the car. */
     private const val AHEAD_DEGREES = 90.0
 
-    /** Suggest only with an active route and a range that will not last it (L4-1). */
+    /**
+     * Suggest only with an active route and a range that will not last it (L4-1), and not when the
+     * route already heads to a charger. The car's navigation inserts its own charging stop for EV
+     * routes set in its UI (seen on the emulator); offering a second one would only confuse.
+     */
     fun shouldSuggest(rangeKm: Double?, route: RouteState): Boolean {
         if (!route.active || rangeKm == null) return false
+        if (route.destinationName?.let(::isChargingStop) == true) return false
         val needed = maxOf(MIN_RANGE_KM, (route.remainingKm ?: 0.0) * ROUTE_MARGIN)
         return rangeKm < needed
     }
@@ -72,6 +77,9 @@ object ChargeStopRules {
         val (preferred, rest) = candidates.partition { it.distanceKm <= SEARCH_RADIUS_KM && ahead(it) }
         return preferred.sortedBy { it.distanceKm } + rest.sortedBy { it.distanceKm }
     }
+
+    /** Navigation names its charging stops "...충전소" or "... E-pit ..." (Hyundai's charging brand). */
+    fun isChargingStop(name: String): Boolean = "충전소" in name || "E-pit" in name
 
     fun distanceKm(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
         val dLat = Math.toRadians(lat2 - lat1)
