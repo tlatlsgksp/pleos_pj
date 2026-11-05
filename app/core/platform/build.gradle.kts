@@ -28,6 +28,7 @@ android {
 dependencies {
     api(project(":core:domain"))
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.pleos.vehicle)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 

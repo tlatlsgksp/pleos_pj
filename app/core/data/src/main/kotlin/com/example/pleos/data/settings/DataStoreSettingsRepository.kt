@@ -24,10 +24,11 @@ internal class DataStoreSettingsRepository @Inject constructor(
         val chargeUnitPriceWon = doublePreferencesKey("charge_unit_price_won")
     }
 
-    // DEMO until a real gateway exists; flip the default to REAL once the Pleos wrappers are bound.
+    // REAL by default. Where no Pleos vehicle service exists, the switching gateway falls back to
+    // the demo and reports DEMO, so a phone or plain emulator still shows the demo.
     override val dataSourceMode: Flow<DataSourceMode> = dataStore.data.map { prefs ->
         prefs[Keys.dataSourceMode]?.let { runCatching { DataSourceMode.valueOf(it) }.getOrNull() }
-            ?: DataSourceMode.DEMO
+            ?: DataSourceMode.REAL
     }
 
     override suspend fun setDataSourceMode(mode: DataSourceMode) {

@@ -1,5 +1,6 @@
 package com.example.pleos.platform.di
 
+import android.content.Context
 import com.example.pleos.domain.gateway.CarPropertySource
 import com.example.pleos.domain.gateway.DemoScenarioController
 import com.example.pleos.domain.gateway.VehicleGateway
@@ -7,6 +8,7 @@ import com.example.pleos.domain.repository.SettingsRepository
 import com.example.pleos.platform.demo.DemoScenarioPlayer
 import com.example.pleos.platform.fake.FakeCarPropertySource
 import com.example.pleos.platform.fake.FakeVehicleGateway
+import com.example.pleos.platform.pleos.PleosVehicleGateway
 import com.example.pleos.platform.switching.SwitchingCarPropertySource
 import com.example.pleos.platform.switching.SwitchingVehicleGateway
 import dagger.Binds
@@ -14,6 +16,7 @@ import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import java.util.Optional
 import javax.inject.Qualifier
@@ -27,7 +30,7 @@ import kotlinx.coroutines.SupervisorJob
 @Retention(AnnotationRetention.BINARY)
 internal annotation class RealSource
 
-/** Scope that outlives any screen; used by the demo scenario player. */
+/** Scope that outlives any screen; used by the demo scenario player and to share the vehicle signal. */
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 internal annotation class DemoScope
@@ -36,11 +39,7 @@ internal annotation class DemoScope
 @InstallIn(SingletonComponent::class)
 internal abstract class PlatformBindings {
 
-    // Real implementations are optional so the app runs on the Fake sources until the SDK wrappers exist.
-    @BindsOptionalOf
-    @RealSource
-    abstract fun realVehicleGateway(): VehicleGateway
-
+    // The AAOS car-property source is optional until it is written; the Fake fills in until then.
     @BindsOptionalOf
     @RealSource
     abstract fun realCarPropertySource(): CarPropertySource
@@ -61,13 +60,18 @@ internal object PlatformModule {
     @Singleton
     fun fakeCarPropertySource(): FakeCarPropertySource = FakeCarPropertySource()
 
+    /** The Pleos SDK gateway exists only where the Pleos vehicle service is installed; elsewhere the demo runs. */
     @Provides
     @Singleton
     fun vehicleGateway(
+        @ApplicationContext context: Context,
         settings: SettingsRepository,
-        @RealSource real: Optional<VehicleGateway>,
         fake: FakeVehicleGateway,
-    ): VehicleGateway = SwitchingVehicleGateway(settings.dataSourceMode, real.orElse(null), fake)
+        @DemoScope scope: CoroutineScope,
+    ): VehicleGateway {
+        val real = if (PleosVehicleGateway.isAvailable(context)) PleosVehicleGateway(context, scope) else null
+        return SwitchingVehicleGateway(settings.dataSourceMode, real, fake)
+    }
 
     @Provides
     @Singleton

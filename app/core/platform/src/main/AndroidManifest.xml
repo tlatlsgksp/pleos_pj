@@ -1,2 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Only the read domains PleosVehicleGateway calls (ARCHITECTURE 2.5-9). All are normal protection. -->
+    <!-- Odometer, gear, brake pedal, range. -->
+    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+    <!-- EV battery, charge port, fuel. -->
+    <uses-permission android:name="pleos.car.permission.CAR_ENERGY" />
+    <!-- Air conditioner state. -->
+    <uses-permission android:name="pleos.car.permission.CAR_CLIMATE" />
+    <!-- VIN, stored only as a hash. -->
+    <uses-permission android:name="pleos.car.permission.CAR_INFO" />
+    <!-- Oil level, washer fluid and power-down warnings. -->
+    <uses-permission android:name="pleos.car.permission.CAR_SAFETY" />
+</manifest>
