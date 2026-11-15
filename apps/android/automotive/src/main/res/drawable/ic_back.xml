@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pleos UI icon grid: 48x48, stroke 3.6, round join and cap (UI_DESIGN_GUIDE 5). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:autoMirrored="true"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:pathData="M29,10 L15,24 L29,38"
+        android:strokeWidth="3.6"
+        android:strokeColor="#FF131417"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

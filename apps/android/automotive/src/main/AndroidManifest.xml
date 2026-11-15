@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- VehicleRecordingService keeps the process alive so drives and charges are recorded while
+         another app (usually the navigation) covers this one. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
     <uses-feature
         android:name="android.hardware.type.automotive"
         android:required="true" />
@@ -33,6 +38,7 @@
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
 
     <application
+        android:name=".PleosApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -40,7 +46,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pleos">
 
-        <!-- Lifestyle category: not Distraction Optimized, so the app is available only while parked.
+        <!-- Mobility Services category. Not Distraction Optimized yet, so the app is available only while parked.
              screenOrientation is unset so the app opens in portrait in a single window. -->
         <activity
             android:name=".MainActivity"
@@ -53,6 +59,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.VehicleRecordingService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Records odometer, drive sessions and EV charging from vehicle signals while other apps are in front" />
+        </service>
     </application>
 
 </manifest>

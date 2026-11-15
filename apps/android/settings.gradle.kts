@@ -28,4 +28,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "pleos"
 include(":automotive")
- 
+include(":core:domain")
+include(":core:data")
+include(":core:platform")

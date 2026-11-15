@@ -1,15 +1,30 @@
 package com.example.pleos.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.example.pleos.R
 
-// Pleos Connect font hierarchy (docs/UI_DESIGN_GUIDE.md §4). Asta Sans is not bundled yet.
+/**
+ * SUIT (OFL, assets/licenses/SUIT-OFL.txt), one variable file for every weight the app uses.
+ * Chosen over the platform face for its Korean rhythm (docs/visual/ledger-design-v3.html).
+ */
+@OptIn(ExperimentalTextApi::class)
+val Suit = FontFamily(
+    listOf(400, 500, 600, 700, 800).map { w ->
+        Font(R.font.suit_variable, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))
+    },
+)
+
+// Pleos Connect font hierarchy (docs/UI_DESIGN_GUIDE.md §4) set in SUIT.
 private fun pleosStyle(size: TextUnit, lineHeight: TextUnit, weight: FontWeight) = TextStyle(
-    fontFamily = FontFamily.Default,
+    fontFamily = Suit,
     fontWeight = weight,
     fontSize = size,
     lineHeight = lineHeight,

@@ -1,0 +1,656 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "21a97ccdffe4f9f368dfad2ca368a6d9",
+    "entities": [
+      {
+        "tableName": "vehicle",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `energyType` TEXT NOT NULL, `vinHash` TEXT, `tankCapacityL` REAL, `batteryCapacityKwh` REAL, `baselineOdometerKm` REAL NOT NULL, `baselineAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyType",
+            "columnName": "energyType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vinHash",
+            "columnName": "vinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tankCapacityL",
+            "columnName": "tankCapacityL",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "batteryCapacityKwh",
+            "columnName": "batteryCapacityKwh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "baselineOdometerKm",
+            "columnName": "baselineOdometerKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineAt",
+            "columnName": "baselineAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "record",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehicleId` TEXT NOT NULL, `type` TEXT NOT NULL, `occurredAt` INTEGER NOT NULL, `amountWon` INTEGER, `stampOdometerKm` REAL NOT NULL, `stampVinHash` TEXT, `stampCapturedAt` INTEGER NOT NULL, `stampSource` TEXT NOT NULL, `origin` TEXT NOT NULL, `status` TEXT NOT NULL, `memo` TEXT, `rentalPeriodId` TEXT, `editedAt` INTEGER, `integrityHash` TEXT, `syncState` TEXT NOT NULL, `energyKind` TEXT, `energyAmount` REAL, `unitPriceWon` REAL, `placeName` TEXT, `levelBefore` REAL, `levelAfter` REAL, `maintenanceItemIds` TEXT, `shopName` TEXT, `serviceOdometerKm` REAL, `expenseCategory` TEXT, `expenseCustomLabel` TEXT, `accidentSpeedKmh` REAL, `accidentLatitude` REAL, `accidentLongitude` REAL, `accidentDriveSessionId` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "occurredAt",
+            "columnName": "occurredAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountWon",
+            "columnName": "amountWon",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "stampOdometerKm",
+            "columnName": "stampOdometerKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stampVinHash",
+            "columnName": "stampVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "stampCapturedAt",
+            "columnName": "stampCapturedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stampSource",
+            "columnName": "stampSource",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "origin",
+            "columnName": "origin",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "memo",
+            "columnName": "memo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "rentalPeriodId",
+            "columnName": "rentalPeriodId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "editedAt",
+            "columnName": "editedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "integrityHash",
+            "columnName": "integrityHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "syncState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyKind",
+            "columnName": "energyKind",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "energyAmount",
+            "columnName": "energyAmount",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "unitPriceWon",
+            "columnName": "unitPriceWon",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "placeName",
+            "columnName": "placeName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "levelBefore",
+            "columnName": "levelBefore",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "levelAfter",
+            "columnName": "levelAfter",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "maintenanceItemIds",
+            "columnName": "maintenanceItemIds",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "shopName",
+            "columnName": "shopName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "serviceOdometerKm",
+            "columnName": "serviceOdometerKm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "expenseCategory",
+            "columnName": "expenseCategory",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "expenseCustomLabel",
+            "columnName": "expenseCustomLabel",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "accidentSpeedKmh",
+            "columnName": "accidentSpeedKmh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "accidentLatitude",
+            "columnName": "accidentLatitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "accidentLongitude",
+            "columnName": "accidentLongitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "accidentDriveSessionId",
+            "columnName": "accidentDriveSessionId",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_record_vehicleId_status_occurredAt",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "status",
+              "occurredAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_record_vehicleId_status_occurredAt` ON `${TABLE_NAME}` (`vehicleId`, `status`, `occurredAt`)"
+          },
+          {
+            "name": "index_record_vehicleId_type",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "type"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_record_vehicleId_type` ON `${TABLE_NAME}` (`vehicleId`, `type`)"
+          }
+        ]
+      },
+      {
+        "tableName": "drive_session",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehicleId` TEXT NOT NULL, `kind` TEXT NOT NULL, `startOdometerKm` REAL NOT NULL, `startVinHash` TEXT, `startCapturedAt` INTEGER NOT NULL, `startSource` TEXT NOT NULL, `endOdometerKm` REAL, `endVinHash` TEXT, `endCapturedAt` INTEGER, `endSource` TEXT, `distanceKm` REAL NOT NULL, `energyUsed` REAL, `idleSeconds` INTEGER NOT NULL, `idleEnergyUsed` REAL, `tollWon` INTEGER, `destinationName` TEXT, `syncState` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startOdometerKm",
+            "columnName": "startOdometerKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startVinHash",
+            "columnName": "startVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "startCapturedAt",
+            "columnName": "startCapturedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startSource",
+            "columnName": "startSource",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endOdometerKm",
+            "columnName": "endOdometerKm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endVinHash",
+            "columnName": "endVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endCapturedAt",
+            "columnName": "endCapturedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "endSource",
+            "columnName": "endSource",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "distanceKm",
+            "columnName": "distanceKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "energyUsed",
+            "columnName": "energyUsed",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "idleSeconds",
+            "columnName": "idleSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idleEnergyUsed",
+            "columnName": "idleEnergyUsed",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "tollWon",
+            "columnName": "tollWon",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "destinationName",
+            "columnName": "destinationName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "syncState",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_drive_session_vehicleId_endCapturedAt",
+            "unique": false,
+            "columnNames": [
+              "vehicleId",
+              "endCapturedAt"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_drive_session_vehicleId_endCapturedAt` ON `${TABLE_NAME}` (`vehicleId`, `endCapturedAt`)"
+          }
+        ]
+      },
+      {
+        "tableName": "drive_sample",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sessionId` TEXT NOT NULL, `at` INTEGER NOT NULL, `speedKmh` REAL, `gear` TEXT, `energyRemaining` REAL, `hvacOn` INTEGER, `brakePedalPressed` INTEGER, `latitude` REAL, `longitude` REAL, PRIMARY KEY(`sessionId`, `at`))",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speedKmh",
+            "columnName": "speedKmh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "gear",
+            "columnName": "gear",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "energyRemaining",
+            "columnName": "energyRemaining",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "hvacOn",
+            "columnName": "hvacOn",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "brakePedalPressed",
+            "columnName": "brakePedalPressed",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sessionId",
+            "at"
+          ]
+        }
+      },
+      {
+        "tableName": "care_item_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`vehicleId` TEXT NOT NULL, `itemId` TEXT NOT NULL, `lastServiceOdometerKm` REAL, `lastServiceAt` INTEGER, `customIntervalKm` INTEGER, `customIntervalMonths` INTEGER, `lastRecordId` TEXT, PRIMARY KEY(`vehicleId`, `itemId`))",
+        "fields": [
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "itemId",
+            "columnName": "itemId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastServiceOdometerKm",
+            "columnName": "lastServiceOdometerKm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "lastServiceAt",
+            "columnName": "lastServiceAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "customIntervalKm",
+            "columnName": "customIntervalKm",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "customIntervalMonths",
+            "columnName": "customIntervalMonths",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastRecordId",
+            "columnName": "lastRecordId",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "vehicleId",
+            "itemId"
+          ]
+        }
+      },
+      {
+        "tableName": "rental_period",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehicleId` TEXT NOT NULL, `start` INTEGER NOT NULL, `end` INTEGER, `startOdometerKm` REAL NOT NULL, `startVinHash` TEXT, `startCapturedAt` INTEGER NOT NULL, `startSource` TEXT NOT NULL, `endOdometerKm` REAL, `endVinHash` TEXT, `endCapturedAt` INTEGER, `endSource` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "start",
+            "columnName": "start",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "end",
+            "columnName": "end",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startOdometerKm",
+            "columnName": "startOdometerKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startVinHash",
+            "columnName": "startVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "startCapturedAt",
+            "columnName": "startCapturedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startSource",
+            "columnName": "startSource",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endOdometerKm",
+            "columnName": "endOdometerKm",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "endVinHash",
+            "columnName": "endVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "endCapturedAt",
+            "columnName": "endCapturedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "endSource",
+            "columnName": "endSource",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_rental_period_vehicleId",
+            "unique": false,
+            "columnNames": [
+              "vehicleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_rental_period_vehicleId` ON `${TABLE_NAME}` (`vehicleId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "pending_visit",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehicleId` TEXT NOT NULL, `shopName` TEXT NOT NULL, `arrivedAt` INTEGER NOT NULL, `arrivedOdometerKm` REAL NOT NULL, `arrivedVinHash` TEXT, `arrivedCapturedAt` INTEGER NOT NULL, `arrivedSource` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "vehicleId",
+            "columnName": "vehicleId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shopName",
+            "columnName": "shopName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivedAt",
+            "columnName": "arrivedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivedOdometerKm",
+            "columnName": "arrivedOdometerKm",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivedVinHash",
+            "columnName": "arrivedVinHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "arrivedCapturedAt",
+            "columnName": "arrivedCapturedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivedSource",
+            "columnName": "arrivedSource",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pending_visit_vehicleId",
+            "unique": false,
+            "columnNames": [
+              "vehicleId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pending_visit_vehicleId` ON `${TABLE_NAME}` (`vehicleId`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '21a97ccdffe4f9f368dfad2ca368a6d9')"
+    ]
+  }
+}
