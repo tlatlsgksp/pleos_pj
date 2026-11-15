@@ -1,0 +1,20 @@
+# Local infrastructure for development. Run: docker compose up -d
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: pleos
+      POSTGRES_PASSWORD: pleos
+      POSTGRES_DB: pleos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres-data:

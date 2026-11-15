@@ -1,0 +1,20 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE and local tool state
+*.iml
+.idea/
+.vscode/
+.bkit/
+
+# Build output (all modules)
+build/
+
+# Local secrets and machine-specific settings.
+# secret/*.env are sops-encrypted and committed; plaintext only lands in the paths below.
+local.properties
+secrets.properties
+.env
+.env.*
+!.env.example

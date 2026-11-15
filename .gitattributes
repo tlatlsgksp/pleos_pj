@@ -1,0 +1,4 @@
+# Shell scripts must stay LF, or sh on macOS/Linux chokes on the CR.
+*.sh text eol=lf
+# sops ciphertext: keep LF so re-encryption diffs stay minimal.
+secret/*.env text eol=lf
