@@ -85,7 +85,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 </head>
 <body>
 <main>
-  <h1>Moli 정보 구조 v2.1</h1>
+  <h1>Moli 정보 구조 v2.2</h1>
   <p class="lede">이전 정보 구조와 화면 기조는 버리고 새로 짰다. 차에는 커뮤니티 피드가 없다. 대신 차가 가장 잘 아는 것, 즉 내 주행과 연비 순위가 중심이고, 메뉴는 화면 위 탭 대신 한쪽에 떠 있는 아이콘으로 둔다.</p>
   <div class="changes">
     <div class="chg"><s>홈의 "지금 할 일" 카드</s><b>홈 = 내 차 + 바로 쓰는 차 기능</b></div>
@@ -105,7 +105,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
       <div class="blk"><b>연비 코치</b>켜짐 · 지금 부드러움</div>
       <div class="blk" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:transparent;padding:0">
         <div class="blk"><b>무드등</b>색 바꾸기</div><div class="blk"><b>충전소</b>가는 길에</div>
-        <div class="blk"><b>여기 핀</b>정차 중</div><div class="blk"><b>그룹 라이딩</b>시작</div>
+        <div class="blk"><b>제보</b>사고·공사·정체…</div><div class="blk"><b>그룹 라이딩</b>시작</div>
       </div>
       <div class="blk" style="grid-column:1 / 3;background:var(--ink);color:var(--bg)"><b style="color:var(--bg)">그룹 라이딩 중 · 멤버 프로필 4개</b>말하는 사람 프로필이 밝아짐 · 활성일 때만 뜨는 배너 · 누르면 그룹 라이딩 화면</div>
     </div></div>
@@ -113,9 +113,10 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
       <div class="layer">연비 코치 켜고 끄기 <span>구현</span></div>
       <div class="layer">무드등 색 바꾸기 <span>구현</span></div>
       <div class="layer">가는 길 충전소·주유소 넣기 <span>구현</span></div>
+      <div class="layer">지금 위치 제보: 사고 · 공사 · 정체 · 단속카메라 · 재난 <span>새로</span></div>
       <div class="layer">지금 여기 핀하기 (정차 중) <span>새로</span></div>
       <div class="layer">그룹 라이딩 시작 (이웃 고르기) <span>새로</span></div>
-      <p class="note" style="margin:10px 0 0;font-size:13px">주행 중에는 한 번 눌러 끝나는 버튼만 연다. 핀하기처럼 입력이 필요한 버튼은 정차 중에만 켜진다.</p>
+      <p class="note" style="margin:10px 0 0;font-size:13px">주행 중에는 한 번 눌러 끝나는 버튼만 연다. 제보는 [제보] → 종류 버튼 하나로 끝나서 주행 중에도 된다. 핀하기처럼 입력이 필요한 버튼은 정차 중에만 켜진다.</p>
     </div>
   </div>
 
@@ -127,7 +128,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
     <div class="node"><span class="ic">리그</span><b>연비 리그</b><p>커뮤니티 대신 차에 있는 순위</p>
       <ul><li>같은 차종 순위 (기본) / 지역 / 이웃</li><li>내 주행 분석<small>가감속 횟수와 흐름, 주행 모드 비율, 공회전, 속도 구간별 연비</small></li><li>순위가 오른 이유 한 문장<small>"급감속이 줄어 3계단 올랐어요"</small></li><li>지난 주행 목록 → 주행별 분석</li></ul></div>
     <div class="node"><span class="ic">지도</span><b>지도</b><p>추천 장소 = 위치를 붙인 글</p>
-      <ul><li>근처 / 가는 길의 핀</li><li>태그로 거르기 (주차 쉬움, 충전기 있음…)</li><li>핀 상세: 글 요약, 태그, 쓴 사람의 차 → [길 안내] [경유지로] <small>정차 중만 글 전체</small></li><li>층: 주유소·충전소 가격</li></ul></div>
+      <ul><li>근처 / 가는 길의 핀</li><li>태그로 거르기 (주차 쉬움, 충전기 있음…)</li><li>핀 상세: 글 요약, 태그, 쓴 사람의 차 → [길 안내] [경유지로] <small>정차 중만 글 전체</small></li><li>층: 주유소·충전소 가격</li><li>층: 실시간 제보 (사고, 공사, 정체, 단속카메라, 재난)</li></ul></div>
     <div class="node"><span class="ic">나</span><b>나</b><p>내 차, 이웃, 설정</p>
       <ul><li>내 프로필과 아이디 <small>예: @minsu_ioniq. 이웃이 이 아이디로 나를 추가</small></li><li>이웃 <small>목록, 아이디로 추가(정차 중), 받은 요청</small></li><li>3D 내 차 꾸미기 <span class="k built">구현</span></li><li>주유·충전 기록과 통계 <span class="k built">구현</span></li><li>선호 브랜드, 연비 코치 설정 <span class="k built">구현</span></li><li>폰과 연결 (QR), 공개 범위</li></ul></div>
   </div>
@@ -158,6 +159,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
       <div class="layer">멤버 위치 <span class="tg on"></span></div>
       <div class="layer">주유소·충전소 (가격) <span class="tg"></span></div>
       <div class="layer">추천 장소 (위치 붙은 글) <span class="tg"></span></div>
+      <div class="layer">실시간 제보 <span class="tg on"></span></div>
       <div class="layer">그룹 목적지 경로 <span class="tg on"></span></div>
       <p class="note" style="margin:10px 0 0;font-size:13px">주행 중에는 층을 바꾸는 버튼 하나만 크게. 세부 설정은 정차 중에.</p>
     </div>
@@ -176,16 +178,32 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
       <ul><li>내 차 프로필 (꾸민 차), 내 아이디</li><li>이웃: 목록, 아이디로 추가, 받은 요청</li><li>그룹, 그룹 라이딩 만들기</li><li>저장한 장소, 내 글</li><li>차 연결, 공개 범위, 차단 목록</li></ul></div>
   </div>
 
-  <h2>5. 데이터 모델 하나로 정리</h2>
+  <h2>5. 실시간 제보</h2>
+  <p class="note">홈의 [제보]를 누르면 큰 버튼 다섯 개가 뜨고, 하나를 누르면 그 순간의 차 위치와 진행 방향으로 바로 올라간다. 입력은 없다.</p>
+  <div class="wrap"><table>
+    <thead><tr><th>종류</th><th>보이는 시간</th><th>다른 운전자에게</th></tr></thead>
+    <tbody>
+      <tr><td>사고</td><td>1시간, 다른 운전자가 "없어졌어요"를 누르면 먼저 내려감</td><td rowspan="5">차·폰 지도의 제보 층에 아이콘. 내 경로 앞에 있으면 차에서 짧은 음성 알림. 지나갈 때 [아직 있어요] [없어졌어요] 버튼 하나</td></tr>
+      <tr><td>공사</td><td>1일</td></tr>
+      <tr><td>정체</td><td>30분</td></tr>
+      <tr><td>단속카메라</td><td>계속 (없어졌다는 제보가 쌓이면 내려감)</td></tr>
+      <tr><td>재난</td><td>3시간 (침수, 낙석, 결빙 등)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note" style="margin-top:12px">제보도 "위치를 붙인 글"의 한 종류다. 커뮤니티 목록에는 섞지 않고 지도와 알림에만 쓴다. 이동 중인 차만 제보할 수 있고, 위치는 차가 준 값이라 엉뚱한 곳 제보를 막는다.</p>
+
+  <h2>6. 데이터 모델 하나로 정리</h2>
   <div class="model">
     장소 핀을 따로 두지 않는다. <code>글</code> = 본문 + 사진 + 태그 + <code>위치(선택)</code>. 위치가 있으면 지도의 핀이 된다. 차에서 "지금 여기 핀하기"를 누르면 위치와 태그만 있는 짧은 글이 만들어지고, 폰에서 나중에 사진과 본문을 덧붙인다. 제휴 핀(확대 계획)은 같은 지도에 "제휴" 표시로 따로 뜨는 다른 종류다.
   </div>
 
-  <h2>6. 결정</h2>
+  <h2>7. 결정</h2>
   <div class="decide"><ol>
     <li><b>정함</b> 메인 홈: 내 차(B) + 바로 쓰는 차 기능 버튼</li>
     <li><b>정함</b> 그룹 라이딩: 늘 떠 있는 메뉴에서 빼고, 진행 중일 때만 떠 있는 배너. 시작은 홈 버튼</li>
     <li><b>정함</b> 이웃: 서로 수락하는 관계. 프로필 아이디로 추가. 그룹 라이딩은 이웃끼리</li>
+    <li><b>정함</b> 홈에서 실시간 제보: 사고, 공사, 정체, 단속카메라, 재난</li>
+    <li><b>정함</b> 그룹 라이딩 화면: 무전기 앱처럼 멤버 프로필과 큰 말하기 버튼, 말하는 사람 강조</li>
     <li>남음: 떠 있는 아이콘 위치(왼쪽 운전석 쪽 / 오른쪽)</li>
     <li>남음: 장소 핀을 "위치 붙은 글"로 합치는 것이 맞는지</li>
     <li>남음: 그룹 라이딩 층(주유소·추천 장소) 기본값 꺼짐 / 켜짐</li>
