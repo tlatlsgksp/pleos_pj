@@ -34,11 +34,11 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 .screen { display: flex; height: 300px; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: var(--raised); }
 .screen .dv { width: 33%; background: var(--navi); display: grid; place-items: center; font-size: 12px; color: var(--ink3); font-weight: 700; }
 .screen .app { flex: 1; position: relative; padding: 14px; display: grid; gap: 8px; }
-.rail { position: absolute; z-index: 2; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; flex-direction: row; gap: 6px; padding: 6px; border-radius: 16px; background: rgba(253,254,255,.86); backdrop-filter: blur(8px); box-shadow: 0 6px 18px -6px rgba(18,22,28,.35); }
+.rail { position: absolute; z-index: 2; left: 10px; bottom: 10px; display: flex; flex-direction: column; gap: 6px; padding: 6px; border-radius: 16px; background: rgba(253,254,255,.86); backdrop-filter: blur(8px); box-shadow: 0 6px 18px -6px rgba(18,22,28,.35); }
 .rail i { width: 38px; height: 38px; border-radius: 11px; background: transparent; display: grid; place-items: center; font-style: normal; font-size: 10px; font-weight: 800; color: var(--ink2); }
 .rail i.on { background: var(--ink); color: var(--bg); }
-.rail.folded { bottom: 0; padding: 4px 6px; border-radius: 12px 12px 0 0; }
-.rail.folded i { width: 44px; height: 14px; border-radius: 7px; }
+.rail.folded { left: 0; padding: 6px 4px; border-radius: 0 12px 12px 0; }
+.rail.folded i { width: 14px; height: 44px; border-radius: 7px; }
 .states { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
 @media (max-width: 900px) { .states { grid-template-columns: 1fr; } }
 .states .screen { height: 200px; }
@@ -48,7 +48,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 .blk b { display: block; color: var(--ink); font-size: 13px; }
 .blk.hero { background: var(--accent-soft); }
 .blk.map { background: #DCE6DD; }
-.screen .app { padding-bottom: 64px; }
+.blk.hero, .blk.map { padding-left: 62px; }
 
 .opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
 @media (max-width: 1000px) { .opts { grid-template-columns: 1fr; } }
@@ -94,10 +94,10 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 <body>
 <main>
   <h1>Moli 정보 구조 v2.3</h1>
-  <p class="lede">이전 정보 구조와 화면 기조는 버리고 새로 짰다. 커뮤니티는 차와 폰 모두에 있다. 다만 글을 읽고 쓰는 피드는 폰에만 두고, 차에서는 운전하면서 참여할 수 있는 커뮤니티만 둔다: 연비 랭킹, 그룹 라이딩, 핀, 제보. 메뉴는 화면 아래쪽에 떠 있는 아이콘이다.</p>
+  <p class="lede">이전 정보 구조와 화면 기조는 버리고 새로 짰다. 커뮤니티는 차와 폰 모두에 있다. 다만 글을 읽고 쓰는 피드는 폰에만 두고, 차에서는 운전하면서 참여할 수 있는 커뮤니티만 둔다: 연비 랭킹, 그룹 라이딩, 핀, 제보. 메뉴는 화면 왼쪽 아래에 세로로 떠 있는 아이콘이다.</p>
   <div class="changes">
     <div class="chg"><s>홈의 "지금 할 일" 카드</s><b>홈 = 내 차 + 빠른 실행</b></div>
-    <div class="chg"><s>화면 위 탭 바</s><b>아래쪽에 떠 있는 메뉴, 스크롤하거나 5초 지나면 접힘</b></div>
+    <div class="chg"><s>화면 위 탭 바</s><b>왼쪽 아래에 세로로 떠 있는 메뉴, 스크롤하거나 5초 지나면 접힘</b></div>
     <div class="chg"><s>차의 커뮤니티 피드</s><b>차의 커뮤니티는 읽고 쓰는 글 대신 랭킹, 그룹 라이딩, 핀, 제보</b></div>
     <div class="chg"><s>장소 핀과 커뮤니티 글 따로</s><b>위치를 붙인 글이 곧 지도의 핀</b></div>
     <div class="chg"><s>커뮤니티 안의 지도</s><b>커뮤니티는 목록, 지도는 별도 메뉴(지도 보기)</b></div>
@@ -128,15 +128,15 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
     </div>
   </div>
 
-  <h2>2. 차량 앱 메뉴 (아래쪽에 떠 있는 아이콘 4개)</h2>
-  <p class="note">메뉴는 앱 화면 아래쪽 가운데에 가로로 떠 있는 반투명 막대다. 화면 영역을 차지하지 않는다. 내용이 앱 화면 전체를 쓰고, 메뉴 뒤로 지도나 3D 차가 그대로 이어지며, 글자와 버튼은 메뉴에 가리지 않는 자리에 둔다. Pleos 시스템 바(공조, 앱 목록)는 화면 맨 아래에 따로 있고, 우리 메뉴는 그 위 앱 영역 안에 뜬다. 화면 위쪽 탭과 페이지 제목 바는 쓰지 않는다. 그룹 라이딩은 늘 떠 있는 메뉴에 두지 않고, 시작은 홈의 버튼에서, 진행 중에는 떠 있는 배너로 돌아간다.</p>
+  <h2>2. 차량 앱 메뉴 (왼쪽 아래에 세로로 떠 있는 아이콘 4개)</h2>
+  <p class="note">메뉴는 세로로 세운 아이콘 묶음으로, 앱 화면 왼쪽 아래 구석에 붙어 떠 있는 반투명 판이다. 화면 영역을 차지하지 않는다. 내용이 앱 화면 전체를 쓰고, 메뉴 뒤로 지도나 3D 차가 그대로 이어지며, 글자와 버튼은 메뉴에 가리지 않는 자리에 둔다. Pleos 시스템 바(공조, 앱 목록)는 화면 맨 아래에 따로 있고, 우리 메뉴는 그 위 앱 영역 왼쪽 아래에 뜬다. 화면 위쪽 탭과 페이지 제목 바는 쓰지 않는다. 그룹 라이딩은 늘 떠 있는 메뉴에 두지 않고, 시작은 홈의 버튼에서, 진행 중에는 떠 있는 배너로 돌아간다.</p>
   <div class="states">
     <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail"><i class="on">홈</i><i>랭킹</i><i>지도</i><i>나</i></div><div class="blk map" style="height:100%"><b>내용은 화면 전체</b>메뉴 뒤로 이어짐</div></div></div>
       <p><b>펼침</b> 앱을 열 때, 손잡이를 눌렀을 때. 반투명 판이 내용 위에 뜬다</p></div>
     <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>접힘</b>가장자리에 손잡이만</div></div></div>
-      <p><b>접힘</b> 스크롤을 시작하면 바로, 또는 5초 동안 메뉴를 만지지 않으면. 아래 가장자리에 작은 손잡이만 남는다</p></div>
-    <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>다시 펼치기</b>손잡이를 누르거나 아래에서 위로 밀기</div></div></div>
-      <p><b>다시 펼치기</b> 손잡이를 누르거나 아래 가장자리에서 위로 민다. 메뉴를 고르면 다시 5초 뒤 접힌다</p></div>
+      <p><b>접힘</b> 스크롤을 시작하면 바로, 또는 5초 동안 메뉴를 만지지 않으면. 왼쪽 아래 가장자리에 세로 손잡이만 남는다</p></div>
+    <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>다시 펼치기</b>손잡이를 누르거나 왼쪽에서 안쪽으로 밀기</div></div></div>
+      <p><b>다시 펼치기</b> 손잡이를 누르거나 왼쪽 가장자리에서 안쪽으로 민다. 메뉴를 고르면 다시 5초 뒤 접힌다</p></div>
   </div>
 
   <div class="tree c4">
@@ -233,7 +233,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
     <li><b>정함</b> 그룹 라이딩: 늘 떠 있는 메뉴에서 빼고, 진행 중일 때만 떠 있는 배너. 시작은 홈 버튼</li>
     <li><b>정함</b> 이웃: 서로 수락하는 관계. 프로필 아이디로 추가. 그룹 라이딩은 이웃끼리</li>
     <li><b>정함</b> 지도: 네이버 지도 SDK (차·폰 공통)</li>
-    <li><b>정함</b> 메뉴: 아래쪽 가로 플로팅, 내용 영역을 차지하지 않음. 스크롤하거나 5초 지나면 손잡이로 접힘</li>
+    <li><b>정함</b> 메뉴: 왼쪽 아래 구석에 세로 플로팅, 내용 영역을 차지하지 않음. 스크롤하거나 5초 지나면 손잡이로 접힘</li>
     <li><b>정함</b> 내 경로 위 제보: 화면 위에서 내려오는 꽉 찬 배너 "현재 경로 위에 사고 제보가 있어요", 누르면 위치</li>
     <li><b>정함</b> 화면 문구는 <a href="../UX_WRITING.md">UX 라이팅 기준</a>의 용어집을 따름</li>
     <li><b>정함</b> 홈에서 실시간 제보: 사고, 공사, 정체, 단속카메라, 재난</li>
