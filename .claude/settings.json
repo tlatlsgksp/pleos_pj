@@ -1,3 +1,16 @@
 {
-  "enableArtifact": false
+  "enableArtifact": false,
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f \"$CLAUDE_PROJECT_DIR/PRODUCT.md\" ] || echo \"PRODUCT.md is missing. Per the Impeccable auto-init rule in CLAUDE.md, run /impeccable init before any app planning, screen, design or UI work, without waiting to be asked.\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
 }
