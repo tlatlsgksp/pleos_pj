@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -30,6 +32,7 @@ import com.example.pleos.ui.design.PleosBackLink
 import com.example.pleos.ui.design.PleosButton
 import com.example.pleos.ui.design.PleosCard
 import com.example.pleos.ui.design.PleosSwitch
+import com.example.pleos.ui.design.QrPlaceholder
 import com.example.pleos.ui.design.PleosText
 import com.example.pleos.ui.design.PleosToastHost
 import com.example.pleos.ui.design.Section
@@ -50,8 +53,10 @@ fun MyCarScreen(
     state: MyCarState,
     onEvent: (MyCarEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    group: MyCarGroup,
     modifier: Modifier = Modifier,
     brandPicker: @Composable () -> Unit = {},
+    ledger: @Composable () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -59,26 +64,28 @@ fun MyCarScreen(
         contentWindowInsets = WindowInsets(0),
         snackbarHost = { PleosToastHost(snackbarHostState) },
     ) { innerPadding ->
-        AdaptiveScreen(Modifier.padding(innerPadding)) { window ->
+        // Same top margin as the other tabs, so the title never touches the window edge.
+        AdaptiveScreen(Modifier.padding(innerPadding).padding(top = Space.l)) { window ->
             when (window.width) {
-                WindowWidth.TWO -> TwoColumns(
-                    leftWeight = 1f,
-                    rightWeight = 2f,
-                    left = { SettingsList(state, onEvent) },
-                    right = {
-                        val section = state.selected
-                        Section(section?.title() ?: stringResource(R.string.ledger_detail), first = true) {
-                            if (section == null) EmptyDetail(stringResource(R.string.mycar_pick)) else Detail(section, state, onEvent, brandPicker)
-                        }
-                    },
-                )
+                // The first row of the tab is open on landing; a tap elsewhere replaces it.
+                WindowWidth.TWO -> {
+                    val section = state.selected?.takeIf { it in group.sections } ?: group.sections.first()
+                    TwoColumns(
+                        leftWeight = 1f,
+                        rightWeight = 2f,
+                        left = { SettingsList(state.copy(selected = section), onEvent, group) },
+                        right = {
+                            Section(section.title(), first = true) { Detail(section, state, onEvent, brandPicker, ledger) }
+                        },
+                    )
+                }
                 WindowWidth.ONE -> PaneColumn {
                     val section = state.selected
                     if (section == null) {
-                        SettingsList(state, onEvent)
+                        SettingsList(state, onEvent, group)
                     } else {
                         PleosBackLink(stringResource(R.string.mycar_back), { onEvent(MyCarEvent.BackTapped) })
-                        Section(section.title(), first = true) { Detail(section, state, onEvent, brandPicker) }
+                        Section(section.title(), first = true) { Detail(section, state, onEvent, brandPicker, ledger) }
                     }
                 }
             }
@@ -89,6 +96,9 @@ fun MyCarScreen(
 @Composable
 private fun MyCarSection.title(): String = stringResource(
     when (this) {
+        MyCarSection.ACCOUNT -> R.string.me_account
+        MyCarSection.LEDGER -> R.string.me_ledger
+        MyCarSection.PHONE -> R.string.me_phone
         MyCarSection.SKIN -> R.string.skin_title
         MyCarSection.ECO -> R.string.eco_title
         MyCarSection.BRANDS -> R.string.brand_title
@@ -100,61 +110,40 @@ private fun MyCarSection.title(): String = stringResource(
 )
 
 @Composable
-private fun SettingsList(state: MyCarState, onEvent: (MyCarEvent) -> Unit) {
+private fun SettingsList(state: MyCarState, onEvent: (MyCarEvent) -> Unit, group: MyCarGroup) {
     fun select(section: MyCarSection) = { onEvent(MyCarEvent.SectionTapped(section)) }
-    Section(stringResource(R.string.tab_my_car), first = true) {
+    @Composable
+    fun row(section: MyCarSection, title: String, detail: String?, trailing: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {}) {
+        ListRow(title = title, detail = detail, selected = state.selected == section, onClick = select(section), trailing = trailing)
+    }
+    if (group == MyCarGroup.ME) Section(stringResource(R.string.me_title), first = true) {
         ListCard {
-            ListRow(
-                title = stringResource(R.string.skin_title),
-                detail = stringResource(R.string.mycar_ambient_base, "#%06X".format(state.ambientColor)),
-                selected = state.selected == MyCarSection.SKIN,
-                onClick = select(MyCarSection.SKIN),
-            ) { ColorSwatch(state.ambientColor) }
+            row(MyCarSection.ACCOUNT, stringResource(R.string.me_account), "${state.nickname}, @${state.handle}")
             ListDivider()
-            ListRow(
-                title = stringResource(R.string.mycar_vehicle),
-                detail = vehicleSummary(state),
-                selected = state.selected == MyCarSection.VEHICLE,
-                onClick = select(MyCarSection.VEHICLE),
-            )
+            row(MyCarSection.VEHICLE, stringResource(R.string.mycar_vehicle), state.carModel.ifEmpty { vehicleSummary(state) })
+            ListDivider()
+            row(MyCarSection.SKIN, stringResource(R.string.skin_title), stringResource(R.string.mycar_ambient_base, "#%06X".format(state.ambientColor))) { ColorSwatch(state.ambientColor) }
+            ListDivider()
+            row(MyCarSection.LEDGER, stringResource(R.string.me_ledger), stringResource(R.string.me_ledger_detail))
         }
     }
-    Section(stringResource(R.string.mycar_settings)) {
+    if (group == MyCarGroup.SETTINGS) Section(stringResource(R.string.mycar_settings), first = true) {
         ListCard {
-            ListRow(
-                title = stringResource(R.string.eco_title),
-                detail = stringResource(if (state.ecoGuideEnabled) R.string.mycar_on else R.string.mycar_off),
-                selected = state.selected == MyCarSection.ECO,
-                onClick = select(MyCarSection.ECO),
-            ) { PleosSwitch(state.ecoGuideEnabled, { onEvent(MyCarEvent.EcoGuideSwitched(it)) }) }
+            row(MyCarSection.BRANDS, stringResource(R.string.brand_title), state.preferredBrands.joinToString(", ").ifEmpty { stringResource(R.string.mycar_brands_none) })
             ListDivider()
-            ListRow(
-                title = stringResource(R.string.brand_title),
-                detail = state.preferredBrands.joinToString(", ").ifEmpty { stringResource(R.string.mycar_brands_none) },
-                selected = state.selected == MyCarSection.BRANDS,
-                onClick = select(MyCarSection.BRANDS),
-            )
+            row(MyCarSection.ECO, stringResource(R.string.eco_title), stringResource(if (state.ecoGuideEnabled) R.string.mycar_on else R.string.mycar_off)) {
+                PleosSwitch(state.ecoGuideEnabled, { onEvent(MyCarEvent.EcoGuideSwitched(it)) })
+            }
             ListDivider()
-            ListRow(
-                title = stringResource(R.string.mycar_price),
-                detail = stringResource(R.string.mycar_price_short, "%.1f".format(state.chargeUnitPriceWon)),
-                selected = state.selected == MyCarSection.PRICE,
-                onClick = select(MyCarSection.PRICE),
-            )
+            row(MyCarSection.PHONE, stringResource(R.string.me_phone), stringResource(R.string.me_phone_off))
             ListDivider()
-            ListRow(
-                title = stringResource(R.string.mycar_consent),
-                detail = stringResource(if (state.consentGiven) R.string.mycar_on else R.string.mycar_off),
-                selected = state.selected == MyCarSection.CONSENT,
-                onClick = select(MyCarSection.CONSENT),
-            ) { PleosSwitch(state.consentGiven, { onEvent(MyCarEvent.ConsentSwitched(it)) }) }
+            row(MyCarSection.PRICE, stringResource(R.string.mycar_price), stringResource(R.string.mycar_price_short, "%.1f".format(state.chargeUnitPriceWon)))
             ListDivider()
-            ListRow(
-                title = stringResource(R.string.mycar_demo),
-                detail = stringResource(if (state.isDemo) R.string.mycar_demo_on else R.string.mycar_demo_off),
-                selected = state.selected == MyCarSection.DEMO,
-                onClick = select(MyCarSection.DEMO),
-            )
+            row(MyCarSection.CONSENT, stringResource(R.string.mycar_consent), stringResource(if (state.consentGiven) R.string.mycar_on else R.string.mycar_off)) {
+                PleosSwitch(state.consentGiven, { onEvent(MyCarEvent.ConsentSwitched(it)) })
+            }
+            ListDivider()
+            row(MyCarSection.DEMO, stringResource(R.string.mycar_demo), stringResource(if (state.isDemo) R.string.mycar_demo_on else R.string.mycar_demo_off))
         }
     }
 }
@@ -171,9 +160,29 @@ private fun vehicleSummary(state: MyCarState): String {
 }
 
 @Composable
-private fun Detail(section: MyCarSection, state: MyCarState, onEvent: (MyCarEvent) -> Unit, brandPicker: @Composable () -> Unit) {
+private fun Detail(section: MyCarSection, state: MyCarState, onEvent: (MyCarEvent) -> Unit, brandPicker: @Composable () -> Unit, ledger: @Composable () -> Unit) {
     val c = Pleos.colors
     when (section) {
+        MyCarSection.ACCOUNT -> PleosCard(Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.me_nickname), style = PleosText.label, color = c.textSecondary)
+            androidx.compose.material3.OutlinedTextField(
+                value = state.nicknameDraft,
+                onValueChange = { onEvent(MyCarEvent.NicknameEdited(it)) },
+                singleLine = true,
+                textStyle = PleosText.cardTitle,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Text(stringResource(R.string.me_nickname_hint), style = PleosText.label, color = c.textSecondary)
+            PleosButton(stringResource(R.string.me_save), { onEvent(MyCarEvent.NicknameSaveTapped) }, style = ButtonStyle.Filled)
+            FactRow(stringResource(R.string.me_handle), "@${state.handle}")
+            Text(stringResource(R.string.me_car_only), style = PleosText.body, color = c.textSecondary)
+        }
+        // The ledger has its own scaffold; inside this scrolling pane it needs a height of its own.
+        MyCarSection.LEDGER -> Box(Modifier.fillMaxWidth().height(Space.xl * 18)) { ledger() }
+        MyCarSection.PHONE -> PleosCard(Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.me_phone_body), style = PleosText.body, color = c.textSecondary)
+            androidx.compose.foundation.layout.Box(Modifier.padding(vertical = Space.s)) { QrPlaceholder() }
+        }
         MyCarSection.SKIN -> PleosCard(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.mycar_skin_hint), style = PleosText.body, color = c.textSecondary)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(Space.s)) {
@@ -223,6 +232,7 @@ private fun Detail(section: MyCarSection, state: MyCarState, onEvent: (MyCarEven
             }
         }
         MyCarSection.VEHICLE -> PleosCard(Modifier.fillMaxWidth()) {
+            FactRow(stringResource(R.string.me_model), state.carModel.ifEmpty { UNKNOWN })
             FactRow(stringResource(R.string.mycar_fact_type), vehicleSummary(state))
             FactRow(stringResource(R.string.mycar_fact_vin), stringResource(if (state.hasVin) R.string.mycar_vin_yes else R.string.mycar_vin_no))
         }
@@ -242,11 +252,11 @@ private val previewState = MyCarState(
 @Preview(name = "Two thirds", showBackground = true, widthDp = 1700, heightDp = 1000)
 @Composable
 private fun MyCarTwoPreview() {
-    PleosTheme { MyCarScreen(previewState, {}, SnackbarHostState()) }
+    PleosTheme { MyCarScreen(previewState, {}, SnackbarHostState(), MyCarGroup.SETTINGS) }
 }
 
 @Preview(name = "One third, list", showBackground = true, widthDp = 628, heightDp = 700)
 @Composable
 private fun MyCarOnePreview() {
-    PleosTheme { MyCarScreen(previewState.copy(selected = null), {}, SnackbarHostState()) }
+    PleosTheme { MyCarScreen(previewState.copy(selected = null), {}, SnackbarHostState(), MyCarGroup.ME) }
 }

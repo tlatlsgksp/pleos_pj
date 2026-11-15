@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Side view of a crossover, drawn for Moli's home card. Tinted at runtime. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp" android:height="120dp" android:viewportWidth="300" android:viewportHeight="120">
+    <path android:fillColor="#FF6C747C" android:pathData="M18,86c0,-14 9,-22 24,-25l38,-26c10,-7 20,-10 34,-10h62c14,0 24,4 34,13l26,23c20,2 40,9 46,25v9H18z" />
+    <path android:fillColor="#FF2B3036" android:pathData="M92,40l22,-12h58l30,26H82z" />
+    <path android:fillColor="#FF16181B" android:pathData="M78,96m-20,0a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+    <path android:fillColor="#FF16181B" android:pathData="M228,96m-20,0a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+    <path android:fillColor="#FFB8BEC4" android:pathData="M78,96m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+    <path android:fillColor="#FFB8BEC4" android:pathData="M228,96m-8,0a8,8 0,1 1,16 0a8,8 0,1 1,-16 0" />
+</vector>

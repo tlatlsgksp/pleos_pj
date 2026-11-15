@@ -103,25 +103,25 @@ object PleosText {
     val value = role(48.sp, 60.sp, FontWeight.ExtraBold, -0.03f, tabular = true)
 
     /** Body Large Bold: one card's name or the situation of an action card. */
-    val cardTitle = role(30.sp, 38.sp, FontWeight.Bold, -0.01f)
+    val cardTitle = role(32.sp, 40.sp, FontWeight.Bold, -0.01f)
 
     /** Body Medium Bold: the name of a list row. */
-    val itemTitle = role(28.sp, 36.sp, FontWeight.Bold)
+    val itemTitle = role(30.sp, 38.sp, FontWeight.Bold)
 
     /** Body Small: descriptions and second lines. The smallest body text. */
-    val body = role(26.sp, 34.sp, FontWeight.Normal)
+    val body = role(28.sp, 36.sp, FontWeight.Normal)
 
     /** Label Medium: a label above a value, dates, sources. Not for information needed while driving. */
-    val label = role(24.sp, 28.sp, FontWeight.Medium)
+    val label = role(26.sp, 32.sp, FontWeight.Medium)
 
     /** [itemTitle] with tabular figures: amounts in a list column. */
-    val figure = role(28.sp, 36.sp, FontWeight.Bold, tabular = true)
+    val figure = role(30.sp, 38.sp, FontWeight.Bold, tabular = true)
 
     /** [label] with tabular figures: odometer readings in a list column. */
-    val labelFigure = role(24.sp, 28.sp, FontWeight.Medium, tabular = true)
+    val labelFigure = role(26.sp, 32.sp, FontWeight.Medium, tabular = true)
 
     /** Label Medium Bold in a semantic color: one status word. */
-    val status = role(24.sp, 28.sp, FontWeight.Bold)
+    val status = role(26.sp, 32.sp, FontWeight.Bold)
 }
 
 /** Shown when a value is unknown (design-foundation 3). */
@@ -337,14 +337,21 @@ fun ProgressTrack(ratio: Float, color: Color, modifier: Modifier = Modifier) {
 
 /** A color chip, e.g. the mood light color. [rgb] is 0xRRGGBB. */
 @Composable
-fun ColorSwatch(rgb: Int, modifier: Modifier = Modifier) {
+fun ColorSwatch(rgb: Int, modifier: Modifier = Modifier, selected: Boolean = false) {
+    val size = if (selected) 72.dp else 64.dp
     Box(
         modifier
-            .size(48.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF000000 or rgb.toLong()))
-            .border(2.dp, Pleos.colors.outline, RoundedCornerShape(12.dp)),
-    )
+            .size(72.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(size)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF000000 or rgb.toLong()))
+                .border(if (selected) 4.dp else 2.dp, if (selected) Pleos.colors.textPrimary else Pleos.colors.outline, RoundedCornerShape(16.dp)),
+        )
+    }
 }
 
 /** Placeholder in an empty detail column. */

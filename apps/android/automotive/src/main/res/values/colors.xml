@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sign tones for map markers (drawables cannot read the Compose palette); keep in step with ui/theme/Color.kt. -->
+<resources>
+    <color name="sign_green">#0B6B45</color>
+    <color name="sign_blue">#1C5BA8</color>
+    <color name="sign_amber">#F2C230</color>
+    <color name="sign_red">#C62828</color>
+    <color name="ink">#1D1E21</color>
+    <color name="marker_white">#FFFFFF</color>
+</resources>

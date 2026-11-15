@@ -1,0 +1,79 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c" width="1200" height="800"></canvas>
+<script src="../../automotive/src/main/assets/skin/lib/three.min.js"></script>
+<script src="../../automotive/src/main/assets/skin/lib/RoomEnvironment.js"></script>
+<script src="../../automotive/src/main/assets/skin/lib/GLTFLoader.js"></script>
+<script>
+// Renders Moli's home card art from the bundled Ioniq 5 model. ?scene=ride|report|charger|eco|light
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const scene_ = new URLSearchParams(location.search).get("scene") || "ride";
+const canvas = document.getElementById("c");
+const r = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+r.setSize(1200, 800, false); r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = THREE.ACESFilmicToneMapping; r.shadowMap.enabled = true;
+const S = new THREE.Scene();
+S.environment = new THREE.PMREMGenerator(r).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+const cam = new THREE.PerspectiveCamera(30, 1.5, 0.05, 400);
+const looks = {
+  ride:    { sky: ["#f6c48a", "#7a8db0"], ground: "#6b6f75", paint: ["#3d6fa8", "#e9eaea", "#2b3036"], light: "#ffd9a8", exposure: 1.0, glow: null },
+  report:  { sky: ["#3a3f52", "#141821"], ground: "#2a2d33", paint: ["#e9eaea"], light: "#9fb0d0", exposure: 0.9, glow: "#ffb020" },
+  charger: { sky: ["#1b2a44", "#0b1018"], ground: "#1d2129", paint: ["#3d6fa8"], light: "#8fb8ff", exposure: 0.95, glow: "#4aa3ff" },
+  eco:     { sky: ["#e8f1ea", "#b9cfc2"], ground: "#c9d3cc", paint: ["#e9eaea"], light: "#ffffff", exposure: 1.05, glow: "#3ccf86" },
+  light:   { sky: ["#241a33", "#0d0a14"], ground: "#191520", paint: ["#2b3036"], light: "#c9a8ff", exposure: 0.95, glow: "#b98cff" },
+}[scene_];
+r.toneMappingExposure = looks.exposure;
+// Sky: a vertical gradient on a big sphere.
+const skyCanvas = document.createElement("canvas"); skyCanvas.width = 2; skyCanvas.height = 256;
+const g = skyCanvas.getContext("2d"); const grad = g.createLinearGradient(0, 0, 0, 256); grad.addColorStop(0, looks.sky[1]); grad.addColorStop(1, looks.sky[0]); g.fillStyle = grad; g.fillRect(0, 0, 2, 256);
+const skyTex = new THREE.CanvasTexture(skyCanvas); skyTex.encoding = THREE.sRGBEncoding;
+S.add(new THREE.Mesh(new THREE.SphereGeometry(150, 32, 16), new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide })));
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: col(looks.ground), roughness: scene_ === "report" ? 0.25 : 0.85, metalness: 0.1 }));
+ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; S.add(ground);
+S.add(new THREE.HemisphereLight(col(looks.sky[0]), col(looks.ground), 0.7));
+const sun = new THREE.DirectionalLight(col(looks.light), 1.6); sun.position.set(-6, 8, 4); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -12, right: 12, top: 12, bottom: -12 }); S.add(sun);
+
+function lane(z, w) { const m = new THREE.Mesh(new THREE.PlaneGeometry(200, w), new THREE.MeshBasicMaterial({ color: col("#e9e4d6") })); m.rotation.x = -Math.PI / 2; m.position.set(0, 0.004, z); S.add(m); }
+
+fetch("../../automotive/src/main/assets/skin/ioniq5.glb").then(x => x.arrayBuffer()).then(b => new Promise((res, rej) => new THREE.GLTFLoader().parse(b, "", res, rej))).then(gltf => {
+  const base = gltf.scene;
+  const box = new THREE.Box3().setFromObject(base), size = box.getSize(new THREE.Vector3());
+  const len = Math.max(size.x, size.z);
+  function car(paint) {
+    const root = base.clone(true);
+    root.traverse(o => {
+      if (!o.isMesh || !o.material) return;
+      o.castShadow = true;
+      if (o.material.name === "M_Gravity_Gold_Matte") o.material = new THREE.MeshPhysicalMaterial({ color: col(paint), roughness: 0.22, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.08 });
+      else if (o.material.name === "M_Ioniq") { const m = o.material.clone(); m.transparent = false; m.alphaTest = 0.5; o.material = m; }
+    });
+    return root;
+  }
+  const along = size.x >= size.z ? "x" : "z";
+  function place(obj, t, side) { obj.position.set(along === "x" ? t : side, -box.min.y, along === "x" ? side : t); S.add(obj); return obj; }
+  if (scene_ === "ride") {
+    if (along === "x") { lane(-1.9, 0.12); lane(1.9, 0.12); }
+    looks.paint.forEach((p, i) => place(car(p), -i * len * 1.45, 0));
+    const mid = -len * 1.45;
+    if (along === "x") { cam.position.set(len * 1.5, size.y * 2.3, len * 1.9); cam.lookAt(mid, size.y * 0.3, 0); }
+    else { cam.position.set(len * 1.9, size.y * 2.3, len * 1.5); cam.lookAt(0, size.y * 0.3, mid); }
+  } else {
+    const c = place(car(looks.paint[0]), 0, 0);
+    if (looks.glow) {
+      const glow = new THREE.PointLight(col(looks.glow), scene_ === "report" ? 6 : 4, len * 1.6, 2);
+      glow.position.set(scene_ === "report" ? len * 0.62 : 0, size.y * (scene_ === "light" ? 0.6 : 0.25), 0); S.add(glow);
+      const disc = new THREE.Mesh(new THREE.CircleGeometry(len * 0.75, 64), new THREE.MeshBasicMaterial({ color: col(looks.glow), transparent: true, opacity: scene_ === "light" ? 0.35 : 0.22, depthWrite: false }));
+      disc.rotation.x = -Math.PI / 2; disc.position.y = 0.006; S.add(disc);
+    }
+    if (scene_ === "charger") {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.5, 2.0, 0.35), new THREE.MeshStandardMaterial({ color: col("#e8edf3"), roughness: 0.4 }));
+      post.position.set(along === "x" ? len * 0.15 : -size.x * 0.95, 1.0, along === "x" ? -size.z * 0.95 : len * 0.15); post.castShadow = true; S.add(post);
+      const strip = new THREE.Mesh(new THREE.BoxGeometry(0.52, 1.2, 0.05), new THREE.MeshBasicMaterial({ color: col("#4aa3ff") })); strip.position.copy(post.position); strip.position.y = 1.15; strip.position.z += along === "x" ? 0.18 : 0; strip.position.x += along === "x" ? 0 : 0.18; S.add(strip);
+    }
+    if (scene_ === "report") { lane(-2.2, 0.1); for (let i = -6; i < 6; i++) { const d = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.12), new THREE.MeshBasicMaterial({ color: col("#e9e4d6") })); d.rotation.x = -Math.PI / 2; d.position.set(i * 3, 0.004, 2.2); S.add(d); } }
+    cam.position.set(len * 0.95, size.y * 1.05, len * 1.15); cam.lookAt(0, size.y * 0.45, 0);
+  }
+  r.render(S, cam);
+  document.title = "done";
+});
+</script></body></html>

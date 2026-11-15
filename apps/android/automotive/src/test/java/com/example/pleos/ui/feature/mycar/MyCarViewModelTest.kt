@@ -34,7 +34,7 @@ class MyCarViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel() = MyCarViewModel(app.vehicles, app.gateway, app.settings, app.demo)
+    private fun viewModel() = MyCarViewModel(app.vehicles, app.gateway, app.settings, app.demo, com.example.pleos.platform.demo.DemoCommunityRepository(app.clock))
 
     @Test
     fun `shows the car and the saved settings`() = runTest {

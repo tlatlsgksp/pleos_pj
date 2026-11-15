@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A ride member on the map: a green disc with a white rim; the speaker gets the green variant. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/sign_green" />
+            <stroke android:width="4dp" android:color="@color/marker_white" />
+            <size android:width="40dp" android:height="40dp" />
+        </shape>
+    </item>
+</layer-list>

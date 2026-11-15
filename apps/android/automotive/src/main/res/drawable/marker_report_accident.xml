@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Map marker: a sign_red disc with a white rim and the report icon; sized 56dp on the 160dpi display. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="@color/sign_red" />
+            <stroke android:width="3dp" android:color="@color/marker_white" />
+            <size android:width="56dp" android:height="56dp" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/marker_icon_accident" android:inset="13dp" android:gravity="center" />
+</layer-list>

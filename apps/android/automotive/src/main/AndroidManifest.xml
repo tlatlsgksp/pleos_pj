@@ -46,6 +46,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pleos">
 
+        <meta-data
+            android:name="com.naver.maps.map.NCP_KEY_ID"
+            android:value="${naverClientId}" />
+
         <!-- Mobility Services category. Not Distraction Optimized yet, so the app is available only while parked.
              screenOrientation is unset so the app opens in portrait in a single window. -->
         <activity

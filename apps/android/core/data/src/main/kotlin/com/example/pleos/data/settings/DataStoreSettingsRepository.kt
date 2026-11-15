@@ -28,6 +28,7 @@ internal class DataStoreSettingsRepository @Inject constructor(
         val preferredBrands = stringSetPreferencesKey("preferred_brands")
         val ecoGuideEnabled = booleanPreferencesKey("eco_guide_enabled")
         val ambientBaseColor = intPreferencesKey("ambient_base_color")
+        val bodyPaint = intPreferencesKey("body_paint")
     }
 
     // REAL by default. Where no Pleos vehicle service exists, the switching gateway falls back to
@@ -76,5 +77,13 @@ internal class DataStoreSettingsRepository @Inject constructor(
 
     override suspend fun setAmbientBaseColor(rgb: Int) {
         dataStore.edit { it[Keys.ambientBaseColor] = rgb }
+    }
+
+    override val bodyPaint: Flow<Int> = dataStore.data.map {
+        it[Keys.bodyPaint] ?: SettingsRepository.DEFAULT_BODY_PAINT
+    }
+
+    override suspend fun setBodyPaint(rgb: Int) {
+        dataStore.edit { it[Keys.bodyPaint] = rgb }
     }
 }

@@ -27,6 +27,14 @@ object Format {
     /** kWh for an EV, L for a fuel car. */
     fun energy(value: Double, isEv: Boolean): String = if (isEv) kwh(value) else liters(value)
 
+    /** km/kWh for an EV, km/L for a fuel car. */
+    fun efficiency(value: Double, isEv: Boolean): String = "%.1f %s".format(value, efficiencyUnit(isEv))
+
+    /** The number of [efficiency] alone, for layouts that set the unit smaller beside it. */
+    fun efficiencyNumber(value: Double): String = "%.1f".format(value)
+
+    fun efficiencyUnit(isEv: Boolean): String = if (isEv) "km/kWh" else "km/L"
+
     fun percent(value: Double): String = "%d%%".format(value.roundToLong())
 
     fun date(value: LocalDate): String = value.format(date)

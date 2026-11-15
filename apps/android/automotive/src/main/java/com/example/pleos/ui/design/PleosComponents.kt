@@ -1,5 +1,7 @@
 package com.example.pleos.ui.design
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -181,33 +183,16 @@ fun PageNavigation(
     val c = Pleos.colors
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth().heightIn(min = 96.dp),
+        // Same top margin as the main tabs, so a page title never touches the window edge.
+        modifier = modifier.fillMaxWidth().padding(top = Space.l, bottom = Space.s).heightIn(min = 96.dp),
     ) {
         if (onBack != null) {
-            val interaction = remember { MutableInteractionSource() }
-            val pressed by interaction.collectIsPressedAsState()
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .pressScale(interaction)
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    // Plain icon button: background only while pressed.
-                    .background(if (pressed) c.buttonBasicPressed else Color.Transparent)
-                    .clickable(interaction, indication = null, role = Role.Button, onClick = onBack),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_back),
-                    contentDescription = stringResource(R.string.common_back),
-                    tint = c.textPrimary,
-                    modifier = Modifier.size(48.dp),
-                )
-            }
+            PleosIconButton(R.drawable.ic_arrow_back, stringResource(R.string.common_back), onBack)
             Spacer(Modifier.width(8.dp))
         }
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineMedium,
+            style = PleosText.pageTitle,
             color = c.textPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -273,39 +258,53 @@ fun BoxScope.CenteredMessage(text: String) {
     )
 }
 
+/** A round icon button, gray at rest: back, close. Sized for a gloved thumb. */
+@Composable
+fun PleosIconButton(@DrawableRes icon: Int, contentDescription: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = Pleos.colors
+    val interaction = remember { MutableInteractionSource() }
+    val pressed by interaction.collectIsPressedAsState()
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .pressScale(interaction)
+            .size(ButtonSize.Large.height)
+            .clip(CircleShape)
+            .background(if (pressed) c.buttonBasicPressed else c.buttonBasic)
+            .clickable(interaction, indication = null, role = Role.Button, onClick = onClick),
+    ) {
+        Icon(painterResource(icon), contentDescription = contentDescription, tint = c.textPrimary, modifier = Modifier.size(48.dp))
+    }
+}
+
 /**
- * Box tabs, fitted (UI_DESIGN_GUIDE 8, Tabs): equal widths, the selected tab is a white chip with a
- * shadow on a gray track. The app's top-level sections; Pleos has no app GNB.
+ * A segmented control, as wide as its labels: the selected segment fills with ink and white text,
+ * the others are gray text on the gray track. Selection changes cross-fade.
  */
 @Composable
 fun BoxTabs(labels: List<String>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val c = Pleos.colors
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(CARD_RADIUS + Space.xs))
             .background(c.surfaceHigh)
-            .padding(6.dp),
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+            .padding(Space.xs),
+        horizontalArrangement = Arrangement.spacedBy(Space.xs),
     ) {
         labels.forEachIndexed { index, label ->
             val isSelected = index == selected
+            val fill by animateColorAsState(if (isSelected) c.buttonFilled else c.surfaceHigh, tween(240), label = "segment")
+            val ink by animateColorAsState(if (isSelected) c.onButtonFilled else c.textSecondary, tween(240), label = "segmentText")
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .weight(1f)
-                    .heightIn(min = 72.dp)
-                    .then(if (isSelected) Modifier.shadow(4.dp, RoundedCornerShape(16.dp)) else Modifier)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(if (isSelected) c.surface else Color.Transparent)
-                    .selectable(selected = isSelected, role = Role.Tab, onClick = { onSelect(index) }),
+                    .heightIn(min = ButtonSize.Large.height)
+                    .clip(RoundedCornerShape(CARD_RADIUS))
+                    .background(fill)
+                    .selectable(selected = isSelected, role = Role.Tab, onClick = { onSelect(index) })
+                    .padding(horizontal = Space.l),
             ) {
-                Text(
-                    label,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal),
-                    color = if (isSelected) c.textPrimary else c.textSecondary,
-                    maxLines = 1,
-                )
+                Text(label, style = PleosText.itemTitle.copy(fontWeight = FontWeight.Bold), color = ink, maxLines = 1)
             }
         }
     }

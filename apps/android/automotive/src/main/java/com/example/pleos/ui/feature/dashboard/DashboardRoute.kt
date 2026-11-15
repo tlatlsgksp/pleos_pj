@@ -11,8 +11,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 /** Wires the ViewModel to the stateless [DashboardScreen] and consumes one-shot effects. */
 @Composable
 fun DashboardRoute(
-    onOpenLedger: () -> Unit,
     onOpenCharge: (recordId: String) -> Unit,
+    onOpenRiding: (ridingId: String?) -> Unit,
+    onOpenMap: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -22,8 +23,9 @@ fun DashboardRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is DashboardEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
-                DashboardEffect.NavigateToLedger -> onOpenLedger()
                 is DashboardEffect.NavigateToCharge -> onOpenCharge(effect.recordId)
+                is DashboardEffect.OpenRiding -> onOpenRiding(effect.ridingId)
+                DashboardEffect.OpenMap -> onOpenMap()
             }
         }
     }

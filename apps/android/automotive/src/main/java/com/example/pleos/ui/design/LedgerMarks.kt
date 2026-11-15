@@ -140,7 +140,7 @@ fun SpineGap(text: String?, withOdometer: Boolean, modifier: Modifier = Modifier
 
 /** A bar inside a table cell, read next to its number. Only the current row is [highlighted]. */
 @Composable
-fun InlineBar(fraction: Float, highlighted: Boolean, modifier: Modifier = Modifier) {
+fun InlineBar(fraction: Float, highlighted: Boolean, modifier: Modifier = Modifier, color: Color? = null) {
     val c = Pleos.colors
     Box(modifier.width(160.dp).height(12.dp)) {
         if (fraction <= 0f) return@Box
@@ -149,7 +149,7 @@ fun InlineBar(fraction: Float, highlighted: Boolean, modifier: Modifier = Modifi
                 .fillMaxWidth(fraction.coerceIn(0.02f, 1f))
                 .height(12.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(if (highlighted) c.accent else c.track),
+                .background(color ?: if (highlighted) c.accent else c.track),
         )
     }
 }

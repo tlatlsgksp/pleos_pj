@@ -23,6 +23,10 @@ dependencyResolutionManagement {
         maven("https://nexus-playground.pleos.ai/repository/maven-releases/") {
             content { includeGroupByRegex("ai\\.pleos\\..*") }
         }
+        // Naver Map SDK.
+        maven("https://repository.map.naver.com/archive/maven") {
+            content { includeGroupByRegex("com\\.naver\\.maps.*") }
+        }
     }
 }
 

@@ -4,9 +4,20 @@ import com.example.pleos.domain.model.EnergyType
 import com.example.pleos.domain.repository.SettingsRepository
 
 /** Rows of the my car list; the selected one opens in the detail column. */
-enum class MyCarSection { SKIN, ECO, BRANDS, PRICE, CONSENT, DEMO, VEHICLE }
+enum class MyCarSection { ACCOUNT, VEHICLE, SKIN, LEDGER, BRANDS, ECO, PHONE, PRICE, CONSENT, DEMO }
+
+/** Which menu tab is open: who I am and my car, or how the app behaves. */
+enum class MyCarGroup(val sections: List<MyCarSection>) {
+    ME(listOf(MyCarSection.ACCOUNT, MyCarSection.VEHICLE, MyCarSection.SKIN, MyCarSection.LEDGER)),
+    SETTINGS(listOf(MyCarSection.BRANDS, MyCarSection.ECO, MyCarSection.PHONE, MyCarSection.PRICE, MyCarSection.CONSENT, MyCarSection.DEMO)),
+}
 
 data class MyCarState(
+    val nickname: String = "",
+    val handle: String = "",
+    val carModel: String = "",
+    /** What the nickname field holds while editing. */
+    val nicknameDraft: String = "",
     val energyType: EnergyType? = null,
     /** kWh for an EV, L for a fuel car. */
     val capacity: Double? = null,
@@ -33,6 +44,8 @@ sealed interface MyCarEvent {
     data object SourceToggleTapped : MyCarEvent
     data object PlayDemoTapped : MyCarEvent
     data object StopDemoTapped : MyCarEvent
+    data class NicknameEdited(val text: String) : MyCarEvent
+    data object NicknameSaveTapped : MyCarEvent
 
     data class Changed(val transform: (MyCarState) -> MyCarState) : MyCarEvent
 }

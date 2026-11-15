@@ -34,11 +34,19 @@ interface SettingsRepository {
 
     suspend fun setAmbientBaseColor(rgb: Int)
 
+    /** The driver's body paint (0xRRGGBB), picked in the car skin; home draws the car in it. */
+    val bodyPaint: Flow<Int>
+
+    suspend fun setBodyPaint(rgb: Int)
+
     companion object {
         /** [기본값] Public fast-charger tariff ballpark. The user can change it. */
         const val DEFAULT_CHARGE_UNIT_PRICE_WON = 324.4
 
         /** The emulator's cabin lights read back white before anything is set. */
         const val DEFAULT_AMBIENT_COLOR = 0xFFFFFF
+
+        /** Ioniq 5 Lucid Blue, the paint of the bundled model. */
+        const val DEFAULT_BODY_PAINT = 0x3D6FA8
     }
 }

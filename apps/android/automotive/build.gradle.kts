@@ -29,6 +29,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Naver Map key (naver.clientId in secrets.properties); the map tiles stay blank without it.
+        manifestPlaceholders["naverClientId"] = secrets.getProperty("naver.clientId") ?: ""
     }
 
     signingConfigs {
@@ -76,6 +78,8 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.webkit)
+    implementation(libs.naver.map.sdk)
+    implementation(libs.naver.map.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

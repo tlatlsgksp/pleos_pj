@@ -3,19 +3,18 @@ package com.example.pleos.ui.feature.dashboard
 import app.cash.turbine.test
 import com.example.pleos.domain.model.EnergyType
 import com.example.pleos.domain.model.NavEvent
-import com.example.pleos.domain.model.WaypointSlot
 import com.example.pleos.domain.model.Record
 import com.example.pleos.domain.model.RecordDetail
 import com.example.pleos.domain.model.RecordOrigin
 import com.example.pleos.domain.model.RecordStatus
 import com.example.pleos.domain.model.RecordType
+import com.example.pleos.domain.model.ReportType
 import com.example.pleos.domain.model.StampSource
 import com.example.pleos.domain.model.VehicleStamp
-import com.example.pleos.domain.model.VehicleWarning
+import com.example.pleos.platform.demo.DemoCommunityRepository
 import com.example.pleos.ui.testing.TestApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -31,6 +30,7 @@ import org.junit.Test
 class DashboardViewModelTest {
 
     private val app = TestApp()
+    private val community = DemoCommunityRepository(app.clock)
 
     @Before
     fun setUp() {
@@ -43,99 +43,60 @@ class DashboardViewModelTest {
     }
 
     private fun viewModel() = DashboardViewModel(
-        app.observeDashboard, app.observePendingDraft, app.observeLedger, app.clock, app.chargeStops, app.ecoGuide,
+        app.observeDashboard, app.observePendingDraft, app.chargeStops, app.ecoGuide, community, app.navigation, app.settings, app.gateway,
     )
 
     private fun draft(id: String) = Record(
         id = id, vehicleId = "v1", type = RecordType.ENERGY, occurredAt = app.clock.now, amountWon = 12_976,
         stamp = VehicleStamp(12_370.0, "vin", app.clock.now, StampSource.DEMO),
-        origin = RecordOrigin.DETECTED, status = RecordStatus.DRAFT,
-        detail = RecordDetail.Energy(EnergyType.EV, 40.0, 324.4),
+        origin = RecordOrigin.DETECTED, status = RecordStatus.DRAFT, detail = RecordDetail.Energy(EnergyType.EV, 40.0),
     )
 
     @Test
-    fun `state follows the EV`() = runTest {
+    fun `the ride card follows invitation, joining and leaving`() = runTest {
         val vm = viewModel()
+        val invited = vm.state.value.rideCard as RideCardUi.Invited
+        assertEquals(1, invited.count)
 
-        val initial = vm.state.value
-        assertEquals(64, initial.batteryPercent)
-        assertEquals(310, initial.rangeKm)
-        assertEquals(12_345.0, initial.odometerKm!!, 0.0)
+        vm.onEvent(DashboardEvent.JoinRideTapped(invited.riding.id))
+        assertTrue(vm.state.value.rideCard is RideCardUi.In)
 
-        app.gateway.update { it.copy(warnings = setOf(VehicleWarning.ENGINE_OIL), cumulativeDistanceKm = 12_400.0) }
-
-        assertEquals(setOf(VehicleWarning.ENGINE_OIL), vm.state.value.warnings)
-        assertEquals(12_400.0, vm.state.value.odometerKm!!, 0.0)
+        vm.onEvent(DashboardEvent.LeaveRideTapped(invited.riding.id))
+        // Others are still in the room, so the ride stays open for a rejoin.
+        assertTrue(vm.state.value.rideCard is RideCardUi.Left)
     }
 
     @Test
-    fun `a new charge draft shows a card and a message, and opens the confirm screen`() = runTest {
+    fun `a route brings its reports, and the nearest new one drops the banner`() = runTest {
         val vm = viewModel()
+        assertTrue(vm.state.value.reportsOnRoute.isEmpty())
 
+        app.navigation.emit(NavEvent.RouteStarted("강릉", 120.0, null))
+
+        assertEquals(2, vm.state.value.reportsOnRoute.size)
+        val banner = vm.state.value.banner as HomeBanner.RouteReport
+        assertEquals(ReportType.ACCIDENT, banner.report.type)
+
+        vm.onEvent(DashboardEvent.FreshReportExpired)
+        assertNull(vm.state.value.banner)
+    }
+
+    @Test
+    fun `reporting closes the sheet and says what was reported`() = runTest {
+        val vm = viewModel()
+        vm.onEvent(DashboardEvent.ReportTapped)
+        assertTrue(vm.state.value.reportSheetOpen)
         vm.effects.test {
-            app.records.upsert(draft("r1"))
-            assertEquals(PendingChargeUi("r1", 40.0, isEv = true, estimatedWon = 12_976), vm.state.value.pendingCharge)
-            assertTrue(awaitItem() is DashboardEffect.ShowMessage)
-
-            vm.onEvent(DashboardEvent.OpenChargeTapped)
-            assertEquals(DashboardEffect.NavigateToCharge("r1"), awaitItem())
-
-            app.records.upsert(draft("r1").copy(status = RecordStatus.CONFIRMED))
-            assertNull(vm.state.value.pendingCharge)
-            expectNoEvents()
+            vm.onEvent(DashboardEvent.ReportPicked(ReportType.DISASTER))
+            assertEquals(DashboardEffect.ShowMessage("재난을 제보했어요."), awaitItem())
         }
+        assertTrue(!vm.state.value.reportSheetOpen)
     }
 
     @Test
-    fun `the month section opens the fuel and charge tab`() = runTest {
-        val vm = viewModel()
-
-        vm.effects.test {
-            vm.onEvent(DashboardEvent.OpenLedgerTapped)
-            assertEquals(DashboardEffect.NavigateToLedger, awaitItem())
-        }
-    }
-
-    @Test
-    fun `home asks one thing at a time, the charger offer before the draft before warnings`() = runTest {
-        val stop = ChargeStopUi("강남역", 8.0, 90.0, 160.0, "대전", isDemoData = true)
-        val charge = PendingChargeUi("r1", 40.0, isEv = true, estimatedWon = 12_976)
-        val warnings = setOf(VehicleWarning.ENGINE_OIL)
-
-        assertEquals(HomeAction.ChargeStop(stop), DashboardState(chargeStop = stop, pendingCharge = charge, warnings = warnings).action)
-        assertEquals(HomeAction.PendingCharge(charge), DashboardState(pendingCharge = charge, warnings = warnings).action)
-        assertEquals(HomeAction.Warnings(warnings), DashboardState(warnings = warnings).action)
-        assertEquals(HomeAction.Airbag, DashboardState(airbagDeployed = true, chargeStop = stop).action)
-        assertNull(DashboardState().action)
-    }
-
-    @Test
-    fun `this month counts confirmed records only`() = runTest {
-        val vm = viewModel()
-        app.records.upsert(draft("d1"))
-        app.records.upsert(draft("r2").copy(status = RecordStatus.CONFIRMED))
-
-        val month = vm.state.value.month!!
-        assertEquals(1, month.energyRecords)
-        assertEquals(12_976L, month.spentWon)
-    }
-
-    @Test
-    fun `low range on a long route shows a charger card that adds the first waypoint`() = runTest(UnconfinedTestDispatcher()) {
-        backgroundScope.launch { app.chargeStops.run() }
-        val vm = viewModel()
-        app.gateway.update { it.copy(rangeRemainingKm = 90.0) }
-
-        vm.effects.test {
-            app.navigation.emit(NavEvent.RouteStarted("대전", 160.0, null))
-            val stop = vm.state.value.chargeStop!!
-            assertEquals("시연용 충전소 · 강남역", stop.name)
-            assertTrue(stop.isDemoData)
-
-            vm.onEvent(DashboardEvent.AddChargeStopTapped)
-            assertEquals(DashboardEffect.ShowMessage("충전소를 내비 경유지로 넣었어요"), awaitItem())
-        }
-        assertEquals(WaypointSlot.FIRST, app.navigation.waypoints.single().second)
-        assertNull(vm.state.value.chargeStop)
+    fun `the object particle fits the last syllable`() {
+        assertEquals("사고를", withObjectParticle("사고"))
+        assertEquals("재난을", withObjectParticle("재난"))
+        assertEquals("단속카메라를", withObjectParticle("단속카메라"))
     }
 }

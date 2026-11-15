@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moli 내 차</title>
+<style>html,body{margin:0;height:100%;overflow:hidden}canvas{width:100%;height:100%;display:block;touch-action:none}</style>
+</head><body>
+<canvas id="view"></canvas>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/RoomEnvironment.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script>
+// Home card viewer: the customised Ioniq 5, no chrome. A still three-quarter view (nothing moves on its
+// own while driving); a drag turns it. ?paint=RRGGBB&ambient=RRGGBB sets the body and the cabin glow.
+(function () {
+  const q = new URLSearchParams(location.search);
+  const paint = "#" + (q.get("paint") || "3d6fa8");
+  const ambient = "#" + (q.get("ambient") || "9fd3f5");
+  const bg = "#" + (q.get("bg") || "ffffff");
+  const col = h => new THREE.Color(h).convertSRGBToLinear();
+  document.body.style.background = bg;
+  const canvas = document.getElementById("view");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.setClearColor(col(bg), 1);
+  const scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(34, 1, 0.05, 200);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true; controls.enablePan = false; controls.enableZoom = false;
+  controls.minPolarAngle = 1.05; controls.maxPolarAngle = 1.45;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444a50, 0.6));
+  const key = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(4, 6, 3); scene.add(key);
+  const cabin = new THREE.PointLight(col(ambient), 2.2, 3.2, 2); scene.add(cabin);
+  function resize() {
+    const w = Math.max(1, canvas.clientWidth), h = Math.max(1, canvas.clientHeight);
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(canvas);
+  fetch("ioniq5.glb").then(r => r.arrayBuffer()).then(glb => new Promise((res, rej) => new THREE.GLTFLoader().parse(glb, "", res, rej))).then(gltf => {
+    const root = gltf.scene; scene.add(root); root.updateMatrixWorld(true);
+    // Collect first: adding the glass child while traversing would visit it again, forever.
+    const meshes = []; root.traverse(o => { if (o.isMesh && o.material) meshes.push(o); });
+    meshes.forEach(o => {
+      if (o.material.name === "M_Gravity_Gold_Matte") {
+        o.material = new THREE.MeshPhysicalMaterial({ color: col(paint), roughness: 0.2, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.08 });
+      } else if (o.material.name === "M_Ioniq") {
+        const src = o.material, opaque = src.clone();
+        opaque.transparent = false; opaque.alphaTest = 0.5; opaque.depthWrite = true; o.material = opaque;
+        const glass = src.clone(); glass.transparent = true; glass.depthWrite = false;
+        glass.onBeforeCompile = s => { s.fragmentShader = s.fragmentShader.replace("#include <alphatest_fragment>", "#include <alphatest_fragment>\n\tif ( diffuseColor.a >= 0.5 ) discard;"); };
+        const gm = new THREE.Mesh(o.geometry, glass); gm.renderOrder = 1; o.add(gm);
+      }
+    });
+    const box = new THREE.Box3().setFromObject(root), size = box.getSize(new THREE.Vector3()), c = box.getCenter(new THREE.Vector3());
+    cabin.position.set(c.x, box.min.y + size.y * 0.62, c.z); cabin.distance = Math.max(size.x, size.z) * 0.9;
+    // A wide floor that darkens softly under the car and fades to the background: perspective and
+    // grounding without a drawn disc.
+    const fc = document.createElement("canvas"); fc.width = fc.height = 512;
+    const g = fc.getContext("2d"), grad = g.createRadialGradient(256, 256, 0, 256, 256, 256);
+    grad.addColorStop(0, "rgba(0,0,0,0.14)"); grad.addColorStop(0.22, "rgba(0,0,0,0.05)"); grad.addColorStop(0.48, "rgba(0,0,0,0)"); grad.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = grad; g.fillRect(0, 0, 512, 512);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(fc), transparent: true, depthWrite: false }));
+    const fs = Math.max(size.x, size.z) * 2.4;
+    floor.scale.set(fs, fs * 0.6, 1); floor.rotation.x = -Math.PI / 2; floor.position.set(c.x, box.min.y + 0.002, c.z); scene.add(floor);
+    const d = Math.max(size.x, size.y, size.z) * 1.45;
+    camera.position.set(c.x + d * 0.8, c.y + d * 0.22, c.z + d * 0.62);
+    controls.target.set(c.x, c.y - size.y * 0.08, c.z); controls.update();
+  }).catch(e => console.error(e));
+  resize();
+  (function loop() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); })();
+})();
+</script>
+</body></html>

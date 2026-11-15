@@ -98,4 +98,7 @@ class InMemorySettingsRepository(
     override suspend fun setEcoGuideEnabled(enabled: Boolean) { ecoState.value = enabled }
     override val ambientBaseColor: Flow<Int> = ambientState
     override suspend fun setAmbientBaseColor(rgb: Int) { ambientState.value = rgb }
+    private val paintState = MutableStateFlow(SettingsRepository.DEFAULT_BODY_PAINT)
+    override val bodyPaint: Flow<Int> = paintState
+    override suspend fun setBodyPaint(rgb: Int) { paintState.value = rgb }
 }

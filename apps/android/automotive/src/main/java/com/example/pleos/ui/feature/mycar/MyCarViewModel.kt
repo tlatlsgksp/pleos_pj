@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.example.pleos.domain.repository.CommunityRepository
 
 /** Personal settings: everything that fits the app to this car, these cards and this driver. */
 @HiltViewModel
@@ -26,6 +27,7 @@ class MyCarViewModel @Inject constructor(
     gateway: VehicleGateway,
     private val settings: SettingsRepository,
     private val demo: DemoScenarioController,
+    private val community: CommunityRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MyCarState())
@@ -52,6 +54,7 @@ class MyCarViewModel @Inject constructor(
         follow(settings.consentGiven) { copy(consentGiven = it) }
         follow(gateway.activeSource) { copy(isDemo = it == DataSourceMode.DEMO) }
         follow(demo.isPlaying) { copy(isDemoPlaying = it) }
+        follow(community.me) { me -> copy(nickname = me.nickname, handle = me.handle, carModel = me.carModel, nicknameDraft = if (nicknameDraft.isEmpty()) me.nickname else nicknameDraft) }
     }
 
     fun onEvent(event: MyCarEvent) {
@@ -77,6 +80,16 @@ class MyCarViewModel @Inject constructor(
                 _effects.trySend(MyCarEffect.ShowMessage("데모 시나리오를 시작했어요. 홈에서 보세요"))
             }
             MyCarEvent.StopDemoTapped -> demo.stop()
+            is MyCarEvent.NicknameEdited -> _state.update { it.copy(nicknameDraft = event.text.take(NICKNAME_MAX)) }
+            MyCarEvent.NicknameSaveTapped -> {
+                val name = _state.value.nicknameDraft.trim()
+                if (name.length < NICKNAME_MIN) {
+                    _effects.trySend(MyCarEffect.ShowMessage("닉네임은 2자 이상이어야 해요."))
+                    return
+                }
+                viewModelScope.launch { community.setNickname(name) }
+                _effects.trySend(MyCarEffect.ShowMessage("닉네임을 바꿨어요."))
+            }
         }
     }
 
@@ -85,5 +98,7 @@ class MyCarViewModel @Inject constructor(
         const val PRICE_STEP = 10.0
         const val MIN_PRICE = 100.0
         const val MAX_PRICE = 1_000.0
+        const val NICKNAME_MIN = 2
+        const val NICKNAME_MAX = 12
     }
 }

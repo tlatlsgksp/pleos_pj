@@ -41,16 +41,17 @@ val NegativeLight = Color(0xFFFE3D16)
 val NegativeDark = Color(0xFFFF4C28)
 
 /**
- * The app's palette (docs/visual/ledger-design-v5.html): Pleos roles, filled with cool gray tints
- * instead of pure white and black, and one blue [accent]. Screens read these instead of Material roles.
+ * The app's palette (.impeccable/surfaces/apps-android-automotive.md): the Pleos grayscale roles
+ * played straight, plus road-sign colors used only for things that lie on the road ahead.
+ * Screens read these instead of Material roles.
  */
 @Immutable
 data class PleosColors(
-    /** The app surface. No cards sit on it; groups are split by [outline] rules. */
+    /** The app ground behind the cards. */
     val background: Color,
-    /** A raised chip on [surfaceHigh], e.g. the selected Box tab. */
+    /** Cards on the ground. */
     val surface: Color,
-    /** The one sunken well: the home action, tab tracks, selected rows. */
+    /** A well inside a card: tab tracks, selected rows, icon tiles. */
     val surfaceHigh: Color,
     val textPrimary: Color,
     val textSecondary: Color,
@@ -63,71 +64,86 @@ data class PleosColors(
     val buttonFilled: Color,
     val buttonFilledPressed: Color,
     val onButtonFilled: Color,
-    /** Rules between rows and sections. */
+    /** Rules between rows. */
     val outline: Color,
-    /** Quiet bars in charts: past months, the empty part of a track. */
+    /** Quiet bars in charts and the empty part of a track. */
     val track: Color,
-    /**
-     * The key color, meaning "my car now" only: the current odometer on the care ruler, this month
-     * in the ledger table, a record the car just detected. Never on controls or titles.
-     */
+    /** Selection and "my car now" marks (the speaking member, my row in a ranking). */
     val accent: Color,
     /** informative_active: the switch's on state, as the Pleos component draws it. */
     val active: Color,
     /** informative_positive. */
     val positive: Color,
-    /** informative_negative: overdue, danger. */
+    /** informative_negative: danger. */
     val negative: Color,
     val onAccent: Color,
+    /** Road guide signs: destinations (green), waypoints and stations (blue), reports (amber). */
+    val signGreen: Color,
+    val signBlue: Color,
+    val signAmber: Color,
+    /** Text and border on green and blue signs. */
+    val onSign: Color,
+    /** Text and border on the amber sign. */
+    val onSignAmber: Color,
     /** Toast: dark background, white text, in both themes. */
     val toast: Color,
     val onToast: Color,
 )
 
 val LightPleosColors = PleosColors(
-    background = Color(0xFFF5F7F9),
-    surface = Color(0xFFFDFEFF),
-    surfaceHigh = Color(0xFFE8ECF1),
-    textPrimary = Color(0xFF1E232A),
-    textSecondary = Color(0xFF545C66),
-    textTertiary = Color(0xFF616973),
-    buttonBasic = Color(0xFFE8ECF1),
-    buttonBasicPressed = Color(0xFFDBE1E8),
-    onButtonBasic = Color(0xFF1E232A),
-    buttonFilled = Color(0xFF1E232A),
-    buttonFilledPressed = Color(0xFF343B45),
-    onButtonFilled = Color(0xFFF5F7F9),
-    outline = Color(0xFFDBE1E8),
-    track = Color(0xFFC6CDD6),
-    accent = Color(0xFF1F5FD1),
+    background = Color(0xFFF5F6F8),
+    surface = BasicLight00,
+    surfaceHigh = BasicLight100,
+    textPrimary = BasicLight800,
+    textSecondary = Color(0xFF5C5F67),
+    textTertiary = Color(0xFF6E7078),
+    buttonBasic = BasicLight100,
+    buttonBasicPressed = BasicLight200,
+    onButtonBasic = BasicLight800,
+    buttonFilled = BasicLight800,
+    buttonFilledPressed = BasicLight700,
+    onButtonFilled = StaticLight,
+    outline = BasicLight200,
+    track = BasicLight300,
+    accent = BasicLight800,
     active = ActiveLight,
     positive = PositiveLight,
     negative = NegativeLight,
     onAccent = StaticLight,
+    signGreen = Color(0xFF0B6B45),
+    signBlue = Color(0xFF1C5BA8),
+    signAmber = Color(0xFFF2C230),
+    onSign = StaticLight,
+    onSignAmber = BasicLight800,
     toast = BasicLight700,
     onToast = StaticLight,
 )
 
 val DarkPleosColors = PleosColors(
-    background = Color(0xFF15181D),
-    surface = Color(0xFF2E343C),
-    surfaceHigh = Color(0xFF22272E),
-    textPrimary = Color(0xFFE9EDF2),
-    textSecondary = Color(0xFFAEB6C0),
-    textTertiary = Color(0xFF959DA8),
-    buttonBasic = Color(0xFF22272E),
-    buttonBasicPressed = Color(0xFF2E343C),
-    onButtonBasic = Color(0xFFE9EDF2),
-    buttonFilled = Color(0xFFE9EDF2),
-    buttonFilledPressed = Color(0xFFC9D0D8),
-    onButtonFilled = Color(0xFF15181D),
-    outline = Color(0xFF2E343C),
-    track = Color(0xFF3A414B),
-    accent = Color(0xFF7FA6FF),
+    background = BasicDark00,
+    surface = BasicDark50,
+    surfaceHigh = BasicDark100,
+    textPrimary = BasicDark900,
+    textSecondary = BasicDark500,
+    textTertiary = BasicDark400,
+    buttonBasic = BasicDark100,
+    buttonBasicPressed = BasicDark200,
+    onButtonBasic = BasicDark900,
+    buttonFilled = BasicDark800,
+    buttonFilledPressed = BasicDark600,
+    onButtonFilled = BasicDark00,
+    outline = BasicDark100,
+    track = BasicDark200,
+    accent = BasicDark900,
     active = ActiveDark,
     positive = PositiveDark,
     negative = NegativeDark,
     onAccent = StaticLight,
+    signGreen = Color(0xFF0E7A50),
+    signBlue = Color(0xFF2266BA),
+    signAmber = Color(0xFFF2C230),
+    onSign = StaticLight,
+    onSignAmber = BasicLight800,
     toast = BasicLight700,
     onToast = StaticLight,
 )

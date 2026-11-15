@@ -8,10 +8,12 @@ import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pleos.ui.feature.brand.BrandPickerRoute
+import com.example.pleos.ui.feature.ledger.LedgerRoute
 
 @Composable
 fun MyCarRoute(
     onOpenSkin: () -> Unit,
+    group: MyCarGroup = MyCarGroup.ME,
     viewModel: MyCarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -26,5 +28,5 @@ fun MyCarRoute(
         }
     }
 
-    MyCarScreen(state, viewModel::onEvent, snackbarHostState, brandPicker = { BrandPickerRoute() })
+    MyCarScreen(state, viewModel::onEvent, snackbarHostState, group, brandPicker = { BrandPickerRoute() }, ledger = { LedgerRoute() })
 }

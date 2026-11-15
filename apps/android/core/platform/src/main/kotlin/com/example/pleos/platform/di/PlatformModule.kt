@@ -5,6 +5,8 @@ import com.example.pleos.domain.gateway.CarPropertySource
 import com.example.pleos.domain.gateway.ChargerSource
 import com.example.pleos.domain.gateway.DemoScenarioController
 import com.example.pleos.domain.gateway.NavigationGateway
+import com.example.pleos.domain.repository.CommunityRepository
+import com.example.pleos.platform.demo.DemoCommunityRepository
 import com.example.pleos.domain.gateway.VehicleGateway
 import com.example.pleos.domain.repository.SettingsRepository
 import com.example.pleos.platform.demo.DemoScenarioPlayer
@@ -49,6 +51,9 @@ internal abstract class PlatformBindings {
     @BindsOptionalOf
     @RealSource
     abstract fun realCarPropertySource(): CarPropertySource
+
+    @Binds
+    abstract fun communityRepository(impl: DemoCommunityRepository): CommunityRepository
 
     @Binds
     abstract fun demoScenarioController(player: DemoScenarioPlayer): DemoScenarioController
