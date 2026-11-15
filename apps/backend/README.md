@@ -7,7 +7,7 @@ Moli 서버. NestJS, PostgreSQL(Prisma), Redis(BullMQ).
 - 계정·차량 연결(QR), 이웃, 커뮤니티 글·댓글·핀, 도로 제보
 - 같은 차종 연비 랭킹 집계
 - 그룹 라이딩 위치·워키토키 음성 중계
-- 외부 API 프록시: 오피넷 주유소·유가, 네이버 지도(Geocoding). API 키를 앱에 넣지 않기 위함
+- 외부 API 연동: 오피넷 주유소·유가, 네이버 지도(Geocoding)
 
 지금 구현된 모듈은 `fuel-prices`(오피넷 API 형식으로 응답하는 스텁, 외부 호출 없음)와 패턴 예시 `vehicles`다. 스텁 데이터는 `node scripts/generate-opinet-fixtures.mjs`로 다시 만든다.
 
