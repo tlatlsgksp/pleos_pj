@@ -125,8 +125,12 @@ h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 64px 0 
   <div class="grid" id="map"></div>
 
   <h2>E. 그룹 라이딩</h2>
-  <p class="sec-note">디스코드 음성 채널처럼 동작한다. 그룹 라이딩은 열려 있는 방이고, 이웃은 언제든 참여하고 나갈 수 있다. 참여 중에도 소리만 끌 수 있다. 참여 중이면 다른 화면에서는 위쪽 배너로 보인다.</p>
+  <p class="sec-note">디스코드 음성 채널처럼 열려 있는 방. 흐름은 만들기 → 초대 → 초대 확인 → 참여·나가기·다시 참여. 홈 카드는 이 상태에 따라 다섯 가지로 바뀐다(E1).</p>
   <div class="grid" id="ride"></div>
+
+  <h2>I. 주유소·충전소 리뷰</h2>
+  <p class="sec-note">들른 주유소·충전소에 버튼 몇 개로 리뷰를 남기고, 그 리뷰가 주변 목록, 지도, 주행 중 지도 핀에 함께 보인다.</p>
+  <div class="grid" id="review"></div>
 
   <h2>F. 나</h2>
   <p class="sec-note">내 계정, 차량 정보, 이웃, 설정. 정차 중에만 쓰는 화면이라 목록 | 상세 구성. 휴대폰 앱이 없어도 계정을 만들고 닉네임을 정할 수 있다.</p>
@@ -154,10 +158,20 @@ const ride = (talk = 1) => `<div class="ride">${["민수","지은","나","현우
 const card = (area, inner, extra = "") => `<div style="grid-area:${area};background:var(--g1);border-radius:12px;padding:10px;display:flex;flex-direction:column;justify-content:space-between;min-height:0;${extra}">${inner}</div>`;
 const qa = (area, name, sub, dim) => card(area, `<div class="ico" style="width:24px;height:24px"></div><div><b style="font-size:12px">${name}</b><br><span class="t3">${sub}</span></div>`, dim ? "opacity:.45" : "");
 const myCar = area => card(area, `<div class="ph" style="flex:1;padding:0;min-height:0">꾸민 차</div><div class="row" style="justify-content:space-between;margin-top:6px"><div><div class="t1">민수</div><div class="t3">아이오닉 5</div></div><div style="text-align:right"><div class="t2">6.0 km/kWh</div><div class="t3">이번 주 214위</div></div></div>`);
-const rideCard = (area, state) => card(area, `<div class="row" style="justify-content:space-between"><div><b style="font-size:12px">주말 동호회 라이딩</b><br><span class="t3">${state === "none" ? "진행 중인 그룹 라이딩 없음" : state === "in" ? "참여 중, 4명" : "진행 중, 3명 참여"}</span></div>${state === "in" ? '<span class="chip on">참여 중</span>' : ""}</div>
-  <div class="row" style="gap:4px">${state === "none" ? '<span class="t3" style="flex:1">이웃과 함께 달려 보세요.</span><span class="btn pri">시작</span>' : `${["민수","지은","현우","서연"].slice(0, state === "in" ? 4 : 3).map((n,i)=>`<div class="av ${state==="in"&&i===0?"talk":""}">${n}</div>`).join("")}<span style="flex:1"></span>${state === "in" ? '<span class="btn">나가기</span>' : '<span class="btn pri">참여</span>'}`}</div>`);
+// Group riding card on home. States: none, invited, invites, in, left.
+const avs = (names, talk = -1) => names.map((n,i)=>`<div class="av ${i===talk?"talk":""}">${n}</div>`).join("");
+const rideCard = (area, state) => {
+  const st = {
+    none:    { title: "그룹 라이딩", sub: "진행 중인 라이딩이 없어요", body: `<span style="flex:1"></span><span class="btn pri">라이딩 만들기</span>` },
+    invited: { title: "민수의 라이딩", sub: "초대받음, 강릉 경포해변", tag: "초대", body: `${avs(["민수","지은","현우"])}<span style="flex:1"></span><span class="btn">보기</span><span class="btn pri">참여</span>` },
+    invites: { title: "라이딩 초대 2개", sub: "민수의 라이딩, 지은의 라이딩", tag: "초대", body: `${avs(["민수","지은"])}<span style="flex:1"></span><span class="btn pri">초대 보기</span>` },
+    in:      { title: "민수의 라이딩", sub: "참여 중, 4명", tag: "참여 중", body: `${avs(["민수","지은","나","현우"], 0)}<span style="flex:1"></span><span class="btn">나가기</span>` },
+    left:    { title: "민수의 라이딩", sub: "진행 중, 3명 참여", body: `${avs(["민수","지은","현우"])}<span style="flex:1"></span><span class="btn pri">다시 참여</span>` },
+  }[state];
+  return card(area, `<div class="row" style="justify-content:space-between;align-items:flex-start"><div><b style="font-size:12px">${st.title}</b><br><span class="t3">${st.sub}</span></div>${st.tag ? `<span class="chip ${state==="in"?"on":""}">${st.tag}</span>` : ""}</div><div class="row" style="gap:4px">${st.body}</div>`);
+};
 const homeBody = (o = {}) => `<div class="pad" style="display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1.15fr 1fr;grid-template-areas:'car car ride ride' 'rpt chg eco lgt';gap:6px;${o.top ? `padding-top:${o.top}px` : ""}">
-    ${myCar("car")}${rideCard("ride", o.ride || "out")}
+    ${myCar("car")}${rideCard("ride", o.ride || "invited")}
     ${qa("rpt", "제보", o.noRoute ? "사고, 공사, 정체" : "내 경로 위 2건")}${qa("chg", "충전소", "경유지 추가")}
     ${qa("eco", "연비 코치", "켜짐")}${qa("lgt", "무드등", "하늘색")}
   </div>`;
@@ -165,8 +179,8 @@ const homeBody = (o = {}) => `<div class="pad" style="display:grid;grid-template
 put("home",
   fig("A1", "홈", car(homeBody()), "카드 두 크기. 위 줄은 <b>내 차</b>(위에 꾸민 차, 아래에 닉네임·차종·이번 주 연비)와 <b>그룹 라이딩</b> 카드, 아래 줄은 누르면 그 자리에서 끝나는 빠른 실행 넷(제보, 충전소, 연비 코치, 무드등). 내 경로 위 제보는 [제보] 카드의 한 줄(\"내 경로 위 2건\"), 누르면 목록과 제보 버튼. 핀 남기기는 지도 메뉴로. 메뉴는 영역을 차지하지 않고 카드 위에 떠 있다.") +
   fig("A2", "홈, 주행 중 (메뉴 접힘)", car(homeBody({ driving: true }), { fold: true }), "5초 뒤 메뉴는 왼쪽 가장자리 손잡이로 접힌다. 카드 배치는 그대로, 가려졌던 카드 모서리만 다시 보인다.") +
-  fig("A3", "홈, 그룹 라이딩 참여 중", car(homeBody({ ride: "in" })), "참여 중이면 그룹 라이딩 카드에 말하는 사람 표시와 [나가기]. 다른 메뉴로 가면 위쪽에 같은 내용의 배너가 뜬다(E3).") +
-  fig("A0", "홈, 그룹 라이딩 없음", car(homeBody({ ride: "none", noRoute: true })), "진행 중인 그룹 라이딩이 없으면 카드는 [시작] 하나. 경로 안내가 없으면 [제보] 카드는 종류만 보여 준다.") +
+  fig("A3", "홈, 그룹 라이딩 참여 중", car(homeBody({ ride: "in" })), "참여 중이면 그룹 라이딩 카드에 멤버와 말하는 사람 테두리, [나가기]. 카드를 누르면 그룹 라이딩 화면. 카드의 다섯 가지 상태는 E1.") +
+  fig("A0", "홈, 그룹 라이딩 없음", car(homeBody({ ride: "none", noRoute: true })), "참여 중이거나 초대받은 라이딩이 없으면 카드는 [라이딩 만들기] 하나. 경로 안내가 없으면 [제보] 카드는 종류만 보여 준다.") +
   fig("A4", "무드등 색 고르기 (빠른 실행에서)", car(homeBody() + `<div class="panel" style="right:12px;bottom:12px;width:230px"><div class="t1">무드등</div><div class="row" style="margin:10px 0;flex-wrap:wrap;gap:6px">${Array.from({length:8}).map((_,i)=>`<div class="av" style="width:24px;height:24px;${i===2?"outline:2px solid #1E232A;outline-offset:2px":""}"></div>`).join("")}</div><div class="t3">고르면 바로 실내등이 바뀌어요.</div></div>`), "다른 화면으로 넘어가지 않는 작은 판. 색을 누르는 순간 Vehicle SDK로 실내등에 적용된다(구현). 판 밖을 누르면 닫힌다.")
 );
 
@@ -243,19 +257,67 @@ const voiceList = (o = {}) => `<div class="t3" style="margin-bottom:4px">참여 
 const rideMap = `<div class="map"><div class="road" style="left:-10px;right:-10px;top:140px;height:12px;transform:rotate(-8deg)"></div><div class="route" style="left:20px;width:300px;top:144px;transform:rotate(-8deg)"></div>
   <div class="mk me" style="left:90px;top:150px">나</div><div class="mk" style="left:170px;top:132px">민</div><div class="mk" style="left:50px;top:160px">지</div><div class="mk" style="left:260px;top:118px">현</div></div>`;
 const controls = (o = {}) => `<div class="row" style="gap:5px">${o.me === false ? '<span class="btn pri big" style="flex:1">참여</span>' : `<span class="btn big" style="flex:1">${o.deaf ? "소리 켜기" : "소리 끄기"}</span><span class="btn big" style="flex:1">나가기</span>`}</div>`;
+// Group riding: one floating bar at the bottom. Press-to-talk sits at the far left, nearest the driver.
+const rideBar = (o = {}) => {
+  const inMembers = [["민수",1],["지은",0],["나",0],["현우",0]].filter(([n]) => !(o.me === false && n === "나"));
+  const outMembers = ["서연","준호"].concat(o.me === false ? ["나"] : []);
+  return `<div style="position:absolute;left:14px;top:10px;z-index:4" class="row"><span class="chip on" style="height:24px;font-size:10px">민수의 라이딩</span><span class="chip" style="height:24px;font-size:10px">+ 초대</span></div>
+  <div class="panel" style="left:14px;right:10px;bottom:10px;padding:8px;display:flex;align-items:center;gap:8px;z-index:4">
+    ${o.me === false ? `<div style="flex:0 0 110px;height:58px;border-radius:14px;background:var(--g2);color:var(--g4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">누르고 말하기</div>` : `<div style="flex:0 0 110px;height:58px;border-radius:14px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">누르고 말하기</div>`}
+    <div class="row" style="gap:3px">${inMembers.map(([n,t])=>`<div style="text-align:center"><div class="av lg ${t?"talk":""}" style="width:30px;height:30px">${n}</div>${n==="나"&&o.deaf?'<div class="t3" style="font-size:8px">소리 끔</div>':""}</div>`).join("")}</div>
+    <div style="width:1px;height:34px;background:var(--g3)"></div>
+    <div class="row" style="gap:3px;opacity:.45">${outMembers.map(n=>`<div class="av" style="width:22px;height:22px">${n}</div>`).join("")}</div>
+    <span style="flex:1"></span>
+    ${o.me === false ? `<span class="btn pri big">다시 참여</span>` : `<span class="btn" style="padding:0 7px">${o.deaf ? "소리 켜기" : "소리 끄기"}</span><span class="btn" style="padding:0 7px">나가기</span>`}
+  </div>`;
+};
+const stateCard = (state, label) => `<div style="width:290px"><div class="t3" style="margin-bottom:4px;font-weight:700">${label}</div><div style="display:grid;height:120px;grid-template-areas:'ride'">${rideCard("ride", state)}</div></div>`;
+const hubPanel = inner => `<div class="scrim"></div><div class="panel" style="z-index:4;left:40px;right:40px;top:16px;bottom:16px;display:flex;flex-direction:column;gap:6px">${inner}</div>`;
+const rideRow = (title, sub, names, btns, hl) => `<div class="li" style="${hl?"background:var(--g1);border-radius:8px;padding:6px":""}"><div class="grow"><div class="t2">${title}</div><div class="t3">${sub}</div></div><div class="row" style="gap:3px">${avs(names)}</div>${btns}</div>`;
 put("ride",
-  fig("E1", "그룹 라이딩 시작", car(homeBody({ ride: "none" }) + `<div class="scrim"></div><div class="panel" style="z-index:4;left:60px;right:60px;top:20px;bottom:20px;display:flex;flex-direction:column;gap:6px">
-    <div class="t1">누구와 달릴까요?</div>
-    <div style="flex:1">${neighbors.map(([n,on])=>`<div class="li"><div class="av">${n}</div><div class="grow t2">${n}</div><span class="chip ${on?"on":""}">${on?"선택됨":"선택"}</span></div>`).join("")}</div>
+  `<div class="fig" style="grid-column:1/-1"><div class="id">E1</div><h3>홈 그룹 라이딩 카드의 다섯 상태</h3><div class="row" style="gap:12px;flex-wrap:wrap">
+    ${stateCard("none","1. 아무것도 없음")}${stateCard("invited","2. 초대 하나")}${stateCard("invites","3. 초대 여러 개")}${stateCard("in","4. 참여 중")}${stateCard("left","5. 나갔지만 진행 중")}</div>
+    <p class="n">카드 크기는 그대로, 안의 내용과 버튼만 바뀐다. 우선순위: <b>참여 중 &gt; 초대 &gt; 나갔지만 진행 중 &gt; 없음</b>. 참여 중일 때 새 초대가 오면 카드는 참여 중을 유지하고 위에서 내려오는 알림으로만 알린다. 카드를 누르면 언제나 라이딩 목록(E2).</p></div>` +
+  fig("E2", "라이딩 목록", car(homeBody({ ride: "invites" }) + hubPanel(`<div class="row"><div class="t1" style="flex:1">그룹 라이딩</div><span class="btn pri">라이딩 만들기</span></div>
+    <div class="t3" style="margin-top:4px">받은 초대</div>
+    ${rideRow("민수의 라이딩","강릉 경포해변, 3명 참여 중",["민수","지은","현우"],'<span class="btn">거절</span><span class="btn pri">참여</span>',true)}
+    ${rideRow("지은의 라이딩","목적지 없음, 1명 참여 중",["지은"],'<span class="btn">거절</span><span class="btn pri">참여</span>')}
+    <div class="t3" style="margin-top:6px">이웃의 진행 중인 라이딩</div>
+    ${rideRow("현우의 라이딩","초대받지 않음, 2명",["현우","서연"],'<span class="btn">참여 요청</span>')}`)), "홈 카드나 알림의 [초대 보기]에서 연다. <b>받은 초대</b>는 맨 위, 각 줄에서 바로 [참여] [거절]. 초대받지 않은 이웃의 라이딩에는 [참여 요청]만. 참여 중인 라이딩이 있으면 맨 위에 \"참여 중\" 줄이 생긴다.") +
+  fig("E3", "라이딩 만들기", car(homeBody({ ride: "none" }) + hubPanel(`<div class="t1">라이딩 만들기</div>
+    <div class="li"><div class="grow"><div class="t3">이름</div><div class="t2">민수의 라이딩</div></div><span class="btn">바꾸기</span></div>
     <div class="li"><div class="grow"><div class="t3">목적지</div><div class="t2">강릉 경포해변 (지금 내비 목적지)</div></div><span class="btn">바꾸기</span></div>
-    <div class="row"><span class="btn" style="flex:1">취소</span><span class="btn pri" style="flex:2">시작</span></div></div>`), "홈의 그룹 라이딩 카드 [시작]. 디스코드에서 음성 채널을 여는 것과 같다. 고른 이웃에게 초대가 가고, 시작한 사람은 바로 참여 상태가 된다.") +
-  fig("E2", "초대 받음", car(`<div class="banner"><div class="av" style="background:#3A414B;color:#fff;border-color:#545C66">민수</div><div style="flex:1"><b>민수의 그룹 라이딩에 참여할까요?</b><div style="font-size:9px;opacity:.8;margin-top:2px">참여하는 동안 이웃에게 내 위치가 보여요.</div></div><span class="btn" style="background:#3A414B;color:#fff">나중에</span><span class="btn" style="background:#fff;color:#1E232A">참여</span></div>` + homeBody({ top: 64 }), { fold: true }), "[나중에]를 눌러도 끝이 아니다. 그룹 라이딩은 계속 열려 있고, 홈 카드나 그룹 라이딩 화면에서 언제든 [참여]할 수 있다.") +
-  fig("E3", "그룹 라이딩 화면, 참여 중", car(rideMap + `<div class="panel" style="right:10px;top:10px;bottom:10px;width:190px;display:flex;flex-direction:column;gap:6px"><div class="t1">주말 동호회 라이딩</div><div style="flex:1;overflow:hidden">${voiceList()}</div>
-      <div style="height:52px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">누르고 말하기</div>${controls()}</div>`, { on: "", fold: true }), "디스코드 음성 채널처럼. 오른쪽 판에 <b>참여 중</b>과 <b>참여 안 함</b> 멤버를 나눠 보여 주고, 말하는 사람은 프로필 테두리. 아래는 [누르고 말하기], [소리 끄기], [나가기]. 지도에는 참여 중인 멤버만.") +
-  fig("E4", "소리 끔", car(rideMap + `<div class="panel" style="right:10px;top:10px;bottom:10px;width:190px;display:flex;flex-direction:column;gap:6px"><div class="t1">주말 동호회 라이딩</div><div style="flex:1;overflow:hidden">${voiceList({ deaf: true })}</div>
-      <div style="height:52px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">누르고 말하기</div>${controls({ deaf: true })}</div>`, { on: "", fold: true }), "듣기 싫으면 [소리 끄기]. 그룹에는 남아 있고 위치도 계속 보이지만 다른 멤버 음성이 나오지 않는다. 내 이름 옆에 \"소리 끔\". 말하기는 계속 할 수 있다.") +
-  fig("E5", "나간 뒤 (참여 안 함)", car(rideMap + `<div class="panel" style="right:10px;top:10px;bottom:10px;width:190px;display:flex;flex-direction:column;gap:6px"><div class="t1">주말 동호회 라이딩</div><div style="flex:1;overflow:hidden">${voiceList({ me: false })}</div>${controls({ me: false })}</div>`, { on: "", fold: true }), "[나가기]를 누르면 음성과 위치 공유가 함께 끝나고 나는 \"참여 안 함\"으로 옮겨진다. 그룹 라이딩은 계속 열려 있어서 [참여]로 언제든 돌아온다. 마지막 사람이 나가면 그룹 라이딩이 끝난다.") +
-  fig("E6", "다른 화면에서 참여 중일 때", car(ride(0) + `<div class="map" style="top:52px"></div>`, { on: "지도" }), "위쪽 배너에 참여 중인 멤버 프로필과 말하는 사람 테두리. 배너를 누르면 E3. 메뉴는 그대로 왼쪽 아래에 떠 있다.")
+    <div class="t3">초대할 이웃</div><div style="flex:1">${neighbors.map(([n,on])=>`<div class="li" style="padding:4px 0"><div class="av">${n}</div><div class="grow t2">${n}</div><span class="chip ${on?"on":""}">${on?"선택됨":"선택"}</span></div>`).join("")}</div>
+    <div class="row"><span class="btn" style="flex:1">취소</span><span class="btn pri" style="flex:2">만들고 참여하기</span></div>`)), "이름은 \"닉네임의 라이딩\"으로 미리 채운다. 목적지는 지금 내비 목적지를 쓰거나 비워 둘 수 있다(목적지 없이 같이 달리기). 만들면 나는 바로 참여 상태, 고른 이웃에게 초대가 간다. 이웃은 나중에 라이딩 화면에서 더 초대할 수 있다.") +
+  fig("E4", "초대 알림", car(`<div class="banner"><div class="av" style="background:#3A414B;color:#fff;border-color:#545C66">민수</div><div style="flex:1"><b>민수가 라이딩에 초대했어요</b><div style="font-size:9px;opacity:.8;margin-top:2px">강릉 경포해변, 3명 참여 중</div></div><span class="btn" style="background:#3A414B;color:#fff">보기</span><span class="btn" style="background:#fff;color:#1E232A">참여</span></div>` + homeBody({ top: 64, ride: "invited" }), { fold: true }), "위에서 내려오는 알림. 6초 뒤 올라가도 초대는 남아서 홈 카드가 \"초대\" 상태가 된다. [참여] 한 번이면 목적지가 내비에 들어가고 그룹 라이딩 화면. [보기]는 E5.") +
+  fig("E5", "초대 확인", car(homeBody({ ride: "invited" }) + hubPanel(`<div class="row"><div class="av lg">민수</div><div style="flex:1"><div class="t1">민수의 라이딩</div><div class="t3">민수가 초대했어요, 5분 전</div></div></div>
+    <div class="li"><span class="grow t3">목적지</span><b>강릉 경포해변</b></div>
+    <div class="t3">참여 중 3</div><div class="row" style="gap:6px">${avs(["민수","지은","현우"],0)}</div>
+    <div class="t3" style="margin-top:4px">참여하면 이 라이딩 동안 이웃에게 내 위치가 보이고, 목적지가 내비에 들어가요.</div>
+    <span style="flex:1"></span><div class="row"><span class="btn" style="flex:1">거절</span><span class="btn pri big" style="flex:2">참여</span></div>`)), "누가 열었는지, 어디로 가는지, 지금 누가 들어와 있는지만. 거절하면 목록에서 사라지고 홈 카드는 다음 상태로.") +
+  fig("E6", "그룹 라이딩 화면, 참여 중", car(rideMap + rideBar(), { on: "", fold: true }), "지도가 화면 전체를 쓰고, 참여자와 버튼은 아래쪽 떠 있는 막대 하나에. 맨 왼쪽(운전석 쪽)에 가장 큰 [누르고 말하기], 그 옆에 참여 중 프로필(말하는 사람 테두리), 칸막이 뒤로 흐린 참여 안 함 프로필, 오른쪽 끝에 [소리 끄기] [나가기]. 라이딩 이름과 [+ 초대]는 왼쪽 위 작은 칩. 메뉴는 접힌 손잡이로 둔다.") +
+  fig("E7", "소리 끔", car(rideMap + rideBar({ deaf: true }), { on: "", fold: true }), "듣기 싫으면 [소리 끄기]. 라이딩에는 남고 위치도 계속 보이지만 다른 멤버 음성이 나오지 않는다. 내 프로필 아래 \"소리 끔\", 버튼은 [소리 켜기]로.") +
+  fig("E8", "나간 뒤", car(rideMap + rideBar({ me: false }), { on: "", fold: true }), "[나가기]를 누르면 음성과 위치 공유가 함께 끝나고 내 프로필이 흐린 쪽으로 옮겨진다. [누르고 말하기]는 흐려지고 오른쪽 끝이 [다시 참여]. 마지막 사람이 나가면 라이딩이 끝난다.") +
+  fig("E9", "다른 화면에서 참여 중일 때", car(ride(0) + `<div class="map" style="top:52px"></div>`, { on: "지도" }), "위쪽 배너에 참여 중인 멤버 프로필과 말하는 사람 테두리. 누르면 E6.")
+);
+
+const reviewTags = ["빠른 충전","충전기 고장","대기 있음","가격 착함","깨끗함","주차 편함","직원 친절","24시간"];
+const reviewCard = `<div class="panel" style="left:14px;right:10px;bottom:10px;padding:10px;z-index:4">
+  <div class="row"><div class="ico"></div><div style="flex:1"><div class="t1">E-pit 강릉 사천 충전소, 어땠어요?</div><div class="t3">방금 40.0 kWh 충전, kWh당 292원</div></div><span class="t3">나중에</span></div>
+  <div class="row" style="gap:6px;margin:8px 0"><span class="btn big" style="flex:1">좋았어요</span><span class="btn big" style="flex:1">아쉬웠어요</span></div>
+  <div>${reviewTags.map((t,i)=>`<span class="chip ${i===0||i===3?"on":""}">${t}</span>`).join("")}</div></div>`;
+put("review",
+  fig("I1", "방문 직후 리뷰 (떠 있는 카드)", car(homeBody({ ride: "none" }) + reviewCard, { fold: true }), "충전·주유가 감지되거나 내비 목적지·경유지였던 주유소·충전소에 도착했다 떠날 때, 화면 아래에 떠 있는 카드가 올라온다. [좋았어요] [아쉬웠어요] 하나와 태그 몇 개만 누르면 끝. 주행이 시작되면 카드는 접혀서 다음 정차 때 다시 묻는다. [나중에]를 누르면 다시 묻지 않는다.") +
+  fig("I2", "주변 충전소 목록", car(`<div class="pad" style="display:grid;grid-template-columns:1.2fr 1fr;gap:10px"><div>
+    <div class="row" style="margin-bottom:6px"><span class="chip on">충전소</span><span class="chip">주유소</span><span class="chip">내 카드 브랜드</span><span style="flex:1"></span><span class="t3">가까운 순</span></div>
+    ${[["E-pit 강릉 사천","1.2 km, kWh당 292원","좋았어요 92%","빠른 충전, 가격 착함"],["환경부 경포 공영","2.8 km, kWh당 324원","좋았어요 61%","대기 있음, 충전기 고장"],["SK일렉링크 강릉역","4.1 km, kWh당 310원","리뷰 없음",""]].map(([n,d,r,t],i)=>`<div class="li" style="${i===0?"background:var(--g1);border-radius:8px;padding:6px":""}"><div class="grow"><div class="t2">${n}</div><div class="t3">${d}</div>${t?`<div style="margin-top:3px">${t.split(", ").map(x=>`<span class="chip">${x}</span>`).join("")}</div>`:""}</div><div class="t2" style="text-align:right">${r}</div></div>`).join("")}</div>
+    <div style="display:flex;flex-direction:column;gap:6px"><div class="t1">E-pit 강릉 사천</div><div class="t3">급속 4대, 지금 2대 비어 있음</div><div class="t2">좋았어요 92%, 리뷰 38개</div>
+    <div>${["빠른 충전 21","가격 착함 15","깨끗함 9"].map(x=>`<span class="chip">${x}</span>`).join("")}</div>
+    <div class="li"><div class="av">지은</div><div class="grow t3">어제, 좋았어요. 빠른 충전, 가격 착함</div></div>
+    <span style="flex:1"></span><div class="row"><span class="btn pri" style="flex:1">길 안내</span><span class="btn" style="flex:1">경유지 추가</span></div></div></div>`, { on: "지도" }), "지도 메뉴 안의 목록 보기. 줄마다 좋았어요 비율과 가장 많이 붙은 태그. 오른쪽 상세에 태그별 개수와 최근 리뷰. 빈자리 수는 충전소 공공 API에서.") +
+  fig("I3", "주행 중 지도 핀", car(`<div class="map"><div class="road" style="left:-10px;right:-10px;top:150px;height:12px;transform:rotate(-10deg)"></div><div class="route" style="left:40px;width:340px;top:166px;transform:rotate(-10deg)"></div><div class="mk me" style="left:70px;top:178px">나</div>
+    <div style="position:absolute;left:240px;top:110px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:4px 7px"><div class="t2">E-pit 292원</div><div class="t3">좋았어요 92%</div></div>
+    <div style="position:absolute;left:330px;top:70px;background:#fff;border:1px solid var(--g3);border-radius:10px;padding:4px 7px;opacity:.8"><div class="t2">환경부 324원</div><div class="t3">대기 있음</div></div></div>`, { on: "지도", fold: true }), "주행 중에는 핀 말풍선에 가격과 리뷰 한 줄(좋았어요 비율이나 가장 최근에 많이 붙은 태그)만. \"충전기 고장\", \"대기 있음\"처럼 들르기 전에 알아야 할 태그가 최근 3시간 안에 붙었으면 그것을 먼저 보여 준다.")
 );
 
 const meList = ["내 계정","차량 정보","이웃","꾸미기","주유·충전","내 카드 브랜드","연비 코치","휴대폰 연결","공개 설정"];
@@ -283,8 +345,8 @@ put("me",
 );
 
 put("narrow",
-  fig("G1", "홈, 1/3 창", car(`<div class="pad" style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 0.9fr 0.9fr;grid-template-areas:'car car' 'ride ride' 'rpt chg' 'eco lgt';gap:5px">${myCar("car")}${rideCard("ride","out")}${qa("rpt","제보","경로 위 2건")}${qa("chg","충전소","")}${qa("eco","연비 코치","")}${qa("lgt","무드등","")}</div>`, { narrow: true }), "같은 카드를 두 열로 쌓는다. 메뉴는 카드 위에 떠 있다.") +
-  fig("G2", "그룹 라이딩, 1/3 창", car(`<div class="pad" style="display:flex;flex-direction:column;gap:6px"><div class="t1">주말 동호회 라이딩</div><div style="flex:1;overflow:hidden">${voiceList()}</div><div style="height:44px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">누르고 말하기</div>${controls()}</div>`, { narrow: true, fold: true }), "1/3 창에서는 지도를 빼고 음성 채널 목록과 버튼만.")
+  fig("G1", "홈, 1/3 창", car(`<div class="pad" style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 0.9fr 0.9fr;grid-template-areas:'car car' 'ride ride' 'rpt chg' 'eco lgt';gap:5px">${myCar("car")}${rideCard("ride","invited")}${qa("rpt","제보","경로 위 2건")}${qa("chg","충전소","")}${qa("eco","연비 코치","")}${qa("lgt","무드등","")}</div>`, { narrow: true }), "같은 카드를 두 열로 쌓는다. 메뉴는 카드 위에 떠 있다.") +
+  fig("G2", "그룹 라이딩, 1/3 창", car(rideMap + `<div class="panel" style="left:14px;right:8px;bottom:8px;padding:8px;z-index:4"><div class="row" style="gap:5px;margin-bottom:6px">${avs(["민수","지은","나","현우"],0)}<span style="flex:1"></span><span class="btn">소리 끄기</span></div><div class="row" style="gap:6px"><div style="flex:2;height:46px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">누르고 말하기</div><span class="btn big" style="flex:1">나가기</span></div></div>`, { narrow: true, fold: true }), "1/3 창에서는 막대를 두 줄로. 아래 줄 왼쪽에 [누르고 말하기]를 가장 크게.")
 );
 
 const tabs = on => `<div class="ph-tab">${["커뮤니티","지도","랭킹","나"].map(t=>`<span class="${t===on?"on":""}">${t}</span>`).join("")}</div>`;
