@@ -152,3 +152,35 @@
 - 위치 갱신 주기가 3초보다 느리면 보내는 주기를 맞춘다
 - 네이버 지도 SDK가 Pleos(AAOS, 2560×1440 160dpi)에서 그려지는지, 클라이언트 키 발급, 오프라인일 때의 동작
 - Mobility Services 카테고리에서 주행 중 앱 안 지도 표시가 허용되는지. 막히면 주행 중에는 거리 목록, 정차 중에만 지도로 바꾼다
+
+## 6. 상세: 앱 지도에 내 내비 경로 그리기
+
+Pleos 내비에 찍은 경로를 우리 앱 지도(네이버 지도)에 그리고, 경로 위에 있는 제보·핀·주유소·충전소를 골라 보여 준다.
+
+### 6.1 NaviHelper로 받을 수 있는 것 (SDK 3.0.5, 클래스 직접 확인)
+
+| 받는 값 | 어디서 | 쓰는 곳 |
+|---|---|---|
+| 출발지·경유지·목적지 좌표와 경로상 위치(0~1) | `TripSummary.routePoints` (`RoutePointInfo`: 위도·경도, `ratioOnRoute`, ORIGIN/WAYPOINT/DESTINATION, 충전소 여부) | 경로를 다시 그릴 기준점 |
+| 목적지·경유지 좌표, 남은 거리·시간 | `onDestinationInfo`, `onWayPointInfo` | 같음 |
+| 지금 위치, 진행 방향, 경로 ID | `onCurrentLocationInfo` (`routeId`, `currentRouteIndex`) | 경로가 바뀌었는지 판단 |
+| 구간별 정체 (경로상 시작·끝 비율) | `TripSummary.trafficConditions` | 경로 선 색 |
+| 교통 사건 좌표 (사고, 도로 파손, 공사, 행사, 재난) | `RouteStateInfo.trafficStatus.trafficEventList` | **공식 교통 정보**로 우리 제보와 같은 지도에 표시 |
+| 앞의 단속카메라·주의 구간까지 남은 거리 | `onCameraAlert`, `onCautionPointInfo` | 참고(Pleos 내비가 이미 안내함) |
+
+**받을 수 없는 것: 경로 선 자체(도로를 따라가는 좌표 목록).** 그래서 경로 선은 아래처럼 다시 만든다.
+
+### 6.2 경로 선 만들기
+
+1. NaviHelper에서 출발지·경유지·목적지 좌표를 받는다.
+2. 같은 좌표로 **네이버 길찾기 API**(Directions)를 불러 경로 선을 받는다.
+3. 그 선을 네이버 지도에 그리고, 선에서 일정 거리(예: 200 m) 안에 있는 제보·핀·주유소·충전소를 "경로 위"로 본다. 홈의 [제보] 카드 숫자와 경로 위 제보 배너도 이 판단을 쓴다.
+4. 재탐색(`onReRouteEnded`)이나 경유지 변경 이벤트가 오면 2번을 다시 한다.
+
+Pleos 내비와 네이버가 다른 도로를 고를 수 있다. 지금 위치가 우리 선에서 벗어나면 다시 불러 맞춘다.
+
+### 6.3 확인할 것 (에뮬레이터)
+
+- `TripSummary`가 지금 안내 중인 경로에 대해 오는지(`onTripInfo`를 받으려면 `requestTrip`이 필요한지)
+- `trafficEventList`가 실제로 채워져 오는지
+- 네이버 길찾기 API 키 발급과 호출 한도
