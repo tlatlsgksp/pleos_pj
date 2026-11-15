@@ -1,0 +1,515 @@
+[
+  {
+    "UNI_ID": "A9900001",
+    "POLL_DIV_CD": "SKE",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 서울역주유소",
+    "VAN_ADR": "서울특별시 중구 시연동 11",
+    "NEW_ADR": "서울특별시 중구 시연로 11",
+    "TEL": "02-0000-1000",
+    "SIGUNCD": "0102",
+    "LPG_YN": "N",
+    "MAINT_YN": "Y",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "Y",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "309416.9",
+    "GIS_Y_COOR": "550591.4",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1781",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1684",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "B034",
+        "PRICE": "2049",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900002",
+    "POLL_DIV_CD": "RTO",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 남대문셀프주유소",
+    "VAN_ADR": "서울특별시 중구 시연동 27",
+    "NEW_ADR": "서울특별시 중구 시연로 27",
+    "TEL": "02-0000-1001",
+    "SIGUNCD": "0102",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "Y",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "309892.1",
+    "GIS_Y_COOR": "551230.0",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1704",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1607",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900003",
+    "POLL_DIV_CD": "GSC",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 회현주유소",
+    "VAN_ADR": "서울특별시 중구 시연동 39",
+    "NEW_ADR": "서울특별시 중구 시연로 39",
+    "TEL": "02-0000-1002",
+    "SIGUNCD": "0102",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "310172.7",
+    "GIS_Y_COOR": "551027.1",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1758",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1661",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900004",
+    "POLL_DIV_CD": "HDO",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 강남대로주유소",
+    "VAN_ADR": "서울특별시 강남구 시연대로 120",
+    "NEW_ADR": "서울특별시 강남구 시연대로 120",
+    "TEL": "02-0000-1003",
+    "SIGUNCD": "0116",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "Y",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "314311.9",
+    "GIS_Y_COOR": "544545.8",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1801",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1704",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "B034",
+        "PRICE": "2069",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900005",
+    "POLL_DIV_CD": "SOL",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 역삼셀프주유소",
+    "VAN_ADR": "서울특별시 강남구 시연대로 152",
+    "NEW_ADR": "서울특별시 강남구 시연대로 152",
+    "TEL": "02-0000-1004",
+    "SIGUNCD": "0116",
+    "LPG_YN": "N",
+    "MAINT_YN": "Y",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "314888.7",
+    "GIS_Y_COOR": "544739.6",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1728",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1631",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900006",
+    "POLL_DIV_CD": "SKE",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 테헤란주유소",
+    "VAN_ADR": "서울특별시 강남구 시연동 205",
+    "NEW_ADR": "서울특별시 강남구 시연로 205",
+    "TEL": "02-0000-1005",
+    "SIGUNCD": "0116",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "315406.0",
+    "GIS_Y_COOR": "545167.2",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1767",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1670",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900007",
+    "POLL_DIV_CD": "",
+    "GPOLL_DIV_CD": "E1G",
+    "OS_NM": "시연 강남LPG충전소",
+    "VAN_ADR": "서울특별시 강남구 시연동 88",
+    "NEW_ADR": "서울특별시 강남구 시연로 88",
+    "TEL": "02-0000-1006",
+    "SIGUNCD": "0116",
+    "LPG_YN": "Y",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "Y",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "314696.6",
+    "GIS_Y_COOR": "544108.9",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "K015",
+        "PRICE": "1090",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900008",
+    "POLL_DIV_CD": "GSC",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 판교주유소",
+    "VAN_ADR": "경기도 성남시 분당구 시연동 7",
+    "NEW_ADR": "경기도 성남시 분당구 시연로 7",
+    "TEL": "02-0000-1007",
+    "SIGUNCD": "0209",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "321374.2",
+    "GIS_Y_COOR": "532944.2",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1682",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1585",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900009",
+    "POLL_DIV_CD": "RTX",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 판교알뜰주유소",
+    "VAN_ADR": "경기도 성남시 분당구 시연동 19",
+    "NEW_ADR": "경기도 성남시 분당구 시연로 19",
+    "TEL": "02-0000-1008",
+    "SIGUNCD": "0209",
+    "LPG_YN": "N",
+    "MAINT_YN": "Y",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "Y",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "321831.4",
+    "GIS_Y_COOR": "532595.8",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1644",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1547",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900010",
+    "POLL_DIV_CD": "NHO",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 수원IC주유소",
+    "VAN_ADR": "경기도 수원시 팔달구 시연동 3",
+    "NEW_ADR": "경기도 수원시 팔달구 시연로 3",
+    "TEL": "02-0000-1009",
+    "SIGUNCD": "0204",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "Y",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "311658.7",
+    "GIS_Y_COOR": "518568.2",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1663",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1566",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "B034",
+        "PRICE": "1931",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900011",
+    "POLL_DIV_CD": "SOL",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 수원셀프주유소",
+    "VAN_ADR": "경기도 수원시 팔달구 시연동 41",
+    "NEW_ADR": "경기도 수원시 팔달구 시연로 41",
+    "TEL": "02-0000-1010",
+    "SIGUNCD": "0204",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "312065.2",
+    "GIS_Y_COOR": "519263.2",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1678",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1581",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900012",
+    "POLL_DIV_CD": "HDO",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 천안주유소",
+    "VAN_ADR": "충청남도 천안시 동남구 시연동 15",
+    "NEW_ADR": "충청남도 천안시 동남구 시연로 15",
+    "TEL": "02-0000-1011",
+    "SIGUNCD": "0502",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "321155.4",
+    "GIS_Y_COOR": "468576.3",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1666",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1569",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900013",
+    "POLL_DIV_CD": "RTO",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 천안알뜰주유소",
+    "VAN_ADR": "충청남도 천안시 동남구 시연동 33",
+    "NEW_ADR": "충청남도 천안시 동남구 시연로 33",
+    "TEL": "02-0000-1012",
+    "SIGUNCD": "0502",
+    "LPG_YN": "N",
+    "MAINT_YN": "Y",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "Y",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "Y",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "321569.6",
+    "GIS_Y_COOR": "468983.1",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1645",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1548",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "B034",
+        "PRICE": "1913",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900014",
+    "POLL_DIV_CD": "SKE",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 대전역주유소",
+    "VAN_ADR": "대전광역시 중구 시연동 2",
+    "NEW_ADR": "대전광역시 중구 시연로 2",
+    "TEL": "02-0000-1013",
+    "SIGUNCD": "1702",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "N",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "349400.3",
+    "GIS_Y_COOR": "414765.8",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1678",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1581",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  },
+  {
+    "UNI_ID": "A9900015",
+    "POLL_DIV_CD": "GSC",
+    "GPOLL_DIV_CD": "",
+    "OS_NM": "시연 대전셀프주유소",
+    "VAN_ADR": "대전광역시 중구 시연동 58",
+    "NEW_ADR": "대전광역시 중구 시연로 58",
+    "TEL": "02-0000-1014",
+    "SIGUNCD": "1702",
+    "LPG_YN": "N",
+    "MAINT_YN": "N",
+    "CAR_WASH_YN": "Y",
+    "CVS_YN": "N",
+    "KPETRO_YN": "Y",
+    "GOOD_YN": "N",
+    "GOOD_YN_5": "N",
+    "GIS_X_COOR": "348750.6",
+    "GIS_Y_COOR": "414203.7",
+    "OIL_PRICE": [
+      {
+        "PRODCD": "B027",
+        "PRICE": "1653",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      },
+      {
+        "PRODCD": "D047",
+        "PRICE": "1556",
+        "TRADE_DT": "20261105",
+        "TRADE_TM": "160000"
+      }
+    ]
+  }
+]
