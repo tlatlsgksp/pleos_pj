@@ -34,11 +34,11 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 .screen { display: flex; height: 300px; border-radius: 14px; overflow: hidden; border: 1px solid var(--rule); background: var(--raised); }
 .screen .dv { width: 33%; background: var(--navi); display: grid; place-items: center; font-size: 12px; color: var(--ink3); font-weight: 700; }
 .screen .app { flex: 1; position: relative; padding: 14px; display: grid; gap: 8px; }
-.rail { position: absolute; z-index: 2; left: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; padding: 6px; border-radius: 16px; background: rgba(253,254,255,.86); backdrop-filter: blur(8px); box-shadow: 0 6px 18px -6px rgba(18,22,28,.35); }
+.rail { position: absolute; z-index: 2; left: 50%; bottom: 10px; transform: translateX(-50%); display: flex; flex-direction: row; gap: 6px; padding: 6px; border-radius: 16px; background: rgba(253,254,255,.86); backdrop-filter: blur(8px); box-shadow: 0 6px 18px -6px rgba(18,22,28,.35); }
 .rail i { width: 38px; height: 38px; border-radius: 11px; background: transparent; display: grid; place-items: center; font-style: normal; font-size: 10px; font-weight: 800; color: var(--ink2); }
 .rail i.on { background: var(--ink); color: var(--bg); }
-.rail.folded { left: 0; padding: 6px 4px; border-radius: 0 12px 12px 0; }
-.rail.folded i { width: 22px; height: 38px; border-radius: 8px; }
+.rail.folded { bottom: 0; padding: 4px 6px; border-radius: 12px 12px 0 0; }
+.rail.folded i { width: 44px; height: 14px; border-radius: 7px; }
 .states { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin-top: 14px; }
 @media (max-width: 900px) { .states { grid-template-columns: 1fr; } }
 .states .screen { height: 200px; }
@@ -48,7 +48,7 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 .blk b { display: block; color: var(--ink); font-size: 13px; }
 .blk.hero { background: var(--accent-soft); }
 .blk.map { background: #DCE6DD; }
-.blk.hero, .blk.map, .blk.banner { padding-left: 62px; }
+.screen .app { padding-bottom: 64px; }
 
 .opts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
 @media (max-width: 1000px) { .opts { grid-template-columns: 1fr; } }
@@ -94,11 +94,11 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
 <body>
 <main>
   <h1>Moli 정보 구조 v2.3</h1>
-  <p class="lede">이전 정보 구조와 화면 기조는 버리고 새로 짰다. 차에는 커뮤니티 피드가 없다. 대신 차가 가장 잘 아는 것, 즉 내 주행과 연비 순위가 중심이고, 메뉴는 화면 위 탭 대신 한쪽에 떠 있는 아이콘으로 둔다.</p>
+  <p class="lede">이전 정보 구조와 화면 기조는 버리고 새로 짰다. 커뮤니티는 차와 폰 모두에 있다. 다만 글을 읽고 쓰는 피드는 폰에만 두고, 차에서는 운전하면서 참여할 수 있는 커뮤니티만 둔다: 연비 랭킹, 그룹 라이딩, 핀, 제보. 메뉴는 화면 아래쪽에 떠 있는 아이콘이다.</p>
   <div class="changes">
     <div class="chg"><s>홈의 "지금 할 일" 카드</s><b>홈 = 내 차 + 빠른 실행</b></div>
-    <div class="chg"><s>화면 위 탭 바</s><b>한쪽에 떠 있는 아이콘 메뉴</b></div>
-    <div class="chg"><s>차의 커뮤니티 기능</s><b>차에는 연비 순위와 그 속의 주행 정보(가감속, 주행 모드)</b></div>
+    <div class="chg"><s>화면 위 탭 바</s><b>아래쪽에 떠 있는 메뉴, 스크롤하거나 5초 지나면 접힘</b></div>
+    <div class="chg"><s>차의 커뮤니티 피드</s><b>차의 커뮤니티는 읽고 쓰는 글 대신 랭킹, 그룹 라이딩, 핀, 제보</b></div>
     <div class="chg"><s>장소 핀과 커뮤니티 글 따로</s><b>위치를 붙인 글이 곧 지도의 핀</b></div>
     <div class="chg"><s>커뮤니티 안의 지도</s><b>커뮤니티는 목록, 지도는 별도 메뉴(지도 보기)</b></div>
     <div class="chg"><s>그룹 라이딩 메뉴</s><b>진행 중일 때만 떠 있는 배너. 이웃끼리 시작, 층 켜고 끔</b></div>
@@ -107,15 +107,15 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
   <h2>1. 메인 홈: 내 차 + 빠른 실행 <span class="k built">결정</span></h2>
   <p class="note">B안(내 차)으로 정했다. 꾸민 3D 내 차가 중심에 서 있고, 그 옆에 차에 도움이 되는 기능을 누르면 바로 실행되는 버튼으로 둔다. 다른 화면으로 넘어가지 않고 그 자리에서 끝난다.</p>
   <div class="mode">
-    <div class="screen" style="height:330px"><div class="dv">주행 화면</div><div class="app" style="grid-template-columns:1.3fr 1fr;grid-template-rows:auto 1fr auto">
+    <div class="screen" style="height:330px"><div class="dv">주행 화면</div><div class="app" style="grid-template-columns:1.3fr 1fr;grid-template-rows:auto auto 1fr">
       <div class="rail"><i class="on">홈</i><i>랭킹</i><i>지도</i><i>나</i></div>
-      <div class="blk hero" style="grid-row:1 / 3"><b>3D 내 차</b>꾸민 그대로, 무드등 색까지<br>이번 주 6.0 km/kWh, 같은 차종 상위 18%</div>
+      <div class="blk banner" style="grid-column:1 / 3;background:var(--ink);color:var(--bg)"><b style="color:var(--bg)">멤버 프로필 4개</b>말하는 사람 프로필이 밝아짐. 그룹 라이딩 중일 때만 뜨는 배너, 누르면 그룹 라이딩 화면. 아래 메뉴와 겹치지 않게 위쪽에 뜬다</div>
+      <div class="blk hero" style="grid-row:2 / 4"><b>3D 내 차</b>꾸민 그대로, 무드등 색까지<br>이번 주 6.0 km/kWh, 같은 차종 상위 18%</div>
       <div class="blk"><b>연비 코치</b>켜짐</div>
       <div class="blk" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:transparent;padding:0">
         <div class="blk"><b>무드등</b>색 변경</div><div class="blk"><b>충전소</b>경유지 추가</div>
         <div class="blk"><b>제보</b>사고·공사·정체…</div><div class="blk"><b>그룹 라이딩</b>시작</div>
       </div>
-      <div class="blk banner" style="grid-column:1 / 3;background:var(--ink);color:var(--bg)"><b style="color:var(--bg)">멤버 프로필 4개</b>말하는 사람 프로필이 밝아짐. 그룹 라이딩 중일 때만 뜨는 배너, 누르면 그룹 라이딩 화면</div>
     </div></div>
     <div class="layers"><b style="font-size:15px">빠른 실행 (후보)</b>
       <div class="layer">연비 코치 켜고 끄기 <span>구현</span></div>
@@ -128,21 +128,21 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
     </div>
   </div>
 
-  <h2>2. 차량 앱 메뉴 (떠 있는 아이콘 4개)</h2>
-  <p class="note">메뉴는 세로로 세운 아이콘 묶음이지만 화면 영역을 차지하지 않는다. 내용이 앱 화면 전체를 쓰고, 메뉴는 그 위 왼쪽 가장자리에 반투명 판으로 떠 있다. 메뉴 뒤로 지도나 3D 차가 그대로 이어지고, 글자와 버튼은 메뉴에 가리지 않는 자리에 둔다. 화면 위쪽 탭과 페이지 제목 바는 쓰지 않는다. 그룹 라이딩은 늘 떠 있는 메뉴에 두지 않고, 시작은 홈의 버튼에서, 진행 중에는 떠 있는 배너로 돌아간다.</p>
+  <h2>2. 차량 앱 메뉴 (아래쪽에 떠 있는 아이콘 4개)</h2>
+  <p class="note">메뉴는 앱 화면 아래쪽 가운데에 가로로 떠 있는 반투명 막대다. 화면 영역을 차지하지 않는다. 내용이 앱 화면 전체를 쓰고, 메뉴 뒤로 지도나 3D 차가 그대로 이어지며, 글자와 버튼은 메뉴에 가리지 않는 자리에 둔다. Pleos 시스템 바(공조, 앱 목록)는 화면 맨 아래에 따로 있고, 우리 메뉴는 그 위 앱 영역 안에 뜬다. 화면 위쪽 탭과 페이지 제목 바는 쓰지 않는다. 그룹 라이딩은 늘 떠 있는 메뉴에 두지 않고, 시작은 홈의 버튼에서, 진행 중에는 떠 있는 배너로 돌아간다.</p>
   <div class="states">
     <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail"><i class="on">홈</i><i>랭킹</i><i>지도</i><i>나</i></div><div class="blk map" style="height:100%"><b>내용은 화면 전체</b>메뉴 뒤로 이어짐</div></div></div>
       <p><b>펼침</b> 앱을 열 때, 손잡이를 눌렀을 때. 반투명 판이 내용 위에 뜬다</p></div>
     <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>접힘</b>가장자리에 손잡이만</div></div></div>
-      <p><b>접힘</b> 스크롤을 시작하면 바로, 또는 5초 동안 메뉴를 만지지 않으면. 왼쪽 가장자리에 지금 메뉴 색의 손잡이만 남는다</p></div>
-    <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>다시 펼치기</b>손잡이를 누르거나 가장자리에서 밀기</div></div></div>
-      <p><b>다시 펼치기</b> 손잡이를 누르거나 왼쪽 가장자리에서 안쪽으로 민다. 메뉴를 고르면 다시 5초 뒤 접힌다</p></div>
+      <p><b>접힘</b> 스크롤을 시작하면 바로, 또는 5초 동안 메뉴를 만지지 않으면. 아래 가장자리에 작은 손잡이만 남는다</p></div>
+    <div><div class="screen"><div class="dv">주행 화면</div><div class="app"><div class="rail folded"><i class="on"></i></div><div class="blk map" style="height:100%"><b>다시 펼치기</b>손잡이를 누르거나 아래에서 위로 밀기</div></div></div>
+      <p><b>다시 펼치기</b> 손잡이를 누르거나 아래 가장자리에서 위로 민다. 메뉴를 고르면 다시 5초 뒤 접힌다</p></div>
   </div>
 
   <div class="tree c4">
     <div class="node"><span class="ic">홈</span><b>홈</b><p>내 차와 빠른 실행</p>
       <ul><li>3D 내 차, 이번 주 연비·순위 한 줄</li><li>연비 코치 무드등 상태 <span class="k built">구현</span> <span class="k drive">주행 중</span></li><li>빠른 실행 (위 목록)</li><li>그룹 라이딩 초대는 잠깐 뜨는 알림 [참여] [나중에] <span class="k drive">주행 중</span></li></ul></div>
-    <div class="node"><span class="ic">랭킹</span><b>연비 랭킹</b><p>커뮤니티 대신 차에 있는 순위</p>
+    <div class="node"><span class="ic">랭킹</span><b>연비 랭킹</b><p>차에서 보는 커뮤니티. 같은 차종 운전자와 겨룬다</p>
       <ul><li>같은 차종 순위 (기본) / 지역 / 이웃</li><li>주행 리포트<small>가감속 횟수와 흐름, 주행 모드 비율, 공회전, 속도 구간별 연비</small></li><li>순위가 오른 이유 한 문장<small>"급감속이 줄어 3계단 올랐어요"</small></li><li>지난 주행 목록 → 주행별 분석</li></ul></div>
     <div class="node"><span class="ic">지도</span><b>지도</b><p>추천 장소 = 위치를 붙인 글</p>
       <ul><li>근처 / 가는 길의 핀</li><li>태그로 거르기 (주차 쉬움, 충전기 있음…)</li><li>핀 상세: 글 요약, 태그, 쓴 사람의 차 → [길 안내] [경유지 추가] <small>정차 중만 글 전체</small></li><li>지도 표시: 주유소·충전소 가격</li><li>지도 표시: 제보 (사고, 공사, 정체, 단속카메라, 재난)</li></ul></div>
@@ -200,13 +200,26 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
   <div class="wrap"><table>
     <thead><tr><th>종류</th><th>보이는 시간</th><th>다른 운전자에게</th></tr></thead>
     <tbody>
-      <tr><td>사고</td><td>1시간, 다른 운전자가 "없어졌어요"를 누르면 먼저 내려감</td><td rowspan="5">차·폰 지도의 제보 층에 아이콘. 내 경로 앞에 있으면 차에서 짧은 음성 알림. 지나갈 때 [아직 있어요] [없어졌어요] 버튼 하나</td></tr>
+      <tr><td>사고</td><td>1시간, 다른 운전자가 "없어졌어요"를 누르면 먼저 내려감</td><td rowspan="5">차·폰 지도의 제보 표시에 아이콘. 내 경로 위에 있으면 위에서 내려오는 배너와 짧은 음성. 지나갈 때 [아직 있어요] [없어졌어요]</td></tr>
       <tr><td>공사</td><td>1일</td></tr>
       <tr><td>정체</td><td>30분</td></tr>
       <tr><td>단속카메라</td><td>계속 (없어졌다는 제보가 쌓이면 내려감)</td></tr>
       <tr><td>재난</td><td>3시간 (침수, 낙석, 결빙 등)</td></tr>
     </tbody>
   </table></div>
+  <h3 style="margin-top:28px">내 경로 위 제보 알림</h3>
+  <p class="note">다른 운전자의 제보가 지금 안내 중인 경로 위에 있으면, 앱 화면 맨 위에서 꽉 찬 배너가 내려온다. 어느 메뉴에 있든, 메뉴가 접혀 있든 뜬다. 6초 뒤 다시 올라가고, 누르면 그 위치를 지도로 보여 준다.</p>
+  <div class="states" style="grid-template-columns:1fr 1fr">
+    <div><div class="screen"><div class="dv">주행 화면</div><div class="app" style="padding-top:62px">
+      <div class="blk" style="position:absolute;left:0;right:0;top:0;border-radius:0 0 14px 14px;background:var(--ink);color:var(--bg);padding:14px 16px"><b style="color:var(--bg);font-size:14px">현재 경로 위에 사고 제보가 있어요</b></div>
+      <div class="blk hero" style="height:100%"><b>지금 보던 화면</b>그대로 아래에 있음</div>
+      <div class="rail folded"><i class="on"></i></div></div></div>
+      <p><b>배너</b> 앱 화면 너비 그대로, 위에서 아래로 내려옴. 종류만 바꿔 같은 문장: 공사, 정체, 단속카메라, 재난</p></div>
+    <div><div class="screen"><div class="dv">주행 화면</div><div class="app">
+      <div class="blk map" style="height:100%"><b>제보 위치</b>지도에 경로와 사고 아이콘, 내 차. 아래에 "3분 전 제보"와 [아직 있어요] [없어졌어요]</div></div></div>
+      <p><b>누르면</b> 그 위치를 지도로 보여 준다. 확인 버튼은 그 지점을 지날 때 다시 한 번 뜬다</p></div>
+  </div>
+
   <p class="note" style="margin-top:12px">제보도 "위치를 붙인 글"의 한 종류다. 커뮤니티 목록에는 섞지 않고 지도와 알림에만 쓴다. 이동 중인 차만 제보할 수 있고, 위치는 차가 준 값이라 엉뚱한 곳 제보를 막는다.</p>
 
   <h2>6. 데이터 모델 하나로 정리</h2>
@@ -220,11 +233,11 @@ h3 { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin: 0 0 6p
     <li><b>정함</b> 그룹 라이딩: 늘 떠 있는 메뉴에서 빼고, 진행 중일 때만 떠 있는 배너. 시작은 홈 버튼</li>
     <li><b>정함</b> 이웃: 서로 수락하는 관계. 프로필 아이디로 추가. 그룹 라이딩은 이웃끼리</li>
     <li><b>정함</b> 지도: 네이버 지도 SDK (차·폰 공통)</li>
-    <li><b>정함</b> 메뉴: 세로 플로팅, 내용 영역을 차지하지 않음. 스크롤하거나 5초 지나면 손잡이로 접힘</li>
+    <li><b>정함</b> 메뉴: 아래쪽 가로 플로팅, 내용 영역을 차지하지 않음. 스크롤하거나 5초 지나면 손잡이로 접힘</li>
+    <li><b>정함</b> 내 경로 위 제보: 화면 위에서 내려오는 꽉 찬 배너 "현재 경로 위에 사고 제보가 있어요", 누르면 위치</li>
     <li><b>정함</b> 화면 문구는 <a href="../UX_WRITING.md">UX 라이팅 기준</a>의 용어집을 따름</li>
     <li><b>정함</b> 홈에서 실시간 제보: 사고, 공사, 정체, 단속카메라, 재난</li>
     <li><b>정함</b> 그룹 라이딩 화면: 무전기 앱처럼 멤버 프로필과 큰 말하기 버튼, 말하는 사람 강조</li>
-    <li>남음: 떠 있는 아이콘 위치(왼쪽 운전석 쪽 / 오른쪽)</li>
     <li>남음: 장소 핀을 "위치 붙은 글"로 합치는 것이 맞는지</li>
     <li>남음: 그룹 라이딩 지도 표시(주유소·충전소, 핀) 기본값 꺼짐 / 켜짐</li>
     <li>남음: 홈의 바로 쓰는 버튼 목록 확정</li>
