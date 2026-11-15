@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moli 화면 기초 규칙</title>
+<style>
+:root {
+  --bg: #f4f5f7; --card: #fff; --line: #dfe2e6; --fg: #15181c; --muted: #5f6873; --faint: #8a939d;
+  --app-bg: #f1f2f4; --surface: #ffffff; --surface-high: #e9ebee; --filled: #2b3036; --basic: #e9ebee;
+  --positive: #0064ff; --active: #02c265; --negative: #fe3d16;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+main { max-width: 1240px; margin: 0 auto; padding: 32px 20px 80px; }
+h1 { font-size: 28px; margin: 0 0 4px; }
+h2 { font-size: 21px; margin: 48px 0 12px; padding-top: 8px; border-top: 2px solid var(--fg); }
+h3 { font-size: 16px; margin: 24px 0 8px; }
+.sub { color: var(--muted); margin: 0 0 20px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
+.lead strong { background: #fff5c2; padding: 0 3px; }
+table { border-collapse: collapse; width: 100%; background: var(--card); font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 10px; text-align: left; vertical-align: top; }
+th { background: #eef0f3; }
+.scroll { overflow-x: auto; }
+code { background: #eef0f3; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+.bad { color: #b42318; } .good { color: #067647; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+.note { background: #fffbe6; border: 1px solid #f0d77a; border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+
+/* type specimen: real sizes at 50% (1 dp = 0.5 px) */
+.spec td.sample { font-weight: 400; }
+.spec .s { display: inline-block; }
+
+/* mini app mockups at 50% scale of dp */
+.mock { background: var(--app-bg); border: 2px solid var(--fg); border-radius: 8px; padding: 16px; width: 100%; max-width: 560px; }
+.mock .pn { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.mock .tabs { display: flex; background: var(--surface-high); border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 12px; font-size: 14px; }
+.mock .tabs span { flex: 1; text-align: center; padding: 6px 0; border-radius: 8px; color: var(--muted); }
+.mock .tabs span.on { background: #fff; color: var(--fg); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.mock .sec { font-size: 16px; font-weight: 700; margin: 4px 0 8px; display: flex; align-items: baseline; }
+.mock .sec .sp { flex: 1; }
+.mock .tb { font-size: 13px; color: var(--positive); font-weight: 600; }
+.mock .c { background: var(--surface); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.mock .c.hi { background: var(--surface-high); }
+.mock .c.neg { background: var(--negative); color: #fff; }
+.mock .ct { font-size: 15px; font-weight: 700; }
+.mock .it { font-size: 14px; font-weight: 700; }
+.mock .bd { font-size: 13px; color: #3b4148; }
+.mock .mt { font-size: 12px; color: var(--faint); }
+.mock .val { font-size: 24px; font-weight: 700; }
+.mock .vl { font-size: 12px; color: var(--faint); }
+.mock .st { font-size: 12px; font-weight: 700; }
+.mock .row { display: flex; align-items: center; gap: 8px; }
+.mock .grow { flex: 1; }
+.mock .btn { font-size: 12px; font-weight: 700; border-radius: 8px; padding: 6px 12px; background: var(--basic); white-space: nowrap; }
+.mock .btn.f { background: var(--filled); color: #fff; }
+.mock .btn.s { font-size: 11px; padding: 4px 8px; }
+.mock .list { background: var(--surface); border-radius: 14px; margin-bottom: 12px; }
+.mock .list .li { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px; }
+.mock .list .li:first-child { border-top: 0; }
+.mock .vals { display: flex; gap: 12px; }
+.mock .vals > div { flex: 1; }
+.cap { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.tag { font-size: 11px; border-radius: 5px; padding: 0 6px; vertical-align: 2px; }
+.t-bad { background: #fee4e2; color: #b42318; } .t-good { background: #dcfae6; color: #067647; }
+.space { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+.space div { background: var(--positive); opacity: .8; }
+.space span { font-size: 12px; color: var(--muted); display: block; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Moli 화면 기초 규칙</h1>
+  <p style="color:#6B7785">2026-11-15 Moli로 이름을 바꾸며 되살린 문서다. 글자 크기·간격·카드·버튼 규칙은 그대로 따르고, 화면 예시(홈·차계부·내 차 탭)는 Moli 이전 구조 기준이다.</p>
+  <p class="sub">2026-11-15 초안 · 근거: <code>docs/UI_DESIGN_GUIDE.md</code>(Pleos 타이포·컴포넌트), 현재 코드 집계(<code>ui/feature/*</code>) · 짝 문서: <code>ia-flow-layout.html</code>, <code>layout-variants.html</code></p>
+
+  <div class="card lead">
+    <p style="margin-top:0">지금 앱은 Pleos 컴포넌트(버튼, 카드, 상단 바)는 있지만 <strong>"어떤 제목에 어떤 크기를, 묶음은 어떻게, 간격은 얼마"</strong>라는 규칙이 없어 화면마다 제각각이다. 같은 "목록"이 홈·차계부·내 차에서 세 가지 모양으로 그려지고, 카드 제목 크기가 3종, 간격 값이 9종 섞여 있다.</p>
+    <p style="margin-bottom:0">제안: <strong>글자 역할 8개, 간격 6단계, 묶음 규칙 4개, 문구 규칙</strong>을 정하고, 코드에서는 역할 이름으로만 쓰게 해서(<code>PleosText.sectionTitle</code> 등) 화면이 규칙을 벗어날 수 없게 한다.</p>
+  </div>
+
+  <h2>1. 지금 무엇이 섞여 있나 (코드 집계)</h2>
+  <div class="scroll">
+  <table>
+    <tr><th>항목</th><th>지금</th><th>문제</th></tr>
+    <tr><td>제목 크기</td><td>상단 바 36 Bold · "다음 관리" 32 Bold(카드 안) · "관리항목" 32 Bold(카드 밖) · 카드 제목 30 Bold(9곳) · 설정·목록 행 제목 28 Bold</td><td>"다음 관리"와 "관리항목"은 같은 급인데 한쪽은 카드 안, 한쪽은 밖. 홈 왼쪽 열은 섹션 제목이 아예 없다.</td></tr>
+    <tr><td>숫자 값</td><td>상태 값 32 Bold, 충전 금액 32 Bold, 충전 확인 화면 48</td><td>주행 중 한눈에 읽어야 할 홈 상태 값이 카드 제목(30)과 거의 같은 크기.</td></tr>
+    <tr><td>목록 모양</td><td>홈: 회색 카드 안에 흰 카드(카드 속 카드) · 차계부: 행마다 카드 · 내 차: 설정마다 카드</td><td>같은 "목록"이 세 모양. 카드 속 카드는 경계가 이중으로 보인다.</td></tr>
+    <tr><td>간격</td><td>4, 6, 8, 12, 16, 20, 24, 28, 32 dp가 섞임. 카드 안쪽 여백 28, 목록 행 28/20, 카드 사이 24(홈) · 16(차계부) · 12(목록)</td><td>같은 관계의 요소 사이가 화면마다 다르다.</td></tr>
+    <tr><td>버튼</td><td>"차계부에서 보기"(카드 머리, Small) · "꾸미러 가기"(Filled) · "확인하기"(Filled) · 설정 −/+ (Small)</td><td>"더 보기" 성격의 이동이 일반 버튼 모양. 가이드의 Text button(파란 글자 + ›)을 안 씀.</td></tr>
+    <tr><td>단위 표기</td><td><code>Format.km</code>는 "12,370 km", 화면 곳곳에서 <code>"%.1f km"</code> 직접 작성, 문서는 "268km"</td><td>띄어쓰기와 소수 자릿수가 경로마다 다름.</td></tr>
+    <tr><td>색</td><td>배터리 부족 제안 카드 전체가 빨강(negative), 기록 준비 라벨 파랑(positive), 관리 양호 초록(active)</td><td>"위험"이 아닌 제안에 위험색 배경. 의미색 쓰임 기준이 없다.</td></tr>
+  </table>
+  </div>
+
+  <h2>2. 글자 역할 (타이포 규칙)</h2>
+  <p class="cap" style="margin-top:0">크기는 Pleos 가이드 4절 값만 쓴다. 화면 코드에서는 역할 이름만 쓰고 크기 숫자는 쓰지 않는다. 표의 견본은 실제 크기의 50%.</p>
+  <div class="scroll">
+  <table class="spec">
+    <tr><th>역할</th><th>Pleos 스타일</th><th>크기 / 줄</th><th>쓰는 곳</th><th>견본 (50%)</th></tr>
+    <tr><td><b>pageTitle</b></td><td>Title Medium Bold</td><td>36 / 44</td><td>상단 바 제목 (앱 이름, 2단 화면 제목)</td><td><span class="s" style="font-size:18px;font-weight:700">Moli</span></td></tr>
+    <tr><td><b>sectionTitle</b></td><td>Title Small Bold</td><td>32 / 40</td><td>열 위의 묶음 제목. <b>항상 카드 밖</b>. 오른쪽에 Text button 하나 가능</td><td><span class="s" style="font-size:16px;font-weight:700">다음 관리</span></td></tr>
+    <tr><td><b>value</b></td><td>Headline Small Bold</td><td>48 / 64</td><td>한눈에 읽는 숫자 (홈 상태, 금액 확인)</td><td><span class="s" style="font-size:24px;font-weight:700">268 km</span></td></tr>
+    <tr><td><b>cardTitle</b></td><td>Body Large Bold</td><td>30 / 38</td><td>카드 하나의 이름 (연비 주행 가이드, 지금 할 일 문장)</td><td><span class="s" style="font-size:15px;font-weight:700">연비 주행 가이드</span></td></tr>
+    <tr><td><b>itemTitle</b></td><td>Body Medium Bold</td><td>28 / 36</td><td>목록·설정 행의 이름</td><td><span class="s" style="font-size:14px;font-weight:700">에어컨 필터</span></td></tr>
+    <tr><td><b>body</b></td><td>Body Small</td><td>26 / 34</td><td>설명, 행의 두 번째 줄. 본문 최소 크기</td><td><span class="s" style="font-size:13px">2,500 km 남음 · 2027.11.05까지</span></td></tr>
+    <tr><td><b>label</b></td><td>Label Medium</td><td>24 / 28</td><td>값 위 이름표, 날짜, 출처 표시 (주행 중 필수 정보에는 쓰지 않음)</td><td><span class="s" style="font-size:12px;color:#8a939d">주행 가능 거리</span></td></tr>
+    <tr><td><b>status</b></td><td>Label Medium Bold + 의미색</td><td>24 / 28</td><td>상태 한 마디 (곧 교체, 확인 필요, 좋아요)</td><td><span class="s" style="font-size:12px;font-weight:700;color:#0064ff">확인 필요</span></td></tr>
+  </table>
+  </div>
+  <div class="note" style="margin-top:12px">지금 <code>Type.kt</code>는 Material 이름에 Pleos 크기를 한 칸씩 밀어 넣어(headlineMedium = 36 등) 화면 코드만 보고는 어느 Pleos 스타일인지 알 수 없다. 역할 이름(<code>PleosText</code>)을 따로 두고 Material 이름은 컴포넌트 내부에서만 쓴다.</div>
+
+  <h2>3. 제목·문구 쓰기 규칙</h2>
+  <div class="scroll">
+  <table>
+    <tr><th>대상</th><th>규칙</th><th>예 <span class="tag t-good">좋음</span></th><th>예 <span class="tag t-bad">고칠 것</span></th></tr>
+    <tr><td>탭 이름</td><td>명사 2~4자</td><td>홈 · 차계부 · 내 차</td><td></td></tr>
+    <tr><td>섹션 제목</td><td>명사구, 마침표 없음. 그 섹션 안의 카드 제목과 겹치지 않게</td><td>다음 관리 · 기록 · 관리항목 · 설정</td><td>"11월"만 단독 제목 → "이번 달"</td></tr>
+    <tr><td>카드 제목</td><td>기능 이름은 명사. 지금 할 일 카드는 상황을 한 문장으로(~해요)</td><td>연비 주행 가이드 / 배터리가 부족해요</td><td></td></tr>
+    <tr><td>상태</td><td>2~6자 명사형 또는 형용사. 색과 같이 쓰되 색만으로 뜻을 전하지 않는다</td><td>곧 교체 · 교체 필요 · 확인 필요 · 좋아요</td><td>"좋아요 · 무드등 기본색" → 상태 "좋아요" + 설명은 body로 분리</td></tr>
+    <tr><td>버튼</td><td>동사구 2~6자. 결과를 말한다. 확인(Filled)이 왼쪽, 취소가 오른쪽</td><td>경유지로 추가 · 저장 · 기록 안 함 · 켜기</td><td>"오늘 교체했어요"(문장형) → "오늘 교체" · "확인하기" → "확인"</td></tr>
+    <tr><td>이동</td><td>다른 화면·탭으로 가는 것은 Text button: 목적지 + ›</td><td>차계부 › · 전체 보기 ›</td><td>"차계부에서 보기" 일반 버튼</td></tr>
+    <tr><td>안내·토스트</td><td>~해요체, 한두 문장, 다음 행동을 말한다</td><td>충전을 감지했어요. 금액만 확인해 주세요</td><td></td></tr>
+    <tr><td>숫자·단위</td><td>숫자와 단위는 한 칸 띄운다(원은 붙인다). 천 단위 쉼표. 거리는 정수, 10 km 미만만 소수 1자리. 모두 <code>Format</code>을 거친다</td><td>12,370 km · 5.5 km · 40.0 kWh · 12,976원</td><td>화면에서 <code>"%.1f km"</code> 직접 작성</td></tr>
+    <tr><td>모를 때</td><td>값을 모르면 "–" 한 글자. 지원하지 않는 차량이면 항목 자체를 숨긴다</td><td>–</td><td>지금은 하이픈 "-"</td></tr>
+  </table>
+  </div>
+
+  <h2>4. 간격 6단계</h2>
+  <div class="card">
+    <div class="space">
+      <div style="width:4px;height:4px"></div><span>4</span>
+      <div style="width:8px;height:8px"></div><span>8</span>
+      <div style="width:16px;height:16px"></div><span>16</span>
+      <div style="width:24px;height:24px"></div><span>24</span>
+      <div style="width:32px;height:32px"></div><span>32</span>
+      <div style="width:48px;height:48px"></div><span>48</span>
+    </div>
+    <div class="scroll" style="margin-top:12px">
+    <table>
+      <tr><th>관계</th><th>값 (dp)</th><th>토큰</th></tr>
+      <tr><td>제목과 그 아래 설명, 아이콘과 글자</td><td>8</td><td><code>Space.xs</code></td></tr>
+      <tr><td>카드 안 요소 사이, 버튼 사이</td><td>16</td><td><code>Space.s</code></td></tr>
+      <tr><td>카드와 카드 사이, 섹션 제목과 첫 카드 사이, 열과 열 사이</td><td>24</td><td><code>Space.m</code></td></tr>
+      <tr><td>화면 가장자리 여백, 카드 안쪽 여백</td><td>32</td><td><code>Space.l</code></td></tr>
+      <tr><td>섹션과 섹션 사이</td><td>48</td><td><code>Space.xl</code></td></tr>
+      <tr><td>목록 행 안쪽 (위아래 / 좌우), 최소 높이</td><td>24 / 32, 최소 96</td><td><code>Space.m</code> / <code>Space.l</code></td></tr>
+    </table>
+    </div>
+    <p class="cap">4는 진행 막대처럼 그림 요소 안에서만. 6, 12, 20, 28은 쓰지 않는다.</p>
+  </div>
+
+  <h2>5. 묶음 규칙</h2>
+  <div class="scroll">
+  <table>
+    <tr><th>#</th><th>규칙</th><th>이유</th></tr>
+    <tr><td>1</td><td><b>섹션 = 섹션 제목(카드 밖) + 내용.</b> 열마다 섹션이 1~3개.</td><td>"무엇에 관한 묶음인가"를 한 가지 방식으로 보여 준다.</td></tr>
+    <tr><td>2</td><td><b>카드 안에 카드를 넣지 않는다.</b> 여러 항목은 <b>목록 카드</b> 하나 안의 행(구분선)으로.</td><td>경계가 이중으로 보이지 않고, 홈·차계부·내 차의 목록이 같은 모양이 된다.</td></tr>
+    <tr><td>3</td><td><b>카드 종류는 4개만:</b> 정보 카드(흰색) · 목록 카드(흰색 + 행) · 행동 카드(흰색 + Filled 버튼 1개) · 위험 카드(빨강, 사고처럼 즉시 위험할 때만).</td><td>배터리 부족 "제안"은 행동 카드 + 빨간 status. 빨간 배경은 정말 위험할 때를 위해 아낀다.</td></tr>
+    <tr><td>4</td><td><b>Filled 버튼은 카드당 최대 1개,</b> 화면에서 가장 중요한 행동에만. 카드 버튼은 Medium, 섹션 제목 옆은 Text button.</td><td>주행 중 무엇을 눌러야 하는지 한눈에.</td></tr>
+  </table>
+  </div>
+
+  <h2>6. 지금 → 규칙 적용 (홈 2칸의 왼쪽 열, 50% 축소)</h2>
+  <div class="grid2">
+    <div>
+      <div class="mock">
+        <div class="pn">차곡</div>
+        <div class="tabs"><span class="on">홈</span><span>차계부</span><span>내 차</span></div>
+        <div class="c"><div class="vals">
+          <div><div class="vl">배터리</div><div class="st" style="font-size:16px">69%</div></div>
+          <div><div class="vl">주행 가능 거리</div><div class="st" style="font-size:16px">268 km</div></div>
+          <div><div class="vl">총 주행거리</div><div class="st" style="font-size:16px">12,370 km</div></div>
+        </div></div>
+        <div class="c neg">
+          <div class="ct">배터리가 부족해요. 주행 가능 30 km</div>
+          <div class="bd" style="color:#fff">대전역까지 143 km 남았어요</div>
+          <div class="bd" style="color:#fff">선호 브랜드 충전소: 시연용 충전소 · 여의도 · 한국전력 (5.5 km)</div>
+          <div class="row" style="margin-top:8px"><span class="btn f">경유지로 추가</span><span class="btn">괜찮아요</span></div>
+        </div>
+        <div class="c"><div class="row"><div class="grow"><div class="ct">연비 주행 가이드</div><div class="st" style="color:var(--positive)">좋아요 · 무드등 기본색</div></div><span class="btn">끄기</span></div></div>
+        <div class="c hi">
+          <div class="row"><div class="ct grow" style="font-size:16px">다음 관리</div><span class="btn s">차계부에서 보기</span></div>
+          <div class="c" style="margin:8px 0 0"><div class="it">에어컨 필터 <span class="st" style="color:var(--positive);float:right">곧 교체</span></div><div class="bd">2,500 km 남음</div></div>
+          <div class="c" style="margin:8px 0 0"><div class="it">감속기 오일 <span class="st" style="color:var(--faint);float:right">기록 없음</span></div><div class="bd">마지막 교체 시점을 알려 주세요</div></div>
+        </div>
+      </div>
+      <p class="cap"><span class="tag t-bad">지금</span> 상태 값이 작고, 제안 카드 전체가 빨강, 다음 관리는 회색 카드 속 흰 카드, 섹션 제목이 없다가 갑자기 생긴다.</p>
+    </div>
+    <div>
+      <div class="mock">
+        <div class="pn">차곡</div>
+        <div class="tabs"><span class="on">홈</span><span>차계부</span><span>내 차</span></div>
+        <div class="sec">지금 차 상태</div>
+        <div class="c"><div class="vals">
+          <div><div class="vl">배터리</div><div class="val">69%</div></div>
+          <div><div class="vl">주행 가능</div><div class="val">268 km</div></div>
+          <div><div class="vl">총 주행</div><div class="val">12,370 km</div></div>
+        </div></div>
+        <div class="sec">지금 할 일</div>
+        <div class="c">
+          <div class="st" style="color:var(--negative)">배터리 부족</div>
+          <div class="ct">가는 길에 충전하세요</div>
+          <div class="bd">대전역까지 143 km · 주행 가능 30 km</div>
+          <div class="bd">여의도 · 한국전력 <span class="st" style="color:var(--positive)">선호</span> · 5.5 km</div>
+          <div class="row" style="margin-top:8px"><span class="btn f">경유지로 추가</span><span class="btn">괜찮아요</span></div>
+        </div>
+        <div class="c"><div class="row"><div class="grow"><div class="ct">연비 주행 가이드</div><div class="st" style="color:var(--positive)">좋아요</div><div class="mt">무드등 기본색</div></div><span class="btn">끄기</span></div></div>
+        <div class="sec">다음 관리<span class="sp"></span><span class="tb">차계부 ›</span></div>
+        <div class="list">
+          <div class="li"><div class="grow"><div class="it">에어컨 필터</div><div class="bd">2,500 km 남음</div></div><span class="st" style="color:var(--positive)">곧 교체</span></div>
+          <div class="li"><div class="grow"><div class="it">감속기 오일</div><div class="bd">마지막 교체 시점을 알려 주세요</div></div><span class="st" style="color:var(--faint)">기록 없음</span></div>
+        </div>
+      </div>
+      <p class="cap"><span class="tag t-good">규칙 적용</span> 섹션 제목이 모든 묶음 위에 있고, 상태 값은 value(48), 제안은 흰 행동 카드 + 빨간 status, 다음 관리는 목록 카드 하나, 이동은 Text button.</p>
+    </div>
+  </div>
+
+  <h2>7. 개선 방법 (코드)</h2>
+  <div class="scroll">
+  <table>
+    <tr><th>순서</th><th>할 일</th><th>효과</th></tr>
+    <tr><td>1</td><td><code>ui/design</code>에 규칙을 코드로: <code>PleosText</code>(역할 8개), <code>Space</code>(6단계), <code>SectionHeader(title, action)</code>, <code>ListCard</code> + <code>ListRow</code>, <code>TextButton</code>, <code>ActionCard</code></td><td>화면은 역할 이름만 고르면 된다</td></tr>
+    <tr><td>2</td><td>화면에서 <code>MaterialTheme.typography.*</code>, 숫자 <code>.dp</code>, <code>"%.1f km"</code> 직접 쓰기를 없앤다 (지금 41곳 / 30여 곳 / 4곳)</td><td>규칙 밖의 값이 생기지 않는다</td></tr>
+    <tr><td>3</td><td>코드 리뷰 체크 대신 테스트로 막기: <code>ui/feature</code> 소스에 위 패턴이 있으면 실패하는 단위 테스트 하나</td><td>나중에 들어오는 화면도 자동으로 지킨다</td></tr>
+    <tr><td>4</td><td>홈 → 차계부 → 내 차 순서로 바꾸고, 각 화면을 2칸(1700×1184, 1274×855)·1칸(840×1184, 628×855) 미리보기로 확인</td><td><code>layout-variants.html</code>의 시안과 같이 진행 가능</td></tr>
+    <tr><td>5</td><td><code>docs/UI_DESIGN_GUIDE.md</code>에 이 문서의 2~5절을 "우리 앱 규칙" 절로 옮겨 적는다</td><td>디자이너·개발자가 같은 기준을 본다</td></tr>
+  </table>
+  </div>
+  <p class="cap">미리 정할 것: ① 상태 값을 48로 키울지(주행 중 가독성 ↑, 2칸 왼쪽 열 폭은 충분), ② 목록을 "카드 하나 + 행"으로 통일할지(지금 설정 행은 카드마다 분리), ③ 단위 띄어쓰기 "12,370 km" 확정.</p>
+</main>
+</body>
+</html>
