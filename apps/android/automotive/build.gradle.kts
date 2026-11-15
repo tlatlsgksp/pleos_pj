@@ -31,6 +31,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Naver Map key (naver.clientId in secrets.properties); the map tiles stay blank without it.
         manifestPlaceholders["naverClientId"] = secrets.getProperty("naver.clientId") ?: ""
+
+        // Pleos Connect runs on x86_64 (emulator) and arm64 (emulator, cars). Shipping only these
+        // keeps the release APK under GitHub's 100 MB file limit.
+        ndk {
+            abiFilters += listOf("x86_64", "arm64-v8a")
+        }
     }
 
     signingConfigs {
