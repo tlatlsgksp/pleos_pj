@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moli 와이어프레임</title>
+<style>
+:root {
+  --page: #EEF1F4; --paper: #FFFFFF; --g1: #F2F4F6; --g2: #E3E7EB; --g3: #C9CFD6; --g4: #8D959E; --ink: #1E232A; --ink2: #545C66;
+  --navi: #D9DEE4; --hi: #1E232A;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: "SUIT", "Pretendard", system-ui, sans-serif; }
+main { max-width: 1360px; margin: 0 auto; padding: 48px 24px 120px; }
+h1 { font-size: 32px; font-weight: 800; letter-spacing: -0.025em; margin: 0 0 10px; }
+.lede { font-size: 15px; line-height: 1.65; color: var(--ink2); max-width: 78ch; margin: 0 0 8px; }
+.assume { font-size: 13px; color: var(--ink2); background: var(--paper); border: 1px solid var(--g2); border-radius: 12px; padding: 12px 16px; max-width: 900px; line-height: 1.6; margin-top: 16px; }
+h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 64px 0 6px; padding-top: 12px; border-top: 2px solid var(--ink); }
+.sec-note { font-size: 14px; color: var(--ink2); margin: 0 0 20px; max-width: 80ch; line-height: 1.6; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(620px, 1fr)); gap: 36px 28px; }
+.fig .id { font-size: 12px; font-weight: 800; color: var(--g4); letter-spacing: .02em; }
+.fig h3 { font-size: 16px; font-weight: 800; margin: 2px 0 8px; }
+.fig .n { font-size: 13px; color: var(--ink2); line-height: 1.55; margin: 10px 0 0; max-width: 64ch; }
+.fig .n b { color: var(--ink); }
+.wrapx { overflow-x: auto; }
+
+/* Car display: driving view 1/3 + app. 1px = 4dp here (2560 wide display → 640px). */
+.car { display: flex; width: 640px; height: 360px; border-radius: 10px; overflow: hidden; border: 1px solid var(--g3); background: var(--paper); flex: 0 0 auto; }
+.car .dv { width: 213px; background: var(--navi); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--g4); flex: 0 0 auto; }
+.car.narrow .dv { width: 213px; }
+.car .two { width: 213px; background: #E6E9ED; border-left: 1px solid var(--g3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--g4); }
+.app { position: relative; flex: 1; overflow: hidden; background: var(--paper); font-size: 11px; }
+.pad { position: absolute; inset: 0; padding: 12px; }
+
+/* Floating menu, bottom-left, vertical */
+.menu { position: absolute; z-index: 5; left: 8px; bottom: 8px; display: flex; flex-direction: column; gap: 3px; padding: 4px; border-radius: 12px; background: rgba(255,255,255,.92); box-shadow: 0 4px 12px -4px rgba(0,0,0,.35); }
+.menu i { width: 30px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 8px; font-weight: 800; color: var(--ink2); }
+.menu i.on { background: var(--hi); color: #fff; }
+.menu.fold { left: 0; padding: 4px 3px; border-radius: 0 8px 8px 0; }
+.menu.fold i { width: 8px; height: 30px; border-radius: 4px; background: var(--hi); }
+
+/* Primitives */
+.ph { background: var(--g1); border: 1px dashed var(--g3); border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--g4); font-weight: 700; font-size: 10px; line-height: 1.4; padding: 6px; }
+.map { position: absolute; inset: 0; background: #E9EDE6; }
+.map::after { content: "네이버 지도"; position: absolute; right: 8px; bottom: 6px; font-size: 9px; color: var(--g4); font-weight: 700; }
+.road { position: absolute; background: #fff; border-radius: 4px; }
+.route { position: absolute; background: #9AA3AD; border-radius: 3px; height: 5px; }
+.mk { position: absolute; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); font-size: 7px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.mk.sq { border-radius: 4px; }
+.mk.me { background: var(--ink); color: #fff; }
+.t0 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+.t1 { font-size: 14px; font-weight: 800; letter-spacing: -0.01em; }
+.t2 { font-size: 11px; font-weight: 700; }
+.t3 { font-size: 10px; color: var(--ink2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 12px; border-radius: 7px; background: var(--g2); font-weight: 800; font-size: 10px; white-space: nowrap; }
+.btn.pri { background: var(--ink); color: #fff; }
+.btn.big { height: 40px; font-size: 12px; border-radius: 10px; }
+.btn.off { background: transparent; border: 1px solid var(--g3); color: var(--g4); }
+.chip { display: inline-flex; height: 20px; padding: 0 8px; align-items: center; border-radius: 6px; background: var(--g2); font-size: 9px; font-weight: 700; margin: 0 3px 3px 0; }
+.chip.on { background: var(--ink); color: #fff; }
+.tile { background: var(--g1); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between; }
+.tile b { font-size: 11px; }
+.tile span { font-size: 9px; color: var(--ink2); }
+.tile.dim { opacity: .45; }
+.ico { width: 18px; height: 18px; border-radius: 6px; background: var(--g3); }
+.av { width: 26px; height: 26px; border-radius: 50%; background: var(--g2); border: 1px solid var(--g3); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: var(--ink2); }
+.av.lg { width: 44px; height: 44px; font-size: 10px; }
+.av.talk { outline: 3px solid var(--ink); outline-offset: 2px; background: #fff; color: var(--ink); }
+.row { display: flex; align-items: center; gap: 8px; }
+.li { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--g2); }
+.li:last-child { border-bottom: 0; }
+.li .grow { flex: 1; min-width: 0; }
+.seg { display: flex; gap: 2px; padding: 2px; background: var(--g2); border-radius: 7px; }
+.seg span { flex: 1; text-align: center; padding: 4px 8px; font-size: 9px; font-weight: 700; color: var(--ink2); border-radius: 5px; white-space: nowrap; }
+.seg span.on { background: #fff; color: var(--ink); }
+.panel { position: absolute; background: #fff; border-radius: 12px; box-shadow: 0 8px 22px -10px rgba(0,0,0,.4); padding: 12px; }
+.banner { position: absolute; z-index: 6; left: 0; right: 0; top: 0; background: var(--ink); color: #fff; padding: 12px 14px; border-radius: 0 0 12px 12px; display: flex; align-items: center; gap: 8px; }
+.banner b { font-size: 13px; }
+.ride { position: absolute; z-index: 4; left: 12px; right: 12px; top: 10px; background: var(--ink); color: #fff; border-radius: 12px; padding: 7px 10px; display: flex; align-items: center; gap: 6px; }
+.ride .av { width: 22px; height: 22px; background: #3A414B; border-color: #545C66; color: #fff; }
+.ride .av.talk { outline-color: #fff; background: #fff; color: var(--ink); }
+.input { height: 26px; border: 1px solid var(--g3); border-radius: 7px; display: flex; align-items: center; padding: 0 8px; color: var(--g4); font-size: 10px; }
+.bar { height: 8px; border-radius: 4px; background: var(--g2); overflow: hidden; display: flex; }
+.bar i { display: block; height: 100%; background: var(--ink); }
+.bar i + i { background: var(--g4); }
+.qr { width: 96px; height: 96px; background: repeating-conic-gradient(var(--ink) 0 25%, #fff 0 50%) 0 0 / 16px 16px; border: 6px solid #fff; outline: 1px solid var(--g3); }
+.scrim { position: absolute; inset: 0; background: rgba(30,35,42,.35); z-index: 3; }
+.toast { position: absolute; z-index: 6; left: 50%; bottom: 14px; transform: translateX(-50%); background: var(--ink); color: #fff; font-size: 10px; font-weight: 700; padding: 7px 12px; border-radius: 8px; white-space: nowrap; }
+
+/* Phone */
+.ph-frame { width: 230px; height: 480px; border-radius: 28px; background: #1B1F25; padding: 7px; flex: 0 0 auto; }
+.ph-scr { position: relative; width: 100%; height: 100%; border-radius: 22px; overflow: hidden; background: #fff; font-size: 10px; }
+.ph-top { padding: 22px 12px 8px; display: flex; justify-content: space-between; align-items: center; }
+.ph-top b { font-size: 15px; font-weight: 800; }
+.ph-body { padding: 0 12px; }
+.ph-tab { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; border-top: 1px solid var(--g2); display: grid; grid-template-columns: repeat(4,1fr); background: #fff; padding-bottom: 6px; }
+.ph-tab span { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 8px; font-weight: 700; color: var(--g4); }
+.ph-tab span::before { content: ""; width: 14px; height: 14px; border-radius: 4px; background: var(--g3); }
+.ph-tab span.on { color: var(--ink); } .ph-tab span.on::before { background: var(--ink); }
+.post { padding: 8px 0; border-bottom: 1px solid var(--g2); }
+.phones { display: flex; gap: 22px; flex-wrap: wrap; }
+.phones .fig { width: 230px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Moli 와이어프레임 (3단계)</h1>
+  <p class="lede">IA v2.3을 화면으로 옮겼다. 색과 글꼴은 아직 정하지 않았고(4단계 디자인), 회색 상자는 자리와 크기만 뜻한다. 문구는 <b>UX 라이팅 기준</b>의 용어집을 따른다. 차 화면은 실제 비율(2560×1440)을 4분의 1로 줄였고, 왼쪽 회색이 Pleos 주행 화면이다.</p>
+  <div class="assume"><b>IA에서 남았던 항목은 추천안으로 두고 그렸다.</b> 바뀌면 해당 화면만 고친다. 핀은 위치를 붙인 글로 합침. 그룹 라이딩 지도 표시 기본값은 멤버와 제보만 켜짐, 주유소·충전소와 핀은 꺼짐. 빠른 실행은 연비 코치, 무드등, 충전소, 제보, 핀 남기기, 그룹 라이딩 여섯 개. 메뉴 이름은 홈, 랭킹, 지도, 나.</div>
+
+  <h2>A. 홈</h2>
+  <p class="sec-note">꾸민 내 차가 화면의 주인공이고, 오른쪽 빠른 실행은 누르면 그 자리에서 끝난다.</p>
+  <div class="grid" id="home"></div>
+
+  <h2>B. 제보</h2>
+  <p class="sec-note">버튼 두 번(제보 → 종류)으로 끝난다. 입력이 없어서 주행 중에도 된다.</p>
+  <div class="grid" id="report"></div>
+
+  <h2>C. 연비 랭킹</h2>
+  <p class="sec-note">차에서 보는 커뮤니티. 기본은 같은 차종, 이번 주.</p>
+  <div class="grid" id="rank"></div>
+
+  <h2>D. 지도</h2>
+  <p class="sec-note">핀은 위치를 붙인 글이다. 차에서는 짧게 보고 바로 길 안내로 넘긴다. 글 전체와 핀 남기기는 정차 중에만.</p>
+  <div class="grid" id="map"></div>
+
+  <h2>E. 그룹 라이딩</h2>
+  <p class="sec-note">이웃끼리 한다. 무전기 앱처럼 멤버 프로필과 누르고 말하기 버튼 하나. 진행 중이면 어느 화면에서든 위쪽에 프로필 배너가 뜬다.</p>
+  <div class="grid" id="ride"></div>
+
+  <h2>F. 나</h2>
+  <p class="sec-note">내 차, 이웃, 설정. 정차 중에만 쓰는 화면이라 목록 | 상세 구성.</p>
+  <div class="grid" id="me"></div>
+
+  <h2>G. 앱 두 개를 띄운 1/3 창</h2>
+  <p class="sec-note">같은 내용을 세로로 쌓는다. 메뉴와 배너 규칙은 같다.</p>
+  <div class="grid" id="narrow"></div>
+
+  <h2>H. 폰 앱</h2>
+  <p class="sec-note">글을 읽고 쓰는 커뮤니티는 폰에 있다. 하단 탭 넷: 커뮤니티, 지도, 랭킹, 나.</p>
+  <div class="phones" id="phone"></div>
+</main>
+
+<script>
+const menu = (on, fold) => fold ? `<div class="menu fold"><i></i></div>` :
+  `<div class="menu">${["홈","랭킹","지도","나"].map(m => `<i class="${m===on?"on":""}">${m}</i>`).join("")}</div>`;
+const car = (inner, o = {}) => `<div class="car${o.narrow?" narrow":""}"><div class="dv">주행 화면</div>${o.narrow?'<div class="two">다른 앱</div>':""}<div class="app">${inner}${o.menu===false?"":menu(o.on||"홈", o.fold)}</div></div>`;
+const fig = (id, title, screen, note) => `<div class="fig"><div class="id">${id}</div><h3>${title}</h3><div class="wrapx">${screen}</div><p class="n">${note}</p></div>`;
+const put = (id, html) => document.getElementById(id).innerHTML = html;
+const ride = (talk = 1) => `<div class="ride">${["민수","지은","나","현우"].map((n,i)=>`<div class="av ${i===talk?"talk":""}">${n}</div>`).join("")}<span style="flex:1"></span><span class="t2" style="color:#fff">그룹 라이딩</span></div>`;
+
+/* Home layout used in several frames */
+const homeBody = (o = {}) => `<div class="pad" style="display:grid;grid-template-columns:1.35fr 1fr;gap:10px;${o.top?`padding-top:${o.top}px`:""}">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div><div class="t0">6.0 km/kWh</div><div class="t3">이번 주 연비, 같은 차종 상위 18%</div></div>
+    <div class="ph" style="flex:1">3D 내 차<br>꾸민 그대로, 무드등 색까지<br>(드래그로 돌려 보기, 메뉴 뒤로 이어짐)</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:6px">
+    <div class="tile"><div class="ico"></div><div><b>연비 코치</b><br><span>켜짐</span></div></div>
+    <div class="tile"><div class="ico"></div><div><b>무드등</b><br><span>하늘색</span></div></div>
+    <div class="tile"><div class="ico"></div><div><b>충전소</b><br><span>경유지 추가</span></div></div>
+    <div class="tile"><div class="ico"></div><div><b>제보</b><br><span>사고, 공사, 정체</span></div></div>
+    <div class="tile ${o.driving?"dim":""}"><div class="ico"></div><div><b>핀 남기기</b><br><span>${o.driving?"정차 중에":"지금 위치"}</span></div></div>
+    <div class="tile"><div class="ico"></div><div><b>그룹 라이딩</b><br><span>${o.riding?"진행 중":"시작"}</span></div></div>
+  </div></div>`;
+
+put("home",
+  fig("A1", "홈, 정차 중", car(homeBody()), "<b>메뉴</b>는 왼쪽 아래에 펼쳐져 있다. <b>빠른 실행</b> 여섯 개는 같은 크기의 큰 버튼. 연비 코치와 무드등은 누르면 바로 켜고 끄거나 색 고르기가 그 자리에서 열린다. 숫자 아래 한 줄은 차가 잰 값만.") +
+  fig("A2", "홈, 주행 중 (메뉴 접힘)", car(homeBody({ driving: true, fold: true }), { fold: true }), "5초 뒤 메뉴는 왼쪽 가장자리 손잡이로 접힌다. <b>핀 남기기</b>는 흐리게 바뀌고 누르면 \"핀은 차를 세운 뒤 남길 수 있어요.\" 나머지 버튼은 주행 중에도 한 번 눌러 끝난다.") +
+  fig("A3", "홈, 그룹 라이딩 중", car(ride(0) + homeBody({ top: 52, riding: true })), "위쪽 배너에 멤버 프로필이 한 줄로 뜨고, 말하는 사람 프로필에 테두리가 생긴다. 배너를 누르면 그룹 라이딩 화면(E3). 메뉴와 겹치지 않게 위에 둔다.") +
+  fig("A4", "무드등 색 고르기 (빠른 실행에서)", car(homeBody() + `<div class="panel" style="right:12px;top:12px;width:230px"><div class="t1">무드등</div><div class="row" style="margin:10px 0;flex-wrap:wrap;gap:6px">${Array.from({length:8}).map((_,i)=>`<div class="av" style="width:24px;height:24px;${i===2?"outline:2px solid #1E232A;outline-offset:2px":""}"></div>`).join("")}</div><div class="t3">고르면 바로 실내등이 바뀌어요.</div></div>`), "다른 화면으로 넘어가지 않는 작은 판. 색을 누르는 순간 Vehicle SDK로 실내등에 적용된다(구현). 판 밖을 누르면 닫힌다.")
+);
+
+const reportSheet = `<div class="scrim"></div><div class="panel" style="z-index:4;left:12px;right:12px;bottom:12px;top:auto">
+  <div class="t1" style="margin-bottom:10px">무엇을 제보할까요?</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">${["사고","공사","정체","단속카메라","재난"].map(t=>`<div class="tile" style="height:74px;align-items:center;justify-content:center;gap:6px"><div class="ico" style="width:24px;height:24px"></div><b>${t}</b></div>`).join("")}</div>
+  <div style="text-align:right;margin-top:8px"><span class="btn">취소</span></div></div>`;
+put("report",
+  fig("B1", "제보 종류 고르기", car(homeBody({ driving: true, fold: true }) + reportSheet, { fold: true }), "빠른 실행 [제보]를 누르면 아래에서 판이 올라온다. 큰 버튼 다섯 개 중 하나를 누르면 그 순간의 차 위치와 진행 방향으로 바로 올라가고 판이 닫힌다. 확인 단계는 없다.") +
+  fig("B2", "제보 직후", car(homeBody({ driving: true, fold: true }) + `<div class="toast">사고를 제보했어요.</div>`, { fold: true }), "토스트 한 줄. 잘못 눌렀을 때를 위해 토스트가 떠 있는 동안 [취소]를 둘지는 디자인 단계에서 정한다.") +
+  fig("B3", "내 경로 위 제보 배너", car(`<div class="banner"><div class="ico" style="background:#545C66"></div><b>현재 경로 위에 사고 제보가 있어요</b></div>` + homeBody({ top: 56, driving: true, fold: true }), { fold: true }), "다른 운전자의 제보가 안내 중인 경로 위에 있으면 앱 화면 맨 위에서 꽉 찬 배너가 내려온다. 어느 메뉴에 있든 뜨고, 6초 뒤 올라간다. 짧은 음성도 함께. 누르면 B4.") +
+  fig("B4", "제보 위치", car(`<div class="map"><div class="road" style="left:-10px;right:-10px;top:170px;height:12px;transform:rotate(-8deg)"></div><div class="route" style="left:40px;width:300px;top:174px;transform:rotate(-8deg)"></div><div class="mk me" style="left:70px;top:178px">나</div><div class="mk sq" style="left:250px;top:150px">!</div></div>
+    <div class="panel" style="left:12px;right:12px;bottom:12px"><div class="row"><div class="grow" style="flex:1"><div class="t1">사고</div><div class="t3">3분 전 제보, 경로 위 2.4 km 지점</div></div><span class="btn">닫기</span></div></div>`, { menu: false }), "지도에 경로와 제보 아이콘, 내 차. 아래 판에 종류와 제보 시각. 그 지점을 지날 때는 판의 버튼이 [아직 있어요] [없어졌어요]로 바뀐다.")
+);
+
+const rankList = [["1","하늘","7.4"],["2","도윤","7.3"],["3","민수","7.1"],["4","서연","7.0"],["5","지은","6.9"],["6","준호","6.9"]];
+put("rank",
+  fig("C1", "연비 랭킹", car(`<div class="pad" style="display:grid;grid-template-columns:1fr 1.2fr;gap:12px;padding-left:46px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="seg"><span class="on">같은 차종</span><span>지역</span><span>이웃</span></div>
+      <div class="seg"><span class="on">이번 주</span><span>이번 달</span></div>
+      <div style="background:var(--g1);border-radius:10px;padding:10px"><div class="t3">내 순위</div><div class="t0">214위</div><div class="t2">6.0 km/kWh</div><div class="t3" style="margin-top:4px">지난주 252위</div></div>
+      <div style="background:var(--g1);border-radius:10px;padding:10px;flex:1"><div class="t2">이번 주 주행</div>
+        <div class="li"><span class="grow t3">급가속</span><b>3회</b></div><div class="li"><span class="grow t3">급감속</span><b>5회</b></div><div class="li"><span class="grow t3">에코 모드</span><b>62%</b></div>
+        <div class="t2" style="margin-top:4px">주행 리포트 ›</div></div>
+    </div>
+    <div>${rankList.map(([n,name,v])=>`<div class="li"><b style="width:16px">${n}</b><div class="av">${name}</div><div class="grow"><div class="t2">${name}</div><div class="t3">아이오닉 5</div></div><b>${v}</b></div>`).join("")}<div class="li" style="background:var(--g1);border-radius:8px;padding:6px"><b style="width:16px">214</b><div class="av">나</div><div class="grow"><div class="t2">나</div></div><b>6.0</b></div></div>
+  </div>`, { on: "랭킹" }), "왼쪽은 내 순위와 이번 주 주행 요약, 오른쪽은 순위 목록. 줄마다 꾸민 차 프로필. 내 줄은 목록 맨 아래에 고정. 순위가 바뀐 이유를 문장으로 지어내지 않고 숫자(급가속, 급감속, 에코 모드)를 그대로 보여 준다.") +
+  fig("C2", "주행 리포트", car(`<div class="pad" style="display:grid;grid-template-columns:0.8fr 1.4fr;gap:12px;padding-left:46px">
+    <div>${["오늘 08:12","어제 18:40","어제 08:05","11월 13일 19:02","11월 13일 08:10"].map((t,i)=>`<div class="li" style="${i===0?"background:var(--g1);border-radius:8px;padding:6px":""}"><div class="grow"><div class="t2">${t}</div><div class="t3">${[18.4,21.0,17.9,22.3,18.1][i]} km</div></div><b>${[6.4,5.8,6.1,5.5,6.0][i]}</b></div>`).join("")}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div><div class="t3">오늘 08:12 출발, 18.4 km</div><div class="t0">6.4 km/kWh</div></div>
+      <div class="row" style="gap:6px">${[["급가속","1회"],["급감속","2회"],["공회전","4분"]].map(([a,b])=>`<div style="flex:1;background:var(--g1);border-radius:8px;padding:6px"><div class="t3">${a}</div><div class="t1">${b}</div></div>`).join("")}</div>
+      <div><div class="t3" style="margin-bottom:4px">주행 모드</div><div class="bar"><i style="width:62%"></i><i style="width:30%"></i></div><div class="t3" style="margin-top:3px">에코 62%, 노멀 30%, 스포츠 8%</div></div>
+      <div class="ph" style="flex:1">속도 구간별 연비 (막대)</div>
+    </div></div>`, { on: "랭킹" }), "주행 하나를 고르면 오른쪽에 그 주행의 값. 주행 모드 비율은 Vehicle SDK 주행 모드 신호가 필요하다(에뮬레이터 미지원, 확인 필요). 급가속·급감속은 차속으로 계산.")
+);
+
+const mapBase = (pins = true) => `<div class="map"><div class="road" style="left:-10px;right:-10px;top:150px;height:12px;transform:rotate(-10deg)"></div><div class="road" style="left:200px;width:10px;top:-10px;bottom:-10px;transform:rotate(12deg)"></div>
+  <div class="mk me" style="left:120px;top:170px">나</div>${pins?`<div class="mk" style="left:240px;top:90px">핀</div><div class="mk" style="left:330px;top:200px">핀</div><div class="mk" style="left:80px;top:60px">핀</div><div class="mk sq" style="left:290px;top:130px">!</div>`:""}</div>`;
+put("map",
+  fig("D1", "지도", car(mapBase() + `<div style="position:absolute;left:12px;top:12px;right:12px;display:flex;gap:4px;flex-wrap:wrap"><span class="chip on">전체</span><span class="chip">주차 쉬움</span><span class="chip">충전기 있음</span><span class="chip">드라이브 코스</span><span class="chip">맛집</span><span class="chip">카페</span><span style="flex:1"></span><span class="btn">지도 표시</span></div>
+    <div class="panel" style="right:12px;bottom:12px;width:150px"><span class="btn pri" style="width:100%">핀 남기기</span></div>`, { on: "지도" }), "위쪽 칩은 태그 거르기, 오른쪽 [지도 표시]에서 주유소·충전소 가격, 제보, 핀을 켜고 끈다. 오른쪽 아래 [핀 남기기]는 정차 중에만 켜진다. 메뉴는 왼쪽 아래.") +
+  fig("D2", "핀 상세", car(mapBase() + `<div class="panel" style="right:12px;top:12px;bottom:12px;width:220px;display:flex;flex-direction:column;gap:6px">
+    <div class="ph" style="height:70px">사진</div><div class="t1">바다 앞 카페</div>
+    <div><span class="chip">카페</span><span class="chip">주차 쉬움</span><span class="chip">충전기 있음</span></div>
+    <div class="t3" style="line-height:1.5">주차장 넓고 급속 충전기 두 대. 창가 자리에서 바다가 바로 보여요.</div>
+    <div class="row"><div class="av">민수</div><div><div class="t2">민수</div><div class="t3">아이오닉 5, 2일 전</div></div></div>
+    <span style="flex:1"></span><div class="row"><span class="btn pri" style="flex:1">길 안내</span><span class="btn" style="flex:1">경유지 추가</span></div></div>`, { on: "지도" }), "핀을 누르면 오른쪽 판. 글은 세 줄까지만, 주행 중에는 제목과 태그, 버튼만 보인다. [길 안내] [경유지 추가]는 NaviHelper로 바로 들어간다. 저장과 응원은 폰에서.") +
+  fig("D3", "핀 남기기 (정차 중)", car(mapBase(false) + `<div class="panel" style="right:12px;top:12px;bottom:12px;width:250px;display:flex;flex-direction:column;gap:7px">
+    <div class="t1">여기에 핀을 남겨요</div><div class="t3">강원 강릉시 사천면 해안로</div>
+    <div class="input">장소 이름</div>
+    <div><div class="t3" style="margin-bottom:3px">태그</div><span class="chip on">카페</span><span class="chip on">주차 쉬움</span><span class="chip">충전기 있음</span><span class="chip">차박</span><span class="chip">큰 차 편함</span><span class="chip">드라이브 코스</span><span class="chip">맛집</span><span class="chip">저렴한 주유소</span><span class="chip">+ 직접 입력</span></div>
+    <div class="input">한 줄 추천 (선택)</div>
+    <div class="seg"><span class="on">전체 공개</span><span>이웃만</span></div>
+    <span style="flex:1"></span><span class="btn pri big">핀 남기기</span></div>`, { on: "지도" }), "위치는 차가 준 값이라 고를 필요가 없다. 태그는 여러 개, 직접 만들 수도 있다. 사진과 긴 글은 폰에서 덧붙인다. 남기면 위치를 붙인 짧은 글이 커뮤니티에 올라간다.")
+);
+
+const neighbors = [["민수",true],["지은",true],["현우",false],["서연",false],["준호",false]];
+put("ride",
+  fig("E1", "그룹 라이딩 시작", car(homeBody() + `<div class="scrim"></div><div class="panel" style="z-index:4;left:60px;right:60px;top:20px;bottom:20px;display:flex;flex-direction:column;gap:6px">
+    <div class="t1">누구와 달릴까요?</div>
+    <div style="flex:1">${neighbors.map(([n,on])=>`<div class="li"><div class="av">${n}</div><div class="grow t2">${n}</div><span class="chip ${on?"on":""}">${on?"선택됨":"선택"}</span></div>`).join("")}</div>
+    <div class="li"><div class="grow"><div class="t3">목적지</div><div class="t2">강릉 경포해변 (지금 내비 목적지)</div></div><span class="btn">바꾸기</span></div>
+    <div class="row"><span class="btn" style="flex:1">취소</span><span class="btn pri" style="flex:2">초대 보내기</span></div></div>`), "홈 빠른 실행 [그룹 라이딩]에서 연다. 이웃 목록에서 고르고, 목적지는 지금 내비 목적지를 그대로 쓰거나 바꾼다. 이웃이 없으면 \"같이 달릴 이웃이 없어요. 아이디로 이웃을 추가해 보세요.\" [이웃 추가]") +
+  fig("E2", "초대 받음", car(`<div class="banner"><div class="av" style="background:#3A414B;color:#fff;border-color:#545C66">민수</div><div style="flex:1"><b>민수의 그룹 라이딩에 참여할까요?</b><div style="font-size:9px;opacity:.8;margin-top:2px">참여하면 그룹 라이딩 동안 이웃에게 내 위치가 보여요.</div></div><span class="btn" style="background:#3A414B;color:#fff">나중에</span><span class="btn" style="background:#fff;color:#1E232A">참여</span></div>` + homeBody({ top: 64, driving: true, fold: true }), { fold: true }), "위에서 내려오는 배너. 주행 중에도 버튼 하나로 답한다. [참여]를 누르면 목적지가 내비에 들어가고 E3로 넘어간다.") +
+  fig("E3", "그룹 라이딩 화면", car(`<div class="map"><div class="road" style="left:-10px;right:-10px;top:140px;height:12px;transform:rotate(-8deg)"></div><div class="route" style="left:20px;width:380px;top:144px;transform:rotate(-8deg)"></div>
+      <div class="mk me" style="left:100px;top:150px">나</div><div class="mk" style="left:180px;top:132px">민</div><div class="mk" style="left:60px;top:160px">지</div><div class="mk" style="left:320px;top:112px">현</div></div>
+    <div style="position:absolute;right:12px;top:12px"><span class="btn">지도 표시</span></div>
+    <div class="panel" style="left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:10px;padding-left:48px">
+      ${["민수","지은","나","현우"].map((n,i)=>`<div style="text-align:center"><div class="av lg ${i===0?"talk":""}">${n}</div></div>`).join("")}
+      <span style="flex:1"></span><div style="width:110px;height:56px;border-radius:14px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">누르고 말하기</div>
+    </div>`, { on: "", fold: true }), "지도에 멤버의 꾸민 차, 아래 판에 멤버 프로필 한 줄과 큰 [누르고 말하기]. 말하는 사람 프로필이 커지고 테두리가 생긴다(지금 민수). 핸들 음성 버튼으로도 말한다. [나가기]는 정차 중 판을 위로 밀면 나온다.") +
+  fig("E4", "지도 표시 (그룹 라이딩)", car(`<div class="map"></div><div class="panel" style="right:12px;top:12px;width:210px">
+    ${[["멤버",true],["제보",true],["주유소·충전소",false],["핀",false],["목적지 경로",true]].map(([t,on])=>`<div class="li"><span class="grow t2">${t}</span><span class="chip ${on?"on":""}">${on?"켜짐":"꺼짐"}</span></div>`).join("")}</div>`, { menu: false }), "기본은 멤버, 제보, 목적지 경로만 켜짐. 주유소·충전소와 핀은 필요할 때 켠다. 주행 중에는 이 판 대신 [지도 표시] 버튼 하나가 켜짐 묶음을 바꾼다(디자인 단계에서 확정).")
+);
+
+const meList = ["프로필","이웃","꾸미기","주유·충전","내 카드 브랜드","연비 코치","휴대폰 연결","공개 설정","데모 모드"];
+const meFrame = (sel, right) => car(`<div class="pad" style="display:grid;grid-template-columns:0.8fr 1.4fr;gap:12px;padding-left:46px">
+  <div>${meList.map(m=>`<div class="li" style="${m===sel?"background:var(--g1);border-radius:8px;padding:6px":""}"><span class="grow t2">${m}</span><span class="t3">›</span></div>`).join("")}</div>
+  <div style="display:flex;flex-direction:column;gap:8px">${right}</div></div>`, { on: "나" });
+put("me",
+  fig("F1", "이웃", meFrame("이웃", `<div class="row"><div class="t1" style="flex:1">이웃 12명</div><span class="btn pri">이웃 추가</span></div>
+    <div style="background:var(--g1);border-radius:10px;padding:8px"><div class="t2" style="margin-bottom:4px">받은 요청 2</div>
+      ${["서연","준호"].map(n=>`<div class="li"><div class="av">${n}</div><div class="grow t2">${n}</div><span class="btn">거절</span><span class="btn pri">수락</span></div>`).join("")}</div>
+    ${["민수","지은","현우"].map(n=>`<div class="li"><div class="av">${n}</div><div class="grow"><div class="t2">${n}</div><div class="t3">@${n==="민수"?"minsu_ioniq":n==="지은"?"jieun_ev6":"hyunwoo"}</div></div></div>`).join("")}`), "받은 요청을 맨 위에. 이웃은 서로 수락한 사이다. 이웃 목록에서 프로필을 누르면 그 사람의 차와 최근 핀(폰에서 자세히).") +
+  fig("F2", "이웃 추가 (정차 중)", meFrame("이웃", `<div class="t1">이웃 추가</div><div class="input">아이디 입력</div>
+    <div class="li" style="background:var(--g1);border-radius:10px;padding:8px"><div class="av lg">하늘</div><div class="grow"><div class="t2">하늘</div><div class="t3">@haneul_ioniq, 아이오닉 5</div></div><span class="btn pri">이웃 요청</span></div>
+    <div class="t3">내 아이디는 @minsu_ioniq예요. 이웃에게 알려 주세요.</div>`), "아이디로 찾으면 꾸민 차 프로필이 나온다. 키보드가 필요해서 정차 중에만. 폰에서도 같은 방법으로, 커뮤니티 글쓴이 프로필에서도 요청할 수 있다.") +
+  fig("F3", "휴대폰 연결", meFrame("휴대폰 연결", `<div class="t1">휴대폰 연결</div><div class="row" style="gap:14px;align-items:flex-start"><div class="qr"></div><div class="t3" style="line-height:1.6">휴대폰 카메라로 찍으면 Moli 앱이 열려요.<br>로그인하면 이 차와 연결돼요.</div></div>`), "QR 한 번이면 계정과 차가 묶인다. 연결 후에는 \"연결됨\"과 휴대폰 이름, [연결 끊기].") +
+  fig("F4", "꾸미기", meFrame("꾸미기", `<div class="ph" style="flex:1">3D 내 차 (360도)</div><div class="row" style="gap:4px">${["랩핑","무늬","휠","무드등"].map((t,i)=>`<span class="chip ${i===0?"on":""}">${t}</span>`).join("")}</div><div class="row" style="gap:6px">${Array.from({length:7}).map(()=>`<div class="av"></div>`).join("")}</div>`), "지금 구현된 스킨 스튜디오를 이 자리에 넣는다. 꾸민 결과가 홈의 내 차와 커뮤니티 프로필이 된다.")
+);
+
+put("narrow",
+  fig("G1", "홈, 1/3 창", car(`<div class="pad" style="display:flex;flex-direction:column;gap:8px">
+    <div><div class="t0" style="font-size:18px">6.0 km/kWh</div><div class="t3">이번 주, 같은 차종 상위 18%</div></div><div class="ph" style="flex:1">3D 내 차</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px">${["연비 코치","무드등","충전소","제보","핀 남기기","그룹 라이딩"].map(t=>`<div class="tile" style="height:44px"><b>${t}</b></div>`).join("")}</div></div>`, { narrow: true }), "3D 차가 위, 빠른 실행은 아래 3×2. 메뉴는 똑같이 왼쪽 아래.") +
+  fig("G2", "그룹 라이딩, 1/3 창", car(`<div class="map"></div><div class="panel" style="left:8px;right:8px;bottom:8px;padding-left:44px"><div class="row" style="gap:6px;margin-bottom:8px">${["민수","지은","나","현우"].map((n,i)=>`<div class="av ${i===0?"talk":""}">${n}</div>`).join("")}</div><div style="height:44px;border-radius:12px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800">누르고 말하기</div></div>`, { narrow: true, fold: true }), "프로필 줄 아래 말하기 버튼을 가로로 길게.")
+);
+
+const tabs = on => `<div class="ph-tab">${["커뮤니티","지도","랭킹","나"].map(t=>`<span class="${t===on?"on":""}">${t}</span>`).join("")}</div>`;
+const phone = (id, title, inner, note) => `<div class="fig"><div class="id">${id}</div><h3>${title}</h3><div class="ph-frame"><div class="ph-scr">${inner}</div></div><p class="n">${note}</p></div>`;
+put("phone",
+  phone("H1", "커뮤니티", `<div class="ph-top"><b>커뮤니티</b><span class="btn">글쓰기</span></div><div class="ph-body"><div class="seg" style="margin-bottom:6px"><span class="on">이웃</span><span>같은 차종</span><span>전체</span></div>
+    <div class="post"><div class="row"><div class="av">민수</div><div><div class="t2">민수</div><div class="t3">아이오닉 5, 40분 전</div></div></div><div class="ph" style="height:80px;margin-top:6px">사진</div><div class="t3" style="margin-top:4px">바다 앞 카페, 주차 넓어요</div><div class="t3">강릉 사천면에 핀</div></div>
+    <div class="post"><div class="row"><div class="av">지은</div><div><div class="t2">지은</div><div class="t3">EV6, 1시간 전</div></div></div><div style="background:var(--g1);border-radius:8px;padding:8px;margin-top:6px"><div class="t1">6.2 km/kWh</div><div class="t3">주행 카드, 같은 차종 상위 12%</div></div></div></div>${tabs("커뮤니티")}`, "목록으로 본다. 위치가 붙은 글에는 \"…에 핀\" 한 줄. 차에서 넘어온 주행 카드, 꾸미기도 같은 목록.") +
+  phone("H2", "글쓰기", `<div class="ph-top"><span class="t3">취소</span><b>글쓰기</b><span class="btn pri">올리기</span></div><div class="ph-body" style="display:flex;flex-direction:column;gap:8px"><div class="ph" style="height:90px">사진 추가</div><div class="input" style="height:70px;align-items:flex-start;padding-top:6px">내용</div><div class="li"><span class="grow t2">위치</span><span class="t3">강릉 사천면 ›</span></div><div><span class="chip on">카페</span><span class="chip on">주차 쉬움</span><span class="chip">+ 태그</span></div><div class="seg"><span class="on">전체 공개</span><span>이웃만</span></div></div>`, "위치를 붙이면 지도에 핀으로 뜬다. 차에서 남긴 핀을 열면 이 화면으로 사진과 내용을 덧붙인다.") +
+  phone("H3", "지도", `<div class="map" style="bottom:46px"><div class="mk" style="left:60px;top:150px">핀</div><div class="mk" style="left:150px;top:220px">핀</div><div class="mk sq" style="left:110px;top:120px">!</div><div class="mk me" style="left:100px;top:260px">나</div></div><div style="position:absolute;left:10px;right:10px;top:24px;display:flex;gap:3px;flex-wrap:wrap"><span class="chip on">전체</span><span class="chip">주차 쉬움</span><span class="chip">카페</span><span style="flex:1"></span><span class="btn">지도 표시</span></div><div class="panel" style="left:8px;right:8px;bottom:54px;padding:8px"><div class="t2">바다 앞 카페</div><div class="t3">카페, 주차 쉬움</div><div class="row" style="margin-top:6px"><span class="btn" style="flex:1">저장</span><span class="btn pri" style="flex:1">차로 보내기</span></div></div>${tabs("지도")}`, "커뮤니티의 지도 보기. [차로 보내기]는 연결된 차의 목적지로 넣는다. 그룹 라이딩 중이면 멤버도 이 지도에.") +
+  phone("H4", "랭킹", `<div class="ph-top"><b>랭킹</b><span class="t3">이번 주</span></div><div class="ph-body"><div class="seg" style="margin-bottom:8px"><span class="on">같은 차종</span><span>지역</span><span>이웃</span></div><div style="background:var(--g1);border-radius:8px;padding:8px;margin-bottom:6px"><div class="t3">내 순위</div><div class="t0" style="font-size:18px">214위</div><div class="t3">6.0 km/kWh</div></div>${rankList.slice(0,5).map(([n,name,v])=>`<div class="li"><b style="width:12px">${n}</b><div class="av">${name}</div><div class="grow t2">${name}</div><b>${v}</b></div>`).join("")}</div>${tabs("랭킹")}`, "차와 같은 순위. 폰에서는 순위를 공유할 수 있고 주행 리포트를 더 자세히 본다.") +
+  phone("H5", "나", `<div class="ph-top"><b>나</b><span class="t3">설정</span></div><div class="ph-body"><div style="text-align:center;padding:6px 0"><div class="ph" style="height:80px">꾸민 내 차</div><div class="t1" style="margin-top:6px">민수</div><div class="t3">@minsu_ioniq</div></div>${["이웃","그룹 라이딩","저장한 장소","내 글","차 연결","공개 설정"].map(t=>`<div class="li"><span class="grow t2">${t}</span><span class="t3">›</span></div>`).join("")}</div>${tabs("나")}`, "프로필 사진 자리에 꾸민 내 차. 이웃 추가와 그룹 라이딩 만들기도 여기서.")
+);
+</script>
+</body>
+</html>
